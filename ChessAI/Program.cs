@@ -10,6 +10,12 @@ namespace ChessAI
     {
         static void Main(string[] args)
         {
+            Network.BeginPollingServer();
+            Network.MakeMove("Pd2d3");
+            while(true)
+            {
+
+            }
         }
     }
 }
