@@ -7,7 +7,7 @@ namespace ChessAI
 {
     class ServerConnect
     {
-        
+        // Makes a request to the server which will be completed in the callback of RequestComplete
         static void MakeRequest()
         {
             Uri serviceUri = new Uri("http://www.bencarle.com/chess/poll/GAMEID/TEAMNUMBER/TEAMSECRET/");
@@ -16,6 +16,7 @@ namespace ChessAI
             downloader.OpenReadAsync(serviceUri);
         }
 
+        // Callback of MakeRequest when server response is received
         static private void RequestComplete(object sender, OpenReadCompletedEventArgs e)
         {
             if (e.Error == null)
