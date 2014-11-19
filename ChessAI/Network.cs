@@ -18,22 +18,32 @@ namespace ChessAI
 {
     class Network
     {
-        const int gameID = 1283;
-        const int teamID = 1;
-        const string teamKey = "32c68cae";
-        static readonly string pollingServer = "http://www.bencarle.com/chess/poll/" + gameID + "/" + teamID + "/" + teamKey + "/";
+        private int gameID;
+        private int teamID;
+        private string teamKey;
+        private string pollingServer;
         // Append move string with trailing "/" to make a move
-        static readonly string moveServerPrefix = "http://www.bencarle.com/chess/move/"+gameID+"/"+teamID+"/"+teamKey+"/";
-        static bool receivedResponse = false;
-        static JSONPollResponse lastResponse = null;
+        private string moveServerPrefix;
+        private bool receivedResponse;
+        private JSONPollResponse lastResponse;
 
         // FOR TEST
-        const int teamID2 = 2;
-        const string teamKey2 = "1a77594c";
-        
+        //const int teamID2 = 2;
+        //const string teamKey2 = "1a77594c";
+
+        public Network(int gameID, int teamID, string teamKey)
+        {
+            this.gameID = gameID;
+            this.teamID = teamID;
+            this.teamKey = teamKey;
+            pollingServer = "http://www.bencarle.com/chess/poll/" + gameID + "/" + teamID + "/" + teamKey + "/";
+            moveServerPrefix = "http://www.bencarle.com/chess/move/" + gameID + "/" + teamID + "/" + teamKey + "/";
+            receivedResponse = false;
+            lastResponse = null;
+        }
 
         // Makes a request to the server which will be completed in the callback of RequestComplete
-        public static JSONPollResponse MakePoll()
+        public JSONPollResponse MakePoll()
         {
             
             Uri pollingServerURI = new Uri(pollingServer);
@@ -49,7 +59,7 @@ namespace ChessAI
         }
 
         // Callback of MakeRequest when server response is received
-        static private void PollCompleted(object sender, OpenReadCompletedEventArgs e)
+        private void PollCompleted(object sender, OpenReadCompletedEventArgs e)
         {
             if (e.Error == null)
             {
@@ -63,7 +73,7 @@ namespace ChessAI
             }
         }
 
-        public static void MakeMove(string move)
+        public void MakeMove(string move)
         {
             String moveAddress = moveServerPrefix+move+"/";
             Uri moveServerURI = new Uri(moveAddress);
@@ -72,7 +82,7 @@ namespace ChessAI
             downloader.OpenReadAsync(moveServerURI);
         }
 
-        static private void MoveCompleted(object sender, OpenReadCompletedEventArgs e)
+        private void MoveCompleted(object sender, OpenReadCompletedEventArgs e)
         {
             if (e.Error == null)
             {
