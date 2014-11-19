@@ -10,6 +10,8 @@ namespace ChessAI
     {
         static void Main(string[] args)
         {
+            Board b = new Board();
+            Console.WriteLine(b.GetAllStates(true).Count);
         }
     }
 }
