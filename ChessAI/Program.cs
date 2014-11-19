@@ -12,6 +12,7 @@ namespace ChessAI
         {
             Board b = new Board();
             Console.WriteLine(b.GetAllStates(true).Count);
+            Console.WriteLine(b.PlayRandomMove());
         }
     }
 }

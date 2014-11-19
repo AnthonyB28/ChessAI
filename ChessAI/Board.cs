@@ -104,7 +104,7 @@ namespace ChessAI
                                         moves.Add(b);
                                     }
                                 }
-                                if (j == 1 && board[i, j + 2] == 0)
+                                if (j == 1 && board[i,j+1] == 0 && board[i, j + 2] == 0)
                                 {
                                     Board b = this.Clone();
                                     b.MovePiece(i, j, i, j + 2);
@@ -155,7 +155,7 @@ namespace ChessAI
                                         moves.Add(b);
                                     }
                                 }
-                                if (j == 6 && board[i, j - 2] == 0)
+                                if (j == 6 && board[i,j-1] == 0 && board[i, j - 2] == 0)
                                 {
                                     Board b = this.Clone();
                                     b.MovePiece(i, j, i, j - 2);
@@ -615,8 +615,115 @@ namespace ChessAI
             return moves;
         }
 
+        public string PlayRandomMove()
+        {
+            Random rand = new Random(DateTime.Now.Millisecond);
+            List<Board> boards = GetAllStates(WHITE);
+            int x = rand.Next(boards.Count);
+            return detectMove(boards[x]);
+        }
 
+        public string detectMove(Board b)
+        {
+            int startPieceI = 0;
+            int startPieceJ = 0;
+            int endPieceI = 0;
+            int endPieceJ = 0;
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    if (board[i, j] != b.board[i, j])
+                    {
+                        if (b.board[i, j] == 0)
+                        {
+                            startPieceI = i;
+                            startPieceJ = j;
+                        }
+                        else
+                        {
+                            endPieceI = i;
+                            endPieceJ = j;
+                        }
+                    }
+                }
+            }
+            string piece = "";
+            switch (board[startPieceI, startPieceJ] % 6)
+            {
+                case 0:
+                    piece += "K";
+                    break;
+                case 1:
+                    piece += "P";
+                    break;
+                case 2:
+                    piece += "R";
+                    break;
+                case 3:
+                    piece += "N";
+                    break;
+                case 4:
+                    piece += "B";
+                    break;
+                case 5:
+                    piece += "Q";
+                    break;
+            }
+            piece += GetFile(startPieceI);
+            piece += (startPieceJ + 1);
+            piece += GetFile(endPieceI);
+            piece += (endPieceJ + 1);
+            if (board[startPieceI, startPieceJ] != b.board[endPieceI, endPieceJ])
+            {
+                switch (b.board[endPieceI, endPieceJ] % 6)
+                {
+                    case 0:
+                        piece += "K";
+                        break;
+                    case 1:
+                        piece += "P";
+                        break;
+                    case 2:
+                        piece += "R";
+                        break;
+                    case 3:
+                        piece += "N";
+                        break;
+                    case 4:
+                        piece += "B";
+                        break;
+                    case 5:
+                        piece += "Q";
+                        break;
+                }
+            }
+            return piece;
+        }
 
+        public string GetFile(int i)
+        {
+            switch (i)
+            {
+                case 0:
+                    return "A";
+                case 1:
+                    return "B";
+                case 2:
+                    return "C";
+                case 3:
+                    return "D";
+                case 4:
+                    return "E";
+                case 5:
+                    return "F";
+                case 6:
+                    return "G";
+                case 7:
+                    return "H";
+            }
+            return "";
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsColor(int i, int j, bool white)
