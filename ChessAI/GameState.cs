@@ -34,11 +34,11 @@ namespace ChessAI
 
         public void PollForTurn()
         {
-            Network.JSONPollResponse response = network.MakePoll();
+            Network.JSONPollResponse response = network.RequestPoll();
             while (!response.ready)
             {
                 System.Threading.Thread.Sleep(5000);
-                response = network.MakePoll();
+                response = network.RequestPoll();
             }
             UpdateBoard(response);
         }

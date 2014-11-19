@@ -42,14 +42,10 @@ namespace ChessAI
             lastResponse = null;
         }
 
-        // Makes a request to the server which will be completed in the callback of RequestComplete
-        public JSONPollResponse MakePoll()
+        // Attempts to poll server and returns response set by callback asyncronously.
+        public JSONPollResponse RequestPoll()
         {
-            
-            Uri pollingServerURI = new Uri(pollingServer);
-            WebClient downloader = new WebClient();
-            downloader.OpenReadCompleted += new OpenReadCompletedEventHandler(PollCompleted);
-            downloader.OpenReadAsync(pollingServerURI);
+            Poll();
             while(!receivedResponse)
             {
 
@@ -58,18 +54,45 @@ namespace ChessAI
             return lastResponse;
         }
 
-        // Callback of MakeRequest when server response is received
+        // Makes a request to the server with a callback
+        private void Poll()
+        {
+            Uri pollingServerURI = new Uri(pollingServer);
+            WebClient downloader = new WebClient();
+            downloader.OpenReadCompleted += new OpenReadCompletedEventHandler(PollCompleted);
+            downloader.OpenReadAsync(pollingServerURI);
+        }
+
+        // Callback of MakeRequest when server response is received.
+        // If fails, will reattempt to Poll()
         private void PollCompleted(object sender, OpenReadCompletedEventArgs e)
         {
+            bool error = false;
             if (e.Error == null)
             {
                 Console.WriteLine("Received Response");
                 Stream responseStream = e.Result;
-                DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(JSONPollResponse));
-                JSONPollResponse response = (JSONPollResponse)serializer.ReadObject(responseStream);
-                // ready is our turn, not ready is opponent's turn
-                lastResponse = response;
-                receivedResponse = true;
+                try
+                {
+                    DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(JSONPollResponse));
+                    JSONPollResponse response = (JSONPollResponse)serializer.ReadObject(responseStream);
+                    // ready is our turn, not ready is opponent's turn
+                    lastResponse = response;
+                    receivedResponse = true;
+                }
+                catch 
+                {
+                    error = true;
+                }
+            }
+            else
+            {
+                error = true;
+            }
+            if(error)
+            {
+                Console.WriteLine("Error receiving poll response. Retrying.");
+                Poll();
             }
         }
 

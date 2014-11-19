@@ -60,7 +60,7 @@ namespace ChessAI
             this.board = board;
         }
 
-        public override Board Clone()
+        public Board Clone()
         {
             return new Board((byte[,])board.Clone());
         }
