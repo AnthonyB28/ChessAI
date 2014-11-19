@@ -79,29 +79,37 @@ namespace ChessAI
                 for(int j = 0; j < 8; j++){
                     if((board[i,j] != 0) && IsColor(i, j, white) ){
                         //PAWN
-                        if(board[i,j] % 6 == W_PAWN){
-                            if(white){
-                                if(board[i, j+1] == 0){
+                        if (board[i, j] % 6 == W_PAWN)
+                        {
+                            if (white)
+                            {
+                                if (board[i, j + 1] == 0)
+                                {
                                     Board b = this.Clone();
-                                    b.MovePiece(i, j, i, j+1);
+                                    b.MovePiece(i, j, i, j + 1);
                                     moves.Add(b);
                                 }
-                                if(j==1 && board[i,j+2] == 0){
+                                if (j == 1 && board[i, j + 2] == 0)
+                                {
                                     Board b = this.Clone();
-                                    b.MovePiece(i, j, i, j+2);
+                                    b.MovePiece(i, j, i, j + 2);
                                     moves.Add(b);
                                 }
-                                if((i < 7) && (IsColor(i+1, j+1, !white))){
+                                if ((i < 7) && (IsColor(i + 1, j + 1, !white)))
+                                {
                                     Board b = this.Clone();
-                                    b.MovePiece(i, j, i+1, j+1);
+                                    b.MovePiece(i, j, i + 1, j + 1);
                                     moves.Add(b);
                                 }
-                                if((i > 0) && (IsColor(i-1, j+1, !white))){
+                                if ((i > 0) && (IsColor(i - 1, j + 1, !white)))
+                                {
                                     Board b = this.Clone();
-                                    b.MovePiece(i, j, i-1, j+1);
+                                    b.MovePiece(i, j, i - 1, j + 1);
                                     moves.Add(b);
                                 }
-                            }else{
+                            }
+                            else
+                            {
                                 if (board[i, j - 1] == 0)
                                 {
                                     Board b = this.Clone();
@@ -130,8 +138,9 @@ namespace ChessAI
                             }
                         }
                         //ROOK
-                        else if(board[i,j] % 6 == W_ROOK){
-                            for (int x = i+1; x < 8; x++)
+                        else if (board[i, j] % 6 == W_ROOK)
+                        {
+                            for (int x = i + 1; x < 8; x++)
                             {
                                 if (board[x, j] == 0)
                                 {
@@ -169,9 +178,379 @@ namespace ChessAI
                                     break;
                                 }
                             }
-                            for (int y = j + 1; y < 7; y++)
+                            for (int y = j + 1; y < 8; y++)
                             {
-
+                                if (board[i, y] == 0)
+                                {
+                                    Board b = this.Clone();
+                                    b.MovePiece(i, j, i, y);
+                                    moves.Add(b);
+                                }
+                                else
+                                {
+                                    if (IsColor(i, y, !white))
+                                    {
+                                        Board b = this.Clone();
+                                        b.MovePiece(i, j, i, y);
+                                        moves.Add(b);
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int y = j - 1; y >= 0; y--)
+                            {
+                                if (board[i, y] == 0)
+                                {
+                                    Board b = this.Clone();
+                                    b.MovePiece(i, j, i, y);
+                                    moves.Add(b);
+                                }
+                                else
+                                {
+                                    if (IsColor(i, y, !white))
+                                    {
+                                        Board b = this.Clone();
+                                        b.MovePiece(i, j, i, y);
+                                        moves.Add(b);
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                        else if (board[i, j] % 6 == W_BISHOP)
+                        {
+                            for (int x = i + 1, y = j + 1; x < 8 && y < 8; x++, y++)
+                            {
+                                if (board[x, y] == 0)
+                                {
+                                    Board b = this.Clone();
+                                    b.MovePiece(i, j, x, y);
+                                    moves.Add(b);
+                                }
+                                else
+                                {
+                                    if (IsColor(x, y, !white))
+                                    {
+                                        Board b = this.Clone();
+                                        b.MovePiece(i, j, x, y);
+                                        moves.Add(b);
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int x = i - 1, y = j - 1; x >= 0 && y >= 0; x--, y--)
+                            {
+                                if (board[x, y] == 0)
+                                {
+                                    Board b = this.Clone();
+                                    b.MovePiece(i, j, x, y);
+                                    moves.Add(b);
+                                }
+                                else
+                                {
+                                    if (IsColor(x, y, !white))
+                                    {
+                                        Board b = this.Clone();
+                                        b.MovePiece(i, j, x, y);
+                                        moves.Add(b);
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int x = i + 1, y = j - 1; x < 8 && y >= 0; x++, y--)
+                            {
+                                if (board[x, y] == 0)
+                                {
+                                    Board b = this.Clone();
+                                    b.MovePiece(i, j, x, y);
+                                    moves.Add(b);
+                                }
+                                else
+                                {
+                                    if (IsColor(x, y, !white))
+                                    {
+                                        Board b = this.Clone();
+                                        b.MovePiece(i, j, x, y);
+                                        moves.Add(b);
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int x = i - 1, y = j + 1; x >= 0 && y < 8; x--, y++)
+                            {
+                                if (board[x, y] == 0)
+                                {
+                                    Board b = this.Clone();
+                                    b.MovePiece(i, j, x, y);
+                                    moves.Add(b);
+                                }
+                                else
+                                {
+                                    if (IsColor(x, y, !white))
+                                    {
+                                        Board b = this.Clone();
+                                        b.MovePiece(i, j, x, y);
+                                        moves.Add(b);
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                        else if (board[i, j] % 6 == W_QUEEN)
+                        {
+                            for (int x = i + 1; x < 8; x++)
+                            {
+                                if (board[x, j] == 0)
+                                {
+                                    Board b = this.Clone();
+                                    b.MovePiece(i, j, x, j);
+                                    moves.Add(b);
+                                }
+                                else
+                                {
+                                    if (IsColor(x, j, !white))
+                                    {
+                                        Board b = this.Clone();
+                                        b.MovePiece(i, j, x, j);
+                                        moves.Add(b);
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int x = i - 1; x >= 0; x--)
+                            {
+                                if (board[x, j] == 0)
+                                {
+                                    Board b = this.Clone();
+                                    b.MovePiece(i, j, x, j);
+                                    moves.Add(b);
+                                }
+                                else
+                                {
+                                    if (IsColor(x, j, !white))
+                                    {
+                                        Board b = this.Clone();
+                                        b.MovePiece(i, j, x, j);
+                                        moves.Add(b);
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int y = j + 1; y < 8; y++)
+                            {
+                                if (board[i, y] == 0)
+                                {
+                                    Board b = this.Clone();
+                                    b.MovePiece(i, j, i, y);
+                                    moves.Add(b);
+                                }
+                                else
+                                {
+                                    if (IsColor(i, y, !white))
+                                    {
+                                        Board b = this.Clone();
+                                        b.MovePiece(i, j, i, y);
+                                        moves.Add(b);
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int y = j - 1; y >= 0; y--)
+                            {
+                                if (board[i, y] == 0)
+                                {
+                                    Board b = this.Clone();
+                                    b.MovePiece(i, j, i, y);
+                                    moves.Add(b);
+                                }
+                                else
+                                {
+                                    if (IsColor(i, y, !white))
+                                    {
+                                        Board b = this.Clone();
+                                        b.MovePiece(i, j, i, y);
+                                        moves.Add(b);
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int x = i + 1, y = j + 1; x < 8 && y < 8; x++, y++)
+                            {
+                                if (board[x, y] == 0)
+                                {
+                                    Board b = this.Clone();
+                                    b.MovePiece(i, j, x, y);
+                                    moves.Add(b);
+                                }
+                                else
+                                {
+                                    if (IsColor(x, y, !white))
+                                    {
+                                        Board b = this.Clone();
+                                        b.MovePiece(i, j, x, y);
+                                        moves.Add(b);
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int x = i - 1, y = j - 1; x >= 0 && y >= 0; x--, y--)
+                            {
+                                if (board[x, y] == 0)
+                                {
+                                    Board b = this.Clone();
+                                    b.MovePiece(i, j, x, y);
+                                    moves.Add(b);
+                                }
+                                else
+                                {
+                                    if (IsColor(x, y, !white))
+                                    {
+                                        Board b = this.Clone();
+                                        b.MovePiece(i, j, x, y);
+                                        moves.Add(b);
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int x = i + 1, y = j - 1; x < 8 && y >= 0; x++, y--)
+                            {
+                                if (board[x, y] == 0)
+                                {
+                                    Board b = this.Clone();
+                                    b.MovePiece(i, j, x, y);
+                                    moves.Add(b);
+                                }
+                                else
+                                {
+                                    if (IsColor(x, y, !white))
+                                    {
+                                        Board b = this.Clone();
+                                        b.MovePiece(i, j, x, y);
+                                        moves.Add(b);
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int x = i - 1, y = j + 1; x >= 0 && y < 8; x--, y++)
+                            {
+                                if (board[x, y] == 0)
+                                {
+                                    Board b = this.Clone();
+                                    b.MovePiece(i, j, x, y);
+                                    moves.Add(b);
+                                }
+                                else
+                                {
+                                    if (IsColor(x, y, !white))
+                                    {
+                                        Board b = this.Clone();
+                                        b.MovePiece(i, j, x, y);
+                                        moves.Add(b);
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                        else if (board[i, j] % 6 == 0)
+                        {
+                            if ((i < 7) && (board[i + 1, j] == 0 || IsColor(i + 1, j, !white)))
+                            {
+                                Board b = this.Clone();
+                                b.MovePiece(i, j, i + 1, j);
+                                moves.Add(b);
+                            }
+                            if ((i < 7) && (j > 0) && (board[i + 1, j - 1] == 0 || IsColor(i + 1, j - 1, !white)))
+                            {
+                                Board b = this.Clone();
+                                b.MovePiece(i, j, i + 1, j - 1);
+                                moves.Add(b);
+                            }
+                            if ((i < 7) && (j < 7) && (board[i + 1, j + 1] == 0 || IsColor(i + 1, j + 1, !white)))
+                            {
+                                Board b = this.Clone();
+                                b.MovePiece(i, j, i + 1, j + 1);
+                                moves.Add(b);
+                            }
+                            if ((j < 7) && (board[i, j + 1] == 0 || IsColor(i, j, !white)))
+                            {
+                                Board b = this.Clone();
+                                b.MovePiece(i, j, i, j + 1);
+                                moves.Add(b);
+                            }
+                            if ((j > 0) && (board[i, j - 1] == 0 || IsColor(i, j - 1, !white)))
+                            {
+                                Board b = this.Clone();
+                                b.MovePiece(i, j, i, j - 1);
+                                moves.Add(b);
+                            }
+                            if ((i < 7) && (board[i - 1, j] == 0 || IsColor(i - 1, j, !white)))
+                            {
+                                Board b = this.Clone();
+                                b.MovePiece(i, j, i - 1, j);
+                                moves.Add(b);
+                            }
+                            if ((i < 7) && (j < 7) && (board[i - 1, j + 1] == 0 || IsColor(i - 1, j + 1, !white)))
+                            {
+                                Board b = this.Clone();
+                                b.MovePiece(i, j, i - 1, j + 1);
+                                moves.Add(b);
+                            }
+                            if ((i < 7) && (j > 0) && (board[i - 1, j - 1] == 0 || IsColor(i - 1, j - 1, !white)))
+                            {
+                                Board b = this.Clone();
+                                b.MovePiece(i, j, i - 1, j - 1);
+                                moves.Add(b);
+                            }
+                        }
+                        else if (board[i, j] % 6 == W_KNIGHT)
+                        {
+                            if ((i < 6) && (j < 7) && (board[i + 2, j + 1] == 0 || IsColor(i + 2, j + 1, !white)))
+                            {
+                                Board b = this.Clone();
+                                b.MovePiece(i, j, i + 2, j + 1);
+                                moves.Add(b);
+                            }
+                            if ((i < 6) && (j > 0) && (board[i + 2, j - 1] == 0 || IsColor(i + 2, j - 1, !white)))
+                            {
+                                Board b = this.Clone();
+                                b.MovePiece(i, j, i + 2, j - 1);
+                                moves.Add(b);
+                            }
+                            if ((i < 7) && (j < 6) && (board[i + 1, j + 2] == 0 || IsColor(i + 1, j + 2, !white)))
+                            {
+                                Board b = this.Clone();
+                                b.MovePiece(i, j, i + 1, j + 2);
+                                moves.Add(b);
+                            }
+                            if ((i < 7) && (j > 1) && (board[i + 1, j - 2] == 0 || IsColor(i + 1, j - 2, !white)))
+                            {
+                                Board b = this.Clone();
+                                b.MovePiece(i, j, i + 1, j - 2);
+                                moves.Add(b);
+                            }
+                            if ((i > 0) && (j < 6) && (board[i - 1, j + 2] == 0 || IsColor(i - 1, j + 2, !white)))
+                            {
+                                Board b = this.Clone();
+                                b.MovePiece(i, j, i - 1, j + 2);
+                                moves.Add(b);
+                            }
+                            if ((i > 0) && (j > 1) && (board[i - 1, j - 2] == 0 || IsColor(i - 1, j - 2, !white)))
+                            {
+                                Board b = this.Clone();
+                                b.MovePiece(i, j, i - 1, j - 2);
+                                moves.Add(b);
+                            }
+                            if ((i > 1) && (j < 7) && (board[i - 2, j + 1] == 0 || IsColor(i - 2, j + 1, !white)))
+                            {
+                                Board b = this.Clone();
+                                b.MovePiece(i, j, i - 2, j + 1);
+                                moves.Add(b);
+                            }
+                            if ((i > 1) && (j > 0) && (board[i - 2, j - 1] == 0 || IsColor(i - 2, j - 1, !white)))
+                            {
+                                Board b = this.Clone();
+                                b.MovePiece(i, j, i - 2, j - 1);
+                                moves.Add(b);
                             }
                         }
                     }
