@@ -18,39 +18,34 @@ namespace ChessAI
 {
     class Network
     {
-        static Timer pollTimer;
         const int gameID = 1283;
         const int teamID = 1;
         const string teamKey = "32c68cae";
         static readonly string pollingServer = "http://www.bencarle.com/chess/poll/" + gameID + "/" + teamID + "/" + teamKey + "/";
+        // Append move string with trailing "/" to make a move
         static readonly string moveServerPrefix = "http://www.bencarle.com/chess/move/"+gameID+"/"+teamID+"/"+teamKey+"/";
+        static bool receivedResponse = false;
+        static JSONPollResponse lastResponse = null;
 
         // FOR TEST
         const int teamID2 = 2;
         const string teamKey2 = "1a77594c";
-
-        // Begins polling the server based on interval
-        public static void BeginPollingServer(int interval = 5000)
-        {
-            MakePoll(null, null);
-            pollTimer = new Timer();
-            pollTimer.Elapsed += new ElapsedEventHandler(MakePoll);
-            pollTimer.Interval = interval; // 5 seconds      
-            pollTimer.Enabled = true;
-        }
-
-        public static void StopPollingServer()
-        {
-            pollTimer.Enabled = false;
-        }
+        
 
         // Makes a request to the server which will be completed in the callback of RequestComplete
-        static void MakePoll(object source, ElapsedEventArgs e)
+        public static JSONPollResponse MakePoll()
         {
+            
             Uri pollingServerURI = new Uri(pollingServer);
             WebClient downloader = new WebClient();
             downloader.OpenReadCompleted += new OpenReadCompletedEventHandler(PollCompleted);
             downloader.OpenReadAsync(pollingServerURI);
+            while(!receivedResponse)
+            {
+
+            }
+            receivedResponse = true;
+            return lastResponse;
         }
 
         // Callback of MakeRequest when server response is received
@@ -62,14 +57,9 @@ namespace ChessAI
                 Stream responseStream = e.Result;
                 DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(JSONPollResponse));
                 JSONPollResponse response = (JSONPollResponse)serializer.ReadObject(responseStream);
-                if(response.ready)
-                {
-                    // Our turn
-                }
-                else
-                {
-                    // Opponent's turn
-                }
+                // ready is our turn, not ready is opponent's turn
+                lastResponse = response;
+                receivedResponse = true;
             }
         }
 
@@ -91,7 +81,7 @@ namespace ChessAI
         }
 
         [DataContract]
-        class JSONPollResponse
+        public class JSONPollResponse
         {
             [DataMember]
             public bool ready { get; set;}

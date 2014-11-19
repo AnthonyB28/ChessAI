@@ -10,7 +10,7 @@ namespace ChessAI
     {
         static void Main(string[] args)
         {
-            Network.BeginPollingServer();
+            Network.JSONPollResponse response = Network.MakePoll();
             Network.MakeMove("Pd2d3");
             while(true)
             {
