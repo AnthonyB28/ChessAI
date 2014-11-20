@@ -30,15 +30,20 @@ namespace ChessAI
                 PollForTurn();
                 MakeMove();
             }
+            Console.WriteLine("Game Over!");
         }
 
         public void PollForTurn()
         {
             Network.JSONPollResponse response = network.RequestPoll();
-            while (!response.ready || response.lastmovenumber <= turn)
+            while ((!response.ready || response.lastmovenumber <= turn) && (response.gameover == null || response.gameover == false))
             {
                 System.Threading.Thread.Sleep(5000);
                 response = network.RequestPoll();
+            }
+            if (response.gameover != null && response.gameover == true)
+            {
+                gameOver = true;
             }
             UpdateBoard(response);
         }
@@ -107,7 +112,35 @@ namespace ChessAI
                         x2 = 7;
                         break;
                 }
-                board.MovePiece(x1, y1, x2, y2);
+                if (move.Length > 5)
+                {
+                    string s = Convert.ToString(move[5]);
+                    byte z = 0;
+                    switch (move[5])
+                    {
+                        case 'Q':
+                            z = 5;
+                            break;
+                        case 'B':
+                            z = 4;
+                            break;
+                        case 'R':
+                            z = 2;
+                            break;
+                        case 'N':
+                            z = 3;
+                            break;
+                    }
+                    if (color)
+                    {
+                        z += 6;
+                    }
+                    board.MovePiece(x1, y1, x2, y2, z);
+                }
+                else
+                {
+                    board.MovePiece(x1, y1, x2, y2);
+                }
             }
         }
 

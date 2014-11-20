@@ -27,6 +27,7 @@ namespace ChessAI
         private bool receivedResponse;
         private JSONPollResponse lastResponse;
         private bool moveSending;
+        //private WebClient downloader;
 
         // FOR TEST
         //const int teamID2 = 2;
@@ -92,6 +93,8 @@ namespace ChessAI
             {
                 error = true;
             }
+            WebClient s = sender as WebClient;
+            s.CancelAsync();
             if(error)
             {
                 Console.WriteLine("Error receiving poll response. Retrying.");
@@ -120,6 +123,8 @@ namespace ChessAI
             {
                 Console.WriteLine("Received Move Response");
                 moveSending = false;
+                WebClient s = sender as WebClient;
+                s.CancelAsync();
             }
         }
 
@@ -134,6 +139,8 @@ namespace ChessAI
             public int lastmovenumber { get; set; }
             [DataMember]
             public string lastmove { get; set; }
+            [DataMember]
+            public bool? gameover { get; set; }
         }
     }
 }

@@ -67,12 +67,30 @@ namespace ChessAI
 
         public void MovePiece(int x1, int y1, int x2, int y2)
         {
+            if (board[x1, y1] % 6 == 0 && Math.Abs(x2 - x1) == 2)
+            {
+                if (x2 < x1)
+                {
+                    board[x2 + 1, y1] = board[0, y1];
+                    board[0, y1] = BLANK_PIECE;
+                }
+                else
+                {
+                    board[x2 - 1, y1] = board[7, y1];
+                    board[7, y1] = BLANK_PIECE;
+                }
+            }
+            else if (board[x1, y1] % 6 == W_PAWN && x1 != x2 && board[x2, y2] == BLANK_PIECE)
+            {
+                board[x2, y1] = BLANK_PIECE;
+            }
             board[x2, y2] = board[x1, y1];
             board[x1, y1] = BLANK_PIECE;
         }
 
         public void MovePiece(int x1, int y1, int x2, int y2, byte promote)
         {
+            
             board[x2, y2] = promote;
             board[x1, y1] = BLANK_PIECE;
         }
