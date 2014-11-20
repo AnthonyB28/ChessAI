@@ -23,11 +23,6 @@ namespace ChessAI
             this.network = new Network(gameID, teamID, teamKey);
         }
 
-        public int Evaluate(bool color)
-        {
-            return board.Eval(color);
-        }
-
         public void Run()
         {
             while (!gameOver)
