@@ -26,6 +26,7 @@ namespace ChessAI
         private string moveServerPrefix;
         private bool receivedResponse;
         private JSONPollResponse lastResponse;
+        private bool moveSending;
 
         // FOR TEST
         //const int teamID2 = 2;
@@ -40,11 +41,13 @@ namespace ChessAI
             moveServerPrefix = "http://www.bencarle.com/chess/move/" + gameID + "/" + teamID + "/" + teamKey + "/";
             receivedResponse = false;
             lastResponse = null;
+            moveSending = false;
         }
 
         // Attempts to poll server and returns response set by callback asyncronously.
         public JSONPollResponse RequestPoll()
         {
+            receivedResponse = false;
             Poll();
             while(!receivedResponse)
             {
@@ -99,10 +102,16 @@ namespace ChessAI
         public void MakeMove(string move)
         {
             String moveAddress = moveServerPrefix+move+"/";
+            Console.WriteLine(moveAddress);
             Uri moveServerURI = new Uri(moveAddress);
             WebClient downloader = new WebClient();
+            moveSending = true;
             downloader.OpenReadCompleted += new OpenReadCompletedEventHandler(MoveCompleted);
             downloader.OpenReadAsync(moveServerURI);
+            while (moveSending)
+            {
+
+            }
         }
 
         private void MoveCompleted(object sender, OpenReadCompletedEventArgs e)
@@ -110,6 +119,7 @@ namespace ChessAI
             if (e.Error == null)
             {
                 Console.WriteLine("Received Move Response");
+                moveSending = false;
             }
         }
 

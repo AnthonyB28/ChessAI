@@ -10,8 +10,8 @@ namespace ChessAI
     {
         static void Main(string[] args)
         {
-            GameState s = new GameState(true, 1283, 1, "32c68cae");
-            s.PollForTurn();
+            GameState s = new GameState(Convert.ToBoolean(args[0]), Convert.ToInt32(args[1]), Convert.ToInt32(args[2]), args[3]);
+            s.Run();
         }
     }
 }
