@@ -28,6 +28,71 @@ namespace ChessAI
 
         private byte[,] board;
 
+        public int Evaluate(bool color)
+        {
+            const int pawnVal = 1;
+            const int knightVal = 2;
+            const int bishopVal = 3;
+            const int rookVal = 4;
+            const int queenVal = 7; // Give queen preference
+            const int kingVal = 5;
+
+            int blackScore = 0;
+            int whiteScore = 0;
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    int scoreToAdd = 0;
+                    if(board[i,j] % 6 == W_PAWN)
+                    {
+                        scoreToAdd = pawnVal;
+                    }
+                    else if (board[i, j] % 6 == W_KNIGHT)
+                    {
+                        scoreToAdd += knightVal;
+                    }
+                    else if (board[i, j] % 6 == W_ROOK)
+                    {
+                        scoreToAdd += rookVal;
+                    }
+                    else if(board[i, j] % 6 == W_BISHOP)
+                    {
+                        scoreToAdd += bishopVal;
+                    }
+                    else if (board[i, j] % 6 == W_QUEEN)
+                    {
+                        scoreToAdd += queenVal;
+                    }
+                    else if (board[i, j] % 6 == 0) // King
+                    {
+                        scoreToAdd += kingVal;
+                    }
+
+                    if (IsColor(i, j, color))
+                    {
+                        if (color) // White
+                        {
+                            whiteScore += scoreToAdd;
+                        }
+                        else // Black
+                        {
+                            blackScore += scoreToAdd;
+                        }
+                    }
+                }
+            }
+
+            if(color)
+            {
+                return whiteScore - blackScore;
+            }
+            else
+            {
+                return blackScore - whiteScore;
+            }
+        }
+
         public Board()
         {
             board = new byte[8, 8];
