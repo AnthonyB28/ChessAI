@@ -131,9 +131,9 @@ namespace ChessAI
             [DataMember]
             public float secondsleft { get; set; }
             [DataMember]
-            public int lastMoveNumber { get; set; }
+            public int lastmovenumber { get; set; }
             [DataMember]
-            public string lastMove { get; set; }
+            public string lastmove { get; set; }
         }
     }
 }

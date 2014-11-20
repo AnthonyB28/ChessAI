@@ -35,7 +35,7 @@ namespace ChessAI
         public void PollForTurn()
         {
             Network.JSONPollResponse response = network.RequestPoll();
-            while (!response.ready || response.lastMoveNumber <= turn)
+            while (!response.ready || response.lastmovenumber <= turn)
             {
                 System.Threading.Thread.Sleep(5000);
                 response = network.RequestPoll();
@@ -45,14 +45,14 @@ namespace ChessAI
 
         public void UpdateBoard(Network.JSONPollResponse response)
         {
-            turn = response.lastMoveNumber;
-            if (response.lastMove != null)
+            turn = response.lastmovenumber;
+            if (response.lastmove != null && !String.IsNullOrWhiteSpace(response.lastmove))
             {
-                string move = response.lastMove;
+                string move = response.lastmove;
                 int x1 = 0;
                 int x2 = 0;
-                int y1 = Convert.ToInt32(move[2]) - 1;
-                int y2 = Convert.ToInt32(move[4]) - 1;
+                int y1 = Int32.Parse(Convert.ToString(move[2])) - 1;
+                int y2 = Int32.Parse(Convert.ToString(move[4])) - 1;
                 switch (move[1])
                 {
                     case 'a':
