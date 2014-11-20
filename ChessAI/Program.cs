@@ -10,12 +10,8 @@ namespace ChessAI
     {
         static void Main(string[] args)
         {
-            Network.JSONPollResponse response = Network.MakePoll();
-            Network.MakeMove("Pd2d3");
-            while(true)
-            {
-
-            }
+            GameState s = new GameState(Convert.ToBoolean(args[0]), Convert.ToInt32(args[1]), Convert.ToInt32(args[2]), args[3]);
+            s.Run();
         }
     }
 }

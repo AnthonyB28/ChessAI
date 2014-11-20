@@ -18,28 +18,38 @@ namespace ChessAI
 {
     class Network
     {
-        const int gameID = 1283;
-        const int teamID = 1;
-        const string teamKey = "32c68cae";
-        static readonly string pollingServer = "http://www.bencarle.com/chess/poll/" + gameID + "/" + teamID + "/" + teamKey + "/";
+        private int gameID;
+        private int teamID;
+        private string teamKey;
+        private string pollingServer;
         // Append move string with trailing "/" to make a move
-        static readonly string moveServerPrefix = "http://www.bencarle.com/chess/move/"+gameID+"/"+teamID+"/"+teamKey+"/";
-        static bool receivedResponse = false;
-        static JSONPollResponse lastResponse = null;
+        private string moveServerPrefix;
+        private bool receivedResponse;
+        private JSONPollResponse lastResponse;
+        private bool moveSending;
+        //private WebClient downloader;
 
         // FOR TEST
-        const int teamID2 = 2;
-        const string teamKey2 = "1a77594c";
-        
+        //const int teamID2 = 2;
+        //const string teamKey2 = "1a77594c";
 
-        // Makes a request to the server which will be completed in the callback of RequestComplete
-        public static JSONPollResponse MakePoll()
+        public Network(int gameID, int teamID, string teamKey)
         {
-            
-            Uri pollingServerURI = new Uri(pollingServer);
-            WebClient downloader = new WebClient();
-            downloader.OpenReadCompleted += new OpenReadCompletedEventHandler(PollCompleted);
-            downloader.OpenReadAsync(pollingServerURI);
+            this.gameID = gameID;
+            this.teamID = teamID;
+            this.teamKey = teamKey;
+            pollingServer = "http://www.bencarle.com/chess/poll/" + gameID + "/" + teamID + "/" + teamKey + "/";
+            moveServerPrefix = "http://www.bencarle.com/chess/move/" + gameID + "/" + teamID + "/" + teamKey + "/";
+            receivedResponse = false;
+            lastResponse = null;
+            moveSending = false;
+        }
+
+        // Attempts to poll server and returns response set by callback asyncronously.
+        public JSONPollResponse RequestPoll()
+        {
+            receivedResponse = false;
+            Poll();
             while(!receivedResponse)
             {
 
@@ -48,35 +58,73 @@ namespace ChessAI
             return lastResponse;
         }
 
-        // Callback of MakeRequest when server response is received
-        static private void PollCompleted(object sender, OpenReadCompletedEventArgs e)
+        // Makes a request to the server with a callback
+        private void Poll()
         {
+            Uri pollingServerURI = new Uri(pollingServer);
+            WebClient downloader = new WebClient();
+            downloader.OpenReadCompleted += new OpenReadCompletedEventHandler(PollCompleted);
+            downloader.OpenReadAsync(pollingServerURI);
+        }
+
+        // Callback of MakeRequest when server response is received.
+        // If fails, will reattempt to Poll()
+        private void PollCompleted(object sender, OpenReadCompletedEventArgs e)
+        {
+            bool error = false;
             if (e.Error == null)
             {
                 Console.WriteLine("Received Response");
                 Stream responseStream = e.Result;
-                DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(JSONPollResponse));
-                JSONPollResponse response = (JSONPollResponse)serializer.ReadObject(responseStream);
-                // ready is our turn, not ready is opponent's turn
-                lastResponse = response;
-                receivedResponse = true;
+                try
+                {
+                    DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(JSONPollResponse));
+                    JSONPollResponse response = (JSONPollResponse)serializer.ReadObject(responseStream);
+                    // ready is our turn, not ready is opponent's turn
+                    lastResponse = response;
+                    receivedResponse = true;
+                }
+                catch 
+                {
+                    error = true;
+                }
+            }
+            else
+            {
+                error = true;
+            }
+            WebClient s = sender as WebClient;
+            s.CancelAsync();
+            if(error)
+            {
+                Console.WriteLine("Error receiving poll response. Retrying.");
+                Poll();
             }
         }
 
-        public static void MakeMove(string move)
+        public void MakeMove(string move)
         {
             String moveAddress = moveServerPrefix+move+"/";
+            Console.WriteLine(moveAddress);
             Uri moveServerURI = new Uri(moveAddress);
             WebClient downloader = new WebClient();
+            moveSending = true;
             downloader.OpenReadCompleted += new OpenReadCompletedEventHandler(MoveCompleted);
             downloader.OpenReadAsync(moveServerURI);
+            while (moveSending)
+            {
+
+            }
         }
 
-        static private void MoveCompleted(object sender, OpenReadCompletedEventArgs e)
+        private void MoveCompleted(object sender, OpenReadCompletedEventArgs e)
         {
             if (e.Error == null)
             {
                 Console.WriteLine("Received Move Response");
+                moveSending = false;
+                WebClient s = sender as WebClient;
+                s.CancelAsync();
             }
         }
 
@@ -88,9 +136,11 @@ namespace ChessAI
             [DataMember]
             public float secondsleft { get; set; }
             [DataMember]
-            public int lastMoveNumber { get; set; }
+            public int lastmovenumber { get; set; }
             [DataMember]
-            public string lastMove { get; set; }
+            public string lastmove { get; set; }
+            [DataMember]
+            public bool? gameover { get; set; }
         }
     }
 }
