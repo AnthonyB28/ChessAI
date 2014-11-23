@@ -45,6 +45,7 @@
     <Compile Include="Board.cs" />
     <Compile Include="GameState.cs" />
     <Compile Include="Negamax.cs" />
+    <Compile Include="PieceTables.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Network.cs" />

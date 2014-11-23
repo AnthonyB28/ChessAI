@@ -190,8 +190,6 @@ namespace ChessAI
                             {
                                 if (board[i, j + 1] == 0)
                                 {
-                                    
-                                    
                                     if (j == 6) 
                                     {
                                         moves.Add(CreateMove(i, j, i, j + 1, W_QUEEN));
@@ -310,7 +308,7 @@ namespace ChessAI
                                     {
                                         
                                         moves.Add(CreateMove(i, j, x, j));
-                                        ;
+                                       
                                     }
                                     break;
                                 }
@@ -319,17 +317,13 @@ namespace ChessAI
                             {
                                 if (board[i, y] == 0)
                                 {
-                                    
                                     moves.Add(CreateMove(i, j, i, y));
-                                    ;
                                 }
                                 else
                                 {
                                     if (IsColor(i, y, !white))
                                     {
-                                        
                                         moves.Add(CreateMove(i, j, i, y));
-                                        ;
                                     }
                                     break;
                                 }
@@ -340,7 +334,7 @@ namespace ChessAI
                                 {
                                     
                                     moves.Add(CreateMove(i, j, i, y));
-                                    ;
+                                   
                                 }
                                 else
                                 {
@@ -348,7 +342,7 @@ namespace ChessAI
                                     {
                                         
                                         moves.Add(CreateMove(i, j, i, y));
-                                        ;
+                                       
                                     }
                                     break;
                                 }
@@ -362,7 +356,7 @@ namespace ChessAI
                                 {
                                     
                                     moves.Add(CreateMove(i, j, x, y));
-                                    ;
+                                   
                                 }
                                 else
                                 {
@@ -370,7 +364,7 @@ namespace ChessAI
                                     {
                                         
                                         moves.Add(CreateMove(i, j, x, y));
-                                        ;
+                                       
                                     }
                                     break;
                                 }
@@ -381,7 +375,7 @@ namespace ChessAI
                                 {
                                     
                                     moves.Add(CreateMove(i, j, x, y));
-                                    ;
+                                   
                                 }
                                 else
                                 {
@@ -389,7 +383,7 @@ namespace ChessAI
                                     {
                                         
                                         moves.Add(CreateMove(i, j, x, y));
-                                        ;
+                                       
                                     }
                                     break;
                                 }
@@ -400,7 +394,7 @@ namespace ChessAI
                                 {
                                     
                                     moves.Add(CreateMove(i, j, x, y));
-                                    ;
+                                   
                                 }
                                 else
                                 {
@@ -408,7 +402,7 @@ namespace ChessAI
                                     {
                                         
                                         moves.Add(CreateMove(i, j, x, y));
-                                        ;
+                                       
                                     }
                                     break;
                                 }
@@ -419,7 +413,7 @@ namespace ChessAI
                                 {
                                     
                                     moves.Add(CreateMove(i, j, x, y));
-                                    ;
+                                   
                                 }
                                 else
                                 {
@@ -427,7 +421,7 @@ namespace ChessAI
                                     {
                                         
                                         moves.Add(CreateMove(i, j, x, y));
-                                        ;
+                                       
                                     }
                                     break;
                                 }
@@ -441,7 +435,7 @@ namespace ChessAI
                                 {
                                     
                                     moves.Add(CreateMove(i, j, x, j));
-                                    ;
+                                   
                                 }
                                 else
                                 {
@@ -449,7 +443,7 @@ namespace ChessAI
                                     {
                                         
                                         moves.Add(CreateMove(i, j, x, j));
-                                        ;
+                                       
                                     }
                                     break;
                                 }
@@ -460,7 +454,7 @@ namespace ChessAI
                                 {
                                     
                                     moves.Add(CreateMove(i, j, x, j));
-                                    ;
+                                   
                                 }
                                 else
                                 {
@@ -468,7 +462,7 @@ namespace ChessAI
                                     {
                                         
                                         moves.Add(CreateMove(i, j, x, j));
-                                        ;
+                                       
                                     }
                                     break;
                                 }
@@ -479,7 +473,7 @@ namespace ChessAI
                                 {
                                     
                                     moves.Add(CreateMove(i, j, i, y));
-                                    ;
+                                   
                                 }
                                 else
                                 {
@@ -487,7 +481,7 @@ namespace ChessAI
                                     {
                                         
                                         moves.Add(CreateMove(i, j, i, y));
-                                        ;
+                                       
                                     }
                                     break;
                                 }
@@ -498,7 +492,7 @@ namespace ChessAI
                                 {
                                     
                                     moves.Add(CreateMove(i, j, i, y));
-                                    ;
+                                   
                                 }
                                 else
                                 {
@@ -506,7 +500,7 @@ namespace ChessAI
                                     {
                                         
                                         moves.Add(CreateMove(i, j, i, y));
-                                        ;
+                                       
                                     }
                                     break;
                                 }
@@ -517,7 +511,7 @@ namespace ChessAI
                                 {
                                     
                                     moves.Add(CreateMove(i, j, x, y));
-                                    ;
+                                   
                                 }
                                 else
                                 {
@@ -525,7 +519,7 @@ namespace ChessAI
                                     {
                                         
                                         moves.Add(CreateMove(i, j, x, y));
-                                        ;
+                                       
                                     }
                                     break;
                                 }
@@ -536,7 +530,7 @@ namespace ChessAI
                                 {
                                     
                                     moves.Add(CreateMove(i, j, x, y));
-                                    ;
+                                   
                                 }
                                 else
                                 {
@@ -544,7 +538,7 @@ namespace ChessAI
                                     {
                                         
                                         moves.Add(CreateMove(i, j, x, y));
-                                        ;
+                                       
                                     }
                                     break;
                                 }
@@ -555,7 +549,7 @@ namespace ChessAI
                                 {
                                     
                                     moves.Add(CreateMove(i, j, x, y));
-                                    ;
+                                   
                                 }
                                 else
                                 {
@@ -563,7 +557,7 @@ namespace ChessAI
                                     {
                                         
                                         moves.Add(CreateMove(i, j, x, y));
-                                        ;
+                                       
                                     }
                                     break;
                                 }
@@ -574,7 +568,7 @@ namespace ChessAI
                                 {
                                     
                                     moves.Add(CreateMove(i, j, x, y));
-                                    ;
+                                   
                                 }
                                 else
                                 {
@@ -582,7 +576,7 @@ namespace ChessAI
                                     {
                                         
                                         moves.Add(CreateMove(i, j, x, y));
-                                        ;
+                                       
                                     }
                                     break;
                                 }
@@ -594,49 +588,41 @@ namespace ChessAI
                             {
                                 
                                 moves.Add(CreateMove(i, j, i + 1, j));
-                                ;
                             }
                             if ((i < 7) && (j > 0) && (board[i + 1, j - 1] == 0 || IsColor(i + 1, j - 1, !white)))
                             {
                                 
                                 moves.Add(CreateMove(i, j, i + 1, j - 1));
-                                ;
                             }
                             if ((i < 7) && (j < 7) && (board[i + 1, j + 1] == 0 || IsColor(i + 1, j + 1, !white)))
                             {
                                 
                                 moves.Add(CreateMove(i, j, i + 1, j + 1));
-                                ;
                             }
                             if ((j < 7) && (board[i, j + 1] == 0 || IsColor(i, j, !white)))
                             {
                                 
                                 moves.Add(CreateMove(i, j, i, j + 1));
-                                ;
                             }
                             if ((j > 0) && (board[i, j - 1] == 0 || IsColor(i, j - 1, !white)))
                             {
                                 
                                 moves.Add(CreateMove(i, j, i, j - 1));
-                                ;
                             }
                             if ((i > 0) && (board[i - 1, j] == 0 || IsColor(i - 1, j, !white)))
                             {
                                 
                                 moves.Add(CreateMove(i, j, i - 1, j));
-                                ;
                             }
                             if ((i > 0) && (j < 7) && (board[i - 1, j + 1] == 0 || IsColor(i - 1, j + 1, !white)))
                             {
                                 
                                 moves.Add(CreateMove(i, j, i - 1, j + 1));
-                                ;
                             }
                             if ((i > 0) && (j > 0) && (board[i - 1, j - 1] == 0 || IsColor(i - 1, j - 1, !white)))
                             {
                                 
                                 moves.Add(CreateMove(i, j, i - 1, j - 1));
-                                ;
                             }
                         }
                         else if (board[i, j] % 6 == W_KNIGHT)
@@ -645,49 +631,41 @@ namespace ChessAI
                             {
                                 
                                 moves.Add(CreateMove(i, j, i + 2, j + 1));
-                                ;
                             }
                             if ((i < 6) && (j > 0) && (board[i + 2, j - 1] == 0 || IsColor(i + 2, j - 1, !white)))
                             {
                                 
                                 moves.Add(CreateMove(i, j, i + 2, j - 1));
-                                ;
                             }
                             if ((i < 7) && (j < 6) && (board[i + 1, j + 2] == 0 || IsColor(i + 1, j + 2, !white)))
                             {
                                 
                                 moves.Add(CreateMove(i, j, i + 1, j + 2));
-                                ;
                             }
                             if ((i < 7) && (j > 1) && (board[i + 1, j - 2] == 0 || IsColor(i + 1, j - 2, !white)))
                             {
                                 
                                 moves.Add(CreateMove(i, j, i + 1, j - 2));
-                                ;
                             }
                             if ((i > 0) && (j < 6) && (board[i - 1, j + 2] == 0 || IsColor(i - 1, j + 2, !white)))
                             {
                                 
                                 moves.Add(CreateMove(i, j, i - 1, j + 2));
-                                ;
                             }
                             if ((i > 0) && (j > 1) && (board[i - 1, j - 2] == 0 || IsColor(i - 1, j - 2, !white)))
                             {
                                 
                                 moves.Add(CreateMove(i, j, i - 1, j - 2));
-                                ;
                             }
                             if ((i > 1) && (j < 7) && (board[i - 2, j + 1] == 0 || IsColor(i - 2, j + 1, !white)))
                             {
                                 
                                 moves.Add(CreateMove(i, j, i - 2, j + 1));
-                                ;
                             }
                             if ((i > 1) && (j > 0) && (board[i - 2, j - 1] == 0 || IsColor(i - 2, j - 1, !white)))
                             {
                                 
                                 moves.Add(CreateMove(i, j, i - 2, j - 1));
-                                ;
                             }
                         }
                     }
@@ -717,29 +695,28 @@ namespace ChessAI
             Move moveToMake = null;
             if (moves.Count > 0)
             {
-                int depth = 1;
-                int score;
-                while (depth < 5)
+                int depth = 5;
+                int alpha = Negamax.NEGA_SCORE;
+                //while loop here to do multiple depths
+                t.Reset();
+                t.Start();
+                Negamax.pruned = 0;
+                for (int i = 0; i < moves.Count; ++i)
                 {
-                    t.Reset();
-                    t.Start();
-                    score = Negamax.NEGA_SCORE;
-                    for (int i = 0; i < moves.Count; ++i)
+                    MakeMove(moves[i]);
+                    int score = Negamax.negaMax(this, depth, alpha, -Negamax.NEGA_SCORE, color);
+                    UndoMove();
+                    if (score > alpha)
                     {
-                        MakeMove(moves[i]);
-                        int negaScore = -Negamax.negaMax(this, depth, color);
-                        UndoMove();
-                        if(negaScore > score)
-                        {
-                            score = negaScore;
-                            moveToMake = moves[i];
-                            Console.WriteLine("New move:" + score + " @depth:" + depth);
-                        }
+                        alpha = score;
+                        moveToMake = moves[i];
+                        Console.WriteLine("New move:" + score + " @depth:" + depth);
                     }
-                    Console.WriteLine(depth + t.ElapsedMilliseconds);
-                    ++depth;
-                    t.Stop();
                 }
+                Console.WriteLine("Pruned: " + Negamax.pruned);
+                Console.WriteLine(depth + t.ElapsedMilliseconds);
+                //++depth; Use while loop to do multiple depths
+                t.Stop();
             }
 
             Board b = this.Clone();
@@ -836,55 +813,136 @@ namespace ChessAI
 
         public int Evaluate(bool color)
         {
-            const int pawnVal = 1;
-            const int knightVal = 2;
-            const int bishopVal = 3;
-            const int rookVal = 4;
-            const int queenVal = 7; // Give queen preference
-            const int kingVal = 5;
+            const int pawnVal = 100;
+            const int knightVal = 300;
+            const int bishopVal = 325;
+            const int rookVal = 500;
+            const int queenVal = 950; // Give queen preference
+            const int kingVal = 3000;
 
             int blackScore = 0;
             int whiteScore = 0;
+            short bBishops = 0;
+            short wBishops = 0;
+            short knights = 0; // TODO use for handling end game
+
             for (int i = 0; i < 8; i++)
             {
                 for (int j = 0; j < 8; j++)
                 {
                     int scoreToAdd = 0;
-                    if (board[i, j] % 6 == W_PAWN)
+                    int bTableScoreToAdd = 0;
+                    int wTableScoreToAdd = 0;
+                    int pieceToEval = board[i, j] % 6;
+                    int tablePosition = i * 8 + j;
+                    bool isWhitePiece = IsColor(i, j, true);
+                    if (pieceToEval == W_PAWN)
                     {
                         scoreToAdd = pawnVal;
+                        if (isWhitePiece)
+                        {
+                            wTableScoreToAdd = color ? PieceTables.Pawn[tablePosition] : PieceTables.Pawn[63 - tablePosition];
+                        }
+                        else
+                        {
+                            bTableScoreToAdd = color ? PieceTables.Pawn[tablePosition] : PieceTables.Pawn[63 - tablePosition];
+                        }
                     }
-                    else if (board[i, j] % 6 == W_KNIGHT)
+                    else if (pieceToEval == W_KNIGHT)
                     {
-                        scoreToAdd += knightVal;
+                        scoreToAdd = knightVal;
+                        ++knights;
+                        if (isWhitePiece)
+                        {
+                            wTableScoreToAdd = color ? PieceTables.Knight[tablePosition] : PieceTables.Knight[63 - tablePosition];
+                        }
+                        else
+                        {
+                            bTableScoreToAdd = color ? PieceTables.Knight[tablePosition] : PieceTables.Knight[63 - tablePosition];
+                        }
                     }
-                    else if (board[i, j] % 6 == W_ROOK)
+                    else if (pieceToEval == W_ROOK)
                     {
-                        scoreToAdd += rookVal;
+                        scoreToAdd = rookVal;
                     }
-                    else if (board[i, j] % 6 == W_BISHOP)
+                    else if (pieceToEval == W_BISHOP)
                     {
-                        scoreToAdd += bishopVal;
+                        scoreToAdd = bishopVal;
+                        if (isWhitePiece)
+                        {
+                            wTableScoreToAdd = color ? PieceTables.Bishop[tablePosition] : PieceTables.Bishop[63 - tablePosition];
+                            ++wBishops;
+                        }
+                        else
+                        {
+                            bTableScoreToAdd = color ? PieceTables.Bishop[tablePosition] : PieceTables.Bishop[63 - tablePosition];
+                            ++bBishops;
+                        }
                     }
-                    else if (board[i, j] % 6 == W_QUEEN)
+                    else if (pieceToEval == W_QUEEN)
                     {
-                        scoreToAdd += queenVal;
+                        scoreToAdd = queenVal;
                     }
-                    else if (board[i, j] % 6 == 0) // King
+                    else if (pieceToEval == 0 && board[i,j] != 0) // King
                     {
-                        scoreToAdd += kingVal;
+                        scoreToAdd = kingVal;
+                        if (isWhitePiece)
+                        {
+                            wTableScoreToAdd = color ? PieceTables.King[tablePosition] : PieceTables.King[63 - tablePosition];
+                        }
+                        else
+                        {
+                            bTableScoreToAdd = color ? PieceTables.King[tablePosition] : PieceTables.King[63 - tablePosition];
+                        }
                     }
 
-                    if (IsColor(i, j, color))
+                    if (isWhitePiece)
                     {
-                        if (color) // White
-                        {
-                            whiteScore += scoreToAdd;
-                        }
-                        else // Black
-                        {
-                            blackScore += scoreToAdd;
-                        }
+                        whiteScore += scoreToAdd + wTableScoreToAdd;
+                        blackScore += bTableScoreToAdd;
+                    }
+                    else
+                    {
+                        blackScore += scoreToAdd + bTableScoreToAdd;
+                        whiteScore += wTableScoreToAdd;
+                    }
+                }
+            }
+
+            if(wBishops >= 2)
+            {
+                whiteScore += 15;
+            }
+            if(bBishops >= 2)
+            {
+                blackScore += 15;
+            }
+
+            // Attack boost
+            Move lastMove = moves.Peek();
+            if (lastMove.destinationPiece != 0)
+            {
+                if (lastMove.destinationPiece >= 1 && lastMove.destinationPiece <= 6)
+                {
+                    // black took white
+                    if (lastMove.originPiece % 6 < lastMove.destinationPiece % 6)
+                    {
+                        blackScore += 25; // Lesser piece took bigger piece
+                    }
+                    else
+                    {
+                        blackScore += 10;
+                    }
+                }
+                else // white took black
+                {
+                    if (lastMove.originPiece % 6 < lastMove.destinationPiece % 6)
+                    {
+                        whiteScore += 25; // Lesser piece took bigger piece
+                    }
+                    else
+                    {
+                        whiteScore += 10;
                     }
                 }
             }
