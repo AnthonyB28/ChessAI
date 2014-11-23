@@ -31,7 +31,7 @@ namespace ChessAI
                 if(score >= beta)
                 {
                     pruned += moves.Count - i;
-                    return beta;
+                    return score;
                 }
                 if (score > alpha)
                 {

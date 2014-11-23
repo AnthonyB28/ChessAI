@@ -66,6 +66,7 @@ namespace ChessAI
 
         private byte[,] board;
         private Stack<Move> moves;
+        private bool endGame = false;
 
         public Board()
         {
@@ -695,7 +696,7 @@ namespace ChessAI
             Move moveToMake = null;
             if (moves.Count > 0)
             {
-                int depth = 5;
+                int depth = 6;
                 int alpha = Negamax.NEGA_SCORE;
                 //while loop here to do multiple depths
                 t.Reset();
@@ -811,9 +812,10 @@ namespace ChessAI
             return piece;
         }
 
+        // TODO: Speed this fucker up. He's the 80%
         public int Evaluate(bool color)
         {
-            const int pawnVal = 100;
+            const int pawnVal = 150;
             const int knightVal = 320;
             const int bishopVal = 325;
             const int rookVal = 500;
@@ -825,97 +827,132 @@ namespace ChessAI
             short bBishops = 0;
             short wBishops = 0;
             short knights = 0; // TODO use for handling end game
+            int totalPieces = 0;
 
             for (int i = 0; i < 8; i++)
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    int scoreToAdd = 0;
-                    int bTableScoreToAdd = 0;
-                    int wTableScoreToAdd = 0;
-                    int pieceToEval = board[i, j] % 6;
-                    int tablePosition = i * 8 + j;
-                    bool isWhitePiece = IsColor(i, j, true);
-                    if (pieceToEval == W_PAWN)
+                    if (board[i,j] != BLANK_PIECE)
                     {
-                        scoreToAdd = pawnVal;
-                        if (isWhitePiece)
+                        int scoreToAdd = 0;
+                        int bTableScoreToAdd = 0;
+                        int wTableScoreToAdd = 0;
+                        int pieceToEval = board[i, j] % 6;
+                        int tablePosition = j * 8 + i;
+                        ++totalPieces;
+                        bool isWhitePiece = IsColor(i, j, true);
+                        if (pieceToEval == W_PAWN)
                         {
-                            wTableScoreToAdd = color ? PieceTables.Pawn[63 - tablePosition] : PieceTables.Pawn[tablePosition];
+                            scoreToAdd = pawnVal;
+                            if (i == 0 || i == 7) // Rook Pawns
+                            {
+                                scoreToAdd -= 15;
+                            }
+                            if (isWhitePiece)
+                            {
+                                if (j == 2) // Whites in 3rd row are bonus
+                                {
+                                    scoreToAdd += 25;
+                                }
+                                wTableScoreToAdd = color ? PieceTables.Pawn[63 - tablePosition] : PieceTables.Pawn[tablePosition];
+                            }
+                            else
+                            {
+                                if (j == 5) // Blacks in 6th row are bonus
+                                {
+                                    scoreToAdd += 25;
+                                }
+                                bTableScoreToAdd = color ? PieceTables.Pawn[63 - tablePosition] : PieceTables.Pawn[tablePosition];
+                            }
                         }
-                        else
+                        else if (pieceToEval == W_KNIGHT)
                         {
-                            bTableScoreToAdd = color ? PieceTables.Pawn[63 - tablePosition] : PieceTables.Pawn[tablePosition];
+                            scoreToAdd = knightVal;
+                            ++knights;
+                            if (isWhitePiece)
+                            {
+                                wTableScoreToAdd = color ? PieceTables.Knight[63 - tablePosition] : PieceTables.Knight[tablePosition];
+                            }
+                            else
+                            {
+                                bTableScoreToAdd = color ? PieceTables.Knight[63 - tablePosition] : PieceTables.Knight[tablePosition];
+                            }
                         }
-                    }
-                    else if (pieceToEval == W_KNIGHT)
-                    {
-                        scoreToAdd = knightVal;
-                        ++knights;
-                        if (isWhitePiece)
+                        else if (pieceToEval == W_ROOK)
                         {
-                            wTableScoreToAdd = color ? PieceTables.Knight[63 - tablePosition] : PieceTables.Knight[tablePosition];
+                            scoreToAdd = rookVal;
                         }
-                        else
+                        else if (pieceToEval == W_BISHOP)
                         {
-                            bTableScoreToAdd = color ? PieceTables.Knight[63 - tablePosition] : PieceTables.Knight[tablePosition];
+                            scoreToAdd = bishopVal;
+                            if (isWhitePiece)
+                            {
+                                wTableScoreToAdd = color ? PieceTables.Bishop[63 - tablePosition] : PieceTables.Bishop[tablePosition];
+                                ++wBishops;
+                            }
+                            else
+                            {
+                                bTableScoreToAdd = color ? PieceTables.Bishop[63 - tablePosition] : PieceTables.Bishop[tablePosition];
+                                ++bBishops;
+                            }
                         }
-                    }
-                    else if (pieceToEval == W_ROOK)
-                    {
-                        scoreToAdd = rookVal;
-                    }
-                    else if (pieceToEval == W_BISHOP)
-                    {
-                        scoreToAdd = bishopVal;
-                        if (isWhitePiece)
+                        else if (pieceToEval == W_QUEEN)
                         {
-                            wTableScoreToAdd = color ? PieceTables.Bishop[63 - tablePosition] : PieceTables.Bishop[tablePosition];
-                            ++wBishops;
+                            scoreToAdd = queenVal;
+                            if(!endGame)
+                            {
+                                scoreToAdd -= 10;
+                            }
                         }
-                        else
+                        else if (pieceToEval == 0 && board[i, j] != 0) // King
                         {
-                            bTableScoreToAdd = color ? PieceTables.Bishop[63 - tablePosition] : PieceTables.Bishop[tablePosition];
-                            ++bBishops;
+                            scoreToAdd = kingVal;
+                            if (isWhitePiece)
+                            {
+                                if (endGame)
+                                {
+                                    wTableScoreToAdd = color ? PieceTables.KingEndGame[63 - tablePosition] : PieceTables.KingEndGame[tablePosition];
+                                }
+                                else
+                                {
+                                    wTableScoreToAdd = color ? PieceTables.King[63 - tablePosition] : PieceTables.King[tablePosition];
+                                }
+                            }
+                            else
+                            {
+                                if (endGame)
+                                {
+                                    bTableScoreToAdd = color ? PieceTables.KingEndGame[63 - tablePosition] : PieceTables.KingEndGame[tablePosition];
+                                }
+                                else
+                                {
+                                    bTableScoreToAdd = color ? PieceTables.King[63 - tablePosition] : PieceTables.King[tablePosition];
+                                }
+                            }
                         }
-                    }
-                    else if (pieceToEval == W_QUEEN)
-                    {
-                        scoreToAdd = queenVal;
-                    }
-                    else if (pieceToEval == 0 && board[i,j] != 0) // King
-                    {
-                        scoreToAdd = kingVal;
-                        if (isWhitePiece)
-                        {
-                            wTableScoreToAdd = color ? PieceTables.King[63 - tablePosition] : PieceTables.King[tablePosition];
-                        }
-                        else
-                        {
-                            bTableScoreToAdd = color ? PieceTables.King[63 - tablePosition] : PieceTables.King[tablePosition];
-                        }
-                    }
 
-                    if (isWhitePiece)
-                    {
-                        whiteScore += scoreToAdd + wTableScoreToAdd;
-                        blackScore += bTableScoreToAdd;
-                    }
-                    else
-                    {
-                        blackScore += scoreToAdd + bTableScoreToAdd;
-                        whiteScore += wTableScoreToAdd;
+                        if (isWhitePiece)
+                        {
+                            whiteScore += scoreToAdd + wTableScoreToAdd;
+                            blackScore += bTableScoreToAdd;
+                        }
+                        else
+                        {
+                            blackScore += scoreToAdd + bTableScoreToAdd;
+                            whiteScore += wTableScoreToAdd;
+                        }
                     }
                 }
             }
 
             if(wBishops >= 2)
             {
-                whiteScore += 15;
+                whiteScore += 20;
             }
             if(bBishops >= 2)
             {
-                blackScore += 15;
+                blackScore += 20;
             }
 
             // Attack boost
@@ -945,6 +982,15 @@ namespace ChessAI
                         whiteScore += 5;
                     }
                 }
+            }
+
+            if(totalPieces < 10)
+            {
+                this.endGame = true;
+            }
+            else 
+            { 
+                this.endGame = false;
             }
 
             if (color)
