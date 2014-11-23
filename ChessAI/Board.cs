@@ -7,6 +7,44 @@ using System.Runtime.CompilerServices;
 
 namespace ChessAI
 {
+
+    class Move
+    {
+        public int originX;
+        public int originY;
+        public int destX;
+        public int destY;
+        public byte destinationPiece;
+        public byte originPiece;
+        public bool promotion;
+
+        // Regular move
+        // TODO: Special moves aren't considered. Saving only destination piece as opposed to any possible "jumps" like enpassant?
+        public Move(int x1, int y1, int x2, int y2, byte[,] board)
+        {
+            originX = x1;
+            originY = y1;
+            destX = x2;
+            destY = y2;
+            originPiece = board[x1, y1];
+            destinationPiece = board[x2, y2];
+            promotion = false;
+        }
+        
+        // Promotion
+        // TODO: Can there be a move where we remove an enemy piece AND promote? Need to save it.
+        public Move(int x1, int y1, int x2, int y2, byte pieceToMove, byte pieceToSave)
+        {
+            originX = x1;
+            originY = y1;
+            destX = x2;
+            destY = y2;
+            originPiece = pieceToMove;
+            destinationPiece = pieceToSave;
+            promotion = true;
+        }
+    }
+
     class Board
     {
         private static readonly byte BLANK_PIECE = 0;
@@ -27,74 +65,11 @@ namespace ChessAI
         private static readonly bool BLACK = false;
 
         private byte[,] board;
-
-        public int Evaluate(bool color)
-        {
-            const int pawnVal = 1;
-            const int knightVal = 2;
-            const int bishopVal = 3;
-            const int rookVal = 4;
-            const int queenVal = 7; // Give queen preference
-            const int kingVal = 5;
-
-            int blackScore = 0;
-            int whiteScore = 0;
-            for (int i = 0; i < 8; i++)
-            {
-                for (int j = 0; j < 8; j++)
-                {
-                    int scoreToAdd = 0;
-                    if(board[i,j] % 6 == W_PAWN)
-                    {
-                        scoreToAdd = pawnVal;
-                    }
-                    else if (board[i, j] % 6 == W_KNIGHT)
-                    {
-                        scoreToAdd += knightVal;
-                    }
-                    else if (board[i, j] % 6 == W_ROOK)
-                    {
-                        scoreToAdd += rookVal;
-                    }
-                    else if(board[i, j] % 6 == W_BISHOP)
-                    {
-                        scoreToAdd += bishopVal;
-                    }
-                    else if (board[i, j] % 6 == W_QUEEN)
-                    {
-                        scoreToAdd += queenVal;
-                    }
-                    else if (board[i, j] % 6 == 0) // King
-                    {
-                        scoreToAdd += kingVal;
-                    }
-
-                    if (IsColor(i, j, color))
-                    {
-                        if (color) // White
-                        {
-                            whiteScore += scoreToAdd;
-                        }
-                        else // Black
-                        {
-                            blackScore += scoreToAdd;
-                        }
-                    }
-                }
-            }
-
-            if(color)
-            {
-                return whiteScore - blackScore;
-            }
-            else
-            {
-                return blackScore - whiteScore;
-            }
-        }
+        private Stack<Move> moves;
 
         public Board()
         {
+            moves = new Stack<Move>();
             board = new byte[8, 8];
             for (int i = 0; i < 8; i++) {
                 board[i, 1] = W_PAWN;
@@ -120,49 +95,90 @@ namespace ChessAI
             board[7, 7] = B_ROOK;
         }
 
-        public Board(byte[,] board)
+        public Board(byte[,] board, Stack<Move> moves)
         {
             this.board = board;
+            this.moves = moves;
         }
 
         public Board Clone()
         {
-            return new Board((byte[,])board.Clone());
+            return new Board((byte[,])board.Clone(), moves);
         }
 
-        public void MovePiece(int x1, int y1, int x2, int y2)
+//         public void MovePiece(int x1, int y1, int x2, int y2)
+//         {
+//             if (board[x1, y1] % 6 == 0 && Math.Abs(x2 - x1) == 2)
+//             {
+//                 if (x2 < x1)
+//                 {
+//                     board[x2 + 1, y1] = board[0, y1];
+//                     board[0, y1] = BLANK_PIECE;
+//                 }
+//                 else
+//                 {
+//                     board[x2 - 1, y1] = board[7, y1];
+//                     board[7, y1] = BLANK_PIECE;
+//                 }
+//             }
+//             else if (board[x1, y1] % 6 == W_PAWN && x1 != x2 && board[x2, y2] == BLANK_PIECE)
+//             {
+//                 board[x2, y1] = BLANK_PIECE;
+//             }
+//             board[x2, y2] = board[x1, y1];
+//             board[x1, y1] = BLANK_PIECE;
+//         }
+
+        public Move CreateMove(int x1, int y1, int x2, int y2)
         {
-            if (board[x1, y1] % 6 == 0 && Math.Abs(x2 - x1) == 2)
+            // TODO: advanced moves from the old function?
+            return new Move(x1, y1, x2, y2, board);
+        }
+
+//         public void MovePiece(int x1, int y1, int x2, int y2, byte promote)
+//         { 
+//             board[x2, y2] = promote;
+//             board[x1, y1] = BLANK_PIECE;
+//         }
+
+        public Move CreateMove(int x1, int y1, int x2, int y2, byte promote)
+        {
+            return new Move(x1, y1, x2, y2, board[x1,y1], promote);
+        }
+
+        public void UndoMove()
+        {
+            Move move = moves.Pop();
+            if(!move.promotion)
             {
-                if (x2 < x1)
-                {
-                    board[x2 + 1, y1] = board[0, y1];
-                    board[0, y1] = BLANK_PIECE;
-                }
-                else
-                {
-                    board[x2 - 1, y1] = board[7, y1];
-                    board[7, y1] = BLANK_PIECE;
-                }
+                board[move.originX, move.originY] = move.originPiece;
+                board[move.destX, move.destY] = move.destinationPiece;
             }
-            else if (board[x1, y1] % 6 == W_PAWN && x1 != x2 && board[x2, y2] == BLANK_PIECE)
+            else
             {
-                board[x2, y1] = BLANK_PIECE;
+                board[move.originX, move.originY] = move.originPiece;
+                board[move.destX, move.destY] = BLANK_PIECE; // TODO: see Move Promotion TODO
             }
-            board[x2, y2] = board[x1, y1];
-            board[x1, y1] = BLANK_PIECE;
         }
 
-        public void MovePiece(int x1, int y1, int x2, int y2, byte promote)
+        public void MakeMove(Move move)
         {
-            
-            board[x2, y2] = promote;
-            board[x1, y1] = BLANK_PIECE;
+            moves.Push(move);
+            if (!move.promotion)
+            {
+                board[move.originX, move.originY] = BLANK_PIECE;
+                board[move.destX, move.destY] = move.originPiece;
+            }
+            else
+            {
+                board[move.originX, move.originY] = BLANK_PIECE;
+                board[move.destX, move.destY] = move.destinationPiece;
+            }
         }
 
-        public List<Board> GetAllStates(bool white)
+        public List<Move> GetAllStates(bool white)
         {
-            List<Board> moves = new List<Board>();
+            List<Move> moves = new List<Move>();
             //generate all moves
             for(int i = 0; i < 8; i++){
                 for(int j = 0; j < 8; j++){
@@ -174,51 +190,44 @@ namespace ChessAI
                             {
                                 if (board[i, j + 1] == 0)
                                 {
-                                    Board b = this.Clone();
+                                    
                                     
                                     if (j == 6) 
                                     {
-                                        b.MovePiece(i, j, i, j + 1, W_QUEEN);
-                                        moves.Add(b);
+                                        moves.Add(CreateMove(i, j, i, j + 1, W_QUEEN));
                                     }
                                     else
                                     {
-                                        b.MovePiece(i, j, i, j + 1);
-                                        moves.Add(b);
+                                        moves.Add(CreateMove(i, j, i, j + 1));
                                     }
                                 }
                                 if (j == 1 && board[i,j+1] == 0 && board[i, j + 2] == 0)
                                 {
-                                    Board b = this.Clone();
-                                    b.MovePiece(i, j, i, j + 2);
-                                    moves.Add(b);
+                                    
+                                    moves.Add(CreateMove(i, j, i, j + 2));
                                 }
                                 if ((i < 7) && board[i+1,j+1] != 0 && (IsColor(i + 1, j + 1, !white)))
                                 {
-                                    Board b = this.Clone();
+                                    
                                     if (j == 6)
                                     {
-                                        b.MovePiece(i, j, i + 1, j + 1, W_QUEEN);
-                                        moves.Add(b);
+                                        moves.Add(CreateMove(i, j, i + 1, j + 1, W_QUEEN));
                                     }
                                     else
                                     {
-                                        b.MovePiece(i, j, i + 1, j + 1);
-                                        moves.Add(b);
+                                        moves.Add(CreateMove(i, j, i + 1, j + 1));
                                     }
                                 }
                                 if ((i > 0) && board[i-1,j+1] != 0 && (IsColor(i - 1, j + 1, !white)))
                                 {
-                                    Board b = this.Clone();
+                                    
                                     if (j == 6)
                                     {
-                                        b.MovePiece(i, j, i - 1, j + 1, W_QUEEN);
-                                        moves.Add(b);
+                                        moves.Add(CreateMove(i, j, i - 1, j + 1, W_QUEEN));
                                     }
                                     else
                                     {
-                                        b.MovePiece(i, j, i - 1, j + 1);
-                                        moves.Add(b);
+                                        moves.Add(CreateMove(i, j, i - 1, j + 1));
                                     }
                                 }
                             }
@@ -226,50 +235,43 @@ namespace ChessAI
                             {
                                 if (board[i, j - 1] == 0)
                                 {
-                                    Board b = this.Clone();
+                                    
                                     if (j == 1)
                                     {
-                                        b.MovePiece(i, j, i, j - 1, B_QUEEN);
-                                        moves.Add(b);
+                                        moves.Add(CreateMove(i, j, i, j - 1, B_QUEEN));
                                     }
                                     else
                                     {
-                                        b.MovePiece(i, j, i, j - 1);
-                                        moves.Add(b);
+                                        moves.Add(CreateMove(i, j, i, j - 1));
                                     }
                                 }
                                 if (j == 6 && board[i,j-1] == 0 && board[i, j - 2] == 0)
                                 {
-                                    Board b = this.Clone();
-                                    b.MovePiece(i, j, i, j - 2);
-                                    moves.Add(b);
+                                    
+                                    moves.Add(CreateMove(i, j, i, j - 2));
                                 }
                                 if ((i < 7) && board[i+1,j-1] != 0 && (IsColor(i + 1, j - 1, !white)))
                                 {
-                                    Board b = this.Clone();
+                                    
                                     if (j == 1)
                                     {
-                                        b.MovePiece(i, j, i + 1, j - 1, B_QUEEN);
-                                        moves.Add(b);
+                                        moves.Add(CreateMove(i, j, i + 1, j - 1, B_QUEEN));
                                     }
                                     else
                                     {
-                                        b.MovePiece(i, j, i + 1, j - 1);
-                                        moves.Add(b);
+                                        moves.Add(CreateMove(i, j, i + 1, j - 1));
                                     }
                                 }
                                 if ((i > 0) && board[i-1,j-1] !=0 && (IsColor(i - 1, j - 1, !white)))
                                 {
-                                    Board b = this.Clone();
+                                    
                                     if (j == 1)
                                     {
-                                        b.MovePiece(i, j, i - 1, j - 1, B_QUEEN);
-                                        moves.Add(b);
+                                        moves.Add(CreateMove(i, j, i - 1, j - 1, B_QUEEN));
                                     }
                                     else
                                     {
-                                        b.MovePiece(i, j, i - 1, j - 1);
-                                        moves.Add(b);
+                                        moves.Add(CreateMove(i, j, i - 1, j - 1));
                                     }
 
                                 }
@@ -282,17 +284,15 @@ namespace ChessAI
                             {
                                 if (board[x, j] == 0)
                                 {
-                                    Board b = this.Clone();
-                                    b.MovePiece(i, j, x, j);
-                                    moves.Add(b);
+                                    
+                                    moves.Add(CreateMove(i, j, x, j));
                                 }
                                 else
                                 {
                                     if (IsColor(x, j, !white))
                                     {
-                                        Board b = this.Clone();
-                                        b.MovePiece(i, j, x, j);
-                                        moves.Add(b);
+                                        
+                                        moves.Add(CreateMove(i, j, x, j));
                                     }
                                     break;
                                 }
@@ -301,17 +301,16 @@ namespace ChessAI
                             {
                                 if (board[x, j] == 0)
                                 {
-                                    Board b = this.Clone();
-                                    b.MovePiece(i, j, x, j);
-                                    moves.Add(b);
+                                    
+                                    moves.Add(CreateMove(i, j, x, j));
                                 }
                                 else
                                 {
                                     if (IsColor(x, j, !white))
                                     {
-                                        Board b = this.Clone();
-                                        b.MovePiece(i, j, x, j);
-                                        moves.Add(b);
+                                        
+                                        moves.Add(CreateMove(i, j, x, j));
+                                        ;
                                     }
                                     break;
                                 }
@@ -320,17 +319,17 @@ namespace ChessAI
                             {
                                 if (board[i, y] == 0)
                                 {
-                                    Board b = this.Clone();
-                                    b.MovePiece(i, j, i, y);
-                                    moves.Add(b);
+                                    
+                                    moves.Add(CreateMove(i, j, i, y));
+                                    ;
                                 }
                                 else
                                 {
                                     if (IsColor(i, y, !white))
                                     {
-                                        Board b = this.Clone();
-                                        b.MovePiece(i, j, i, y);
-                                        moves.Add(b);
+                                        
+                                        moves.Add(CreateMove(i, j, i, y));
+                                        ;
                                     }
                                     break;
                                 }
@@ -339,17 +338,17 @@ namespace ChessAI
                             {
                                 if (board[i, y] == 0)
                                 {
-                                    Board b = this.Clone();
-                                    b.MovePiece(i, j, i, y);
-                                    moves.Add(b);
+                                    
+                                    moves.Add(CreateMove(i, j, i, y));
+                                    ;
                                 }
                                 else
                                 {
                                     if (IsColor(i, y, !white))
                                     {
-                                        Board b = this.Clone();
-                                        b.MovePiece(i, j, i, y);
-                                        moves.Add(b);
+                                        
+                                        moves.Add(CreateMove(i, j, i, y));
+                                        ;
                                     }
                                     break;
                                 }
@@ -361,17 +360,17 @@ namespace ChessAI
                             {
                                 if (board[x, y] == 0)
                                 {
-                                    Board b = this.Clone();
-                                    b.MovePiece(i, j, x, y);
-                                    moves.Add(b);
+                                    
+                                    moves.Add(CreateMove(i, j, x, y));
+                                    ;
                                 }
                                 else
                                 {
                                     if (IsColor(x, y, !white))
                                     {
-                                        Board b = this.Clone();
-                                        b.MovePiece(i, j, x, y);
-                                        moves.Add(b);
+                                        
+                                        moves.Add(CreateMove(i, j, x, y));
+                                        ;
                                     }
                                     break;
                                 }
@@ -380,17 +379,17 @@ namespace ChessAI
                             {
                                 if (board[x, y] == 0)
                                 {
-                                    Board b = this.Clone();
-                                    b.MovePiece(i, j, x, y);
-                                    moves.Add(b);
+                                    
+                                    moves.Add(CreateMove(i, j, x, y));
+                                    ;
                                 }
                                 else
                                 {
                                     if (IsColor(x, y, !white))
                                     {
-                                        Board b = this.Clone();
-                                        b.MovePiece(i, j, x, y);
-                                        moves.Add(b);
+                                        
+                                        moves.Add(CreateMove(i, j, x, y));
+                                        ;
                                     }
                                     break;
                                 }
@@ -399,17 +398,17 @@ namespace ChessAI
                             {
                                 if (board[x, y] == 0)
                                 {
-                                    Board b = this.Clone();
-                                    b.MovePiece(i, j, x, y);
-                                    moves.Add(b);
+                                    
+                                    moves.Add(CreateMove(i, j, x, y));
+                                    ;
                                 }
                                 else
                                 {
                                     if (IsColor(x, y, !white))
                                     {
-                                        Board b = this.Clone();
-                                        b.MovePiece(i, j, x, y);
-                                        moves.Add(b);
+                                        
+                                        moves.Add(CreateMove(i, j, x, y));
+                                        ;
                                     }
                                     break;
                                 }
@@ -418,17 +417,17 @@ namespace ChessAI
                             {
                                 if (board[x, y] == 0)
                                 {
-                                    Board b = this.Clone();
-                                    b.MovePiece(i, j, x, y);
-                                    moves.Add(b);
+                                    
+                                    moves.Add(CreateMove(i, j, x, y));
+                                    ;
                                 }
                                 else
                                 {
                                     if (IsColor(x, y, !white))
                                     {
-                                        Board b = this.Clone();
-                                        b.MovePiece(i, j, x, y);
-                                        moves.Add(b);
+                                        
+                                        moves.Add(CreateMove(i, j, x, y));
+                                        ;
                                     }
                                     break;
                                 }
@@ -440,17 +439,17 @@ namespace ChessAI
                             {
                                 if (board[x, j] == 0)
                                 {
-                                    Board b = this.Clone();
-                                    b.MovePiece(i, j, x, j);
-                                    moves.Add(b);
+                                    
+                                    moves.Add(CreateMove(i, j, x, j));
+                                    ;
                                 }
                                 else
                                 {
                                     if (IsColor(x, j, !white))
                                     {
-                                        Board b = this.Clone();
-                                        b.MovePiece(i, j, x, j);
-                                        moves.Add(b);
+                                        
+                                        moves.Add(CreateMove(i, j, x, j));
+                                        ;
                                     }
                                     break;
                                 }
@@ -459,17 +458,17 @@ namespace ChessAI
                             {
                                 if (board[x, j] == 0)
                                 {
-                                    Board b = this.Clone();
-                                    b.MovePiece(i, j, x, j);
-                                    moves.Add(b);
+                                    
+                                    moves.Add(CreateMove(i, j, x, j));
+                                    ;
                                 }
                                 else
                                 {
                                     if (IsColor(x, j, !white))
                                     {
-                                        Board b = this.Clone();
-                                        b.MovePiece(i, j, x, j);
-                                        moves.Add(b);
+                                        
+                                        moves.Add(CreateMove(i, j, x, j));
+                                        ;
                                     }
                                     break;
                                 }
@@ -478,17 +477,17 @@ namespace ChessAI
                             {
                                 if (board[i, y] == 0)
                                 {
-                                    Board b = this.Clone();
-                                    b.MovePiece(i, j, i, y);
-                                    moves.Add(b);
+                                    
+                                    moves.Add(CreateMove(i, j, i, y));
+                                    ;
                                 }
                                 else
                                 {
                                     if (IsColor(i, y, !white))
                                     {
-                                        Board b = this.Clone();
-                                        b.MovePiece(i, j, i, y);
-                                        moves.Add(b);
+                                        
+                                        moves.Add(CreateMove(i, j, i, y));
+                                        ;
                                     }
                                     break;
                                 }
@@ -497,17 +496,17 @@ namespace ChessAI
                             {
                                 if (board[i, y] == 0)
                                 {
-                                    Board b = this.Clone();
-                                    b.MovePiece(i, j, i, y);
-                                    moves.Add(b);
+                                    
+                                    moves.Add(CreateMove(i, j, i, y));
+                                    ;
                                 }
                                 else
                                 {
                                     if (IsColor(i, y, !white))
                                     {
-                                        Board b = this.Clone();
-                                        b.MovePiece(i, j, i, y);
-                                        moves.Add(b);
+                                        
+                                        moves.Add(CreateMove(i, j, i, y));
+                                        ;
                                     }
                                     break;
                                 }
@@ -516,17 +515,17 @@ namespace ChessAI
                             {
                                 if (board[x, y] == 0)
                                 {
-                                    Board b = this.Clone();
-                                    b.MovePiece(i, j, x, y);
-                                    moves.Add(b);
+                                    
+                                    moves.Add(CreateMove(i, j, x, y));
+                                    ;
                                 }
                                 else
                                 {
                                     if (IsColor(x, y, !white))
                                     {
-                                        Board b = this.Clone();
-                                        b.MovePiece(i, j, x, y);
-                                        moves.Add(b);
+                                        
+                                        moves.Add(CreateMove(i, j, x, y));
+                                        ;
                                     }
                                     break;
                                 }
@@ -535,17 +534,17 @@ namespace ChessAI
                             {
                                 if (board[x, y] == 0)
                                 {
-                                    Board b = this.Clone();
-                                    b.MovePiece(i, j, x, y);
-                                    moves.Add(b);
+                                    
+                                    moves.Add(CreateMove(i, j, x, y));
+                                    ;
                                 }
                                 else
                                 {
                                     if (IsColor(x, y, !white))
                                     {
-                                        Board b = this.Clone();
-                                        b.MovePiece(i, j, x, y);
-                                        moves.Add(b);
+                                        
+                                        moves.Add(CreateMove(i, j, x, y));
+                                        ;
                                     }
                                     break;
                                 }
@@ -554,17 +553,17 @@ namespace ChessAI
                             {
                                 if (board[x, y] == 0)
                                 {
-                                    Board b = this.Clone();
-                                    b.MovePiece(i, j, x, y);
-                                    moves.Add(b);
+                                    
+                                    moves.Add(CreateMove(i, j, x, y));
+                                    ;
                                 }
                                 else
                                 {
                                     if (IsColor(x, y, !white))
                                     {
-                                        Board b = this.Clone();
-                                        b.MovePiece(i, j, x, y);
-                                        moves.Add(b);
+                                        
+                                        moves.Add(CreateMove(i, j, x, y));
+                                        ;
                                     }
                                     break;
                                 }
@@ -573,17 +572,17 @@ namespace ChessAI
                             {
                                 if (board[x, y] == 0)
                                 {
-                                    Board b = this.Clone();
-                                    b.MovePiece(i, j, x, y);
-                                    moves.Add(b);
+                                    
+                                    moves.Add(CreateMove(i, j, x, y));
+                                    ;
                                 }
                                 else
                                 {
                                     if (IsColor(x, y, !white))
                                     {
-                                        Board b = this.Clone();
-                                        b.MovePiece(i, j, x, y);
-                                        moves.Add(b);
+                                        
+                                        moves.Add(CreateMove(i, j, x, y));
+                                        ;
                                     }
                                     break;
                                 }
@@ -593,102 +592,102 @@ namespace ChessAI
                         {
                             if ((i < 7) && (board[i + 1, j] == 0 || IsColor(i + 1, j, !white)))
                             {
-                                Board b = this.Clone();
-                                b.MovePiece(i, j, i + 1, j);
-                                moves.Add(b);
+                                
+                                moves.Add(CreateMove(i, j, i + 1, j));
+                                ;
                             }
                             if ((i < 7) && (j > 0) && (board[i + 1, j - 1] == 0 || IsColor(i + 1, j - 1, !white)))
                             {
-                                Board b = this.Clone();
-                                b.MovePiece(i, j, i + 1, j - 1);
-                                moves.Add(b);
+                                
+                                moves.Add(CreateMove(i, j, i + 1, j - 1));
+                                ;
                             }
                             if ((i < 7) && (j < 7) && (board[i + 1, j + 1] == 0 || IsColor(i + 1, j + 1, !white)))
                             {
-                                Board b = this.Clone();
-                                b.MovePiece(i, j, i + 1, j + 1);
-                                moves.Add(b);
+                                
+                                moves.Add(CreateMove(i, j, i + 1, j + 1));
+                                ;
                             }
                             if ((j < 7) && (board[i, j + 1] == 0 || IsColor(i, j, !white)))
                             {
-                                Board b = this.Clone();
-                                b.MovePiece(i, j, i, j + 1);
-                                moves.Add(b);
+                                
+                                moves.Add(CreateMove(i, j, i, j + 1));
+                                ;
                             }
                             if ((j > 0) && (board[i, j - 1] == 0 || IsColor(i, j - 1, !white)))
                             {
-                                Board b = this.Clone();
-                                b.MovePiece(i, j, i, j - 1);
-                                moves.Add(b);
+                                
+                                moves.Add(CreateMove(i, j, i, j - 1));
+                                ;
                             }
                             if ((i > 0) && (board[i - 1, j] == 0 || IsColor(i - 1, j, !white)))
                             {
-                                Board b = this.Clone();
-                                b.MovePiece(i, j, i - 1, j);
-                                moves.Add(b);
+                                
+                                moves.Add(CreateMove(i, j, i - 1, j));
+                                ;
                             }
                             if ((i > 0) && (j < 7) && (board[i - 1, j + 1] == 0 || IsColor(i - 1, j + 1, !white)))
                             {
-                                Board b = this.Clone();
-                                b.MovePiece(i, j, i - 1, j + 1);
-                                moves.Add(b);
+                                
+                                moves.Add(CreateMove(i, j, i - 1, j + 1));
+                                ;
                             }
                             if ((i > 0) && (j > 0) && (board[i - 1, j - 1] == 0 || IsColor(i - 1, j - 1, !white)))
                             {
-                                Board b = this.Clone();
-                                b.MovePiece(i, j, i - 1, j - 1);
-                                moves.Add(b);
+                                
+                                moves.Add(CreateMove(i, j, i - 1, j - 1));
+                                ;
                             }
                         }
                         else if (board[i, j] % 6 == W_KNIGHT)
                         {
                             if ((i < 6) && (j < 7) && (board[i + 2, j + 1] == 0 || IsColor(i + 2, j + 1, !white)))
                             {
-                                Board b = this.Clone();
-                                b.MovePiece(i, j, i + 2, j + 1);
-                                moves.Add(b);
+                                
+                                moves.Add(CreateMove(i, j, i + 2, j + 1));
+                                ;
                             }
                             if ((i < 6) && (j > 0) && (board[i + 2, j - 1] == 0 || IsColor(i + 2, j - 1, !white)))
                             {
-                                Board b = this.Clone();
-                                b.MovePiece(i, j, i + 2, j - 1);
-                                moves.Add(b);
+                                
+                                moves.Add(CreateMove(i, j, i + 2, j - 1));
+                                ;
                             }
                             if ((i < 7) && (j < 6) && (board[i + 1, j + 2] == 0 || IsColor(i + 1, j + 2, !white)))
                             {
-                                Board b = this.Clone();
-                                b.MovePiece(i, j, i + 1, j + 2);
-                                moves.Add(b);
+                                
+                                moves.Add(CreateMove(i, j, i + 1, j + 2));
+                                ;
                             }
                             if ((i < 7) && (j > 1) && (board[i + 1, j - 2] == 0 || IsColor(i + 1, j - 2, !white)))
                             {
-                                Board b = this.Clone();
-                                b.MovePiece(i, j, i + 1, j - 2);
-                                moves.Add(b);
+                                
+                                moves.Add(CreateMove(i, j, i + 1, j - 2));
+                                ;
                             }
                             if ((i > 0) && (j < 6) && (board[i - 1, j + 2] == 0 || IsColor(i - 1, j + 2, !white)))
                             {
-                                Board b = this.Clone();
-                                b.MovePiece(i, j, i - 1, j + 2);
-                                moves.Add(b);
+                                
+                                moves.Add(CreateMove(i, j, i - 1, j + 2));
+                                ;
                             }
                             if ((i > 0) && (j > 1) && (board[i - 1, j - 2] == 0 || IsColor(i - 1, j - 2, !white)))
                             {
-                                Board b = this.Clone();
-                                b.MovePiece(i, j, i - 1, j - 2);
-                                moves.Add(b);
+                                
+                                moves.Add(CreateMove(i, j, i - 1, j - 2));
+                                ;
                             }
                             if ((i > 1) && (j < 7) && (board[i - 2, j + 1] == 0 || IsColor(i - 2, j + 1, !white)))
                             {
-                                Board b = this.Clone();
-                                b.MovePiece(i, j, i - 2, j + 1);
-                                moves.Add(b);
+                                
+                                moves.Add(CreateMove(i, j, i - 2, j + 1));
+                                ;
                             }
                             if ((i > 1) && (j > 0) && (board[i - 2, j - 1] == 0 || IsColor(i - 2, j - 1, !white)))
                             {
-                                Board b = this.Clone();
-                                b.MovePiece(i, j, i - 2, j - 1);
-                                moves.Add(b);
+                                
+                                moves.Add(CreateMove(i, j, i - 2, j - 1));
+                                ;
                             }
                         }
                     }
@@ -701,10 +700,58 @@ namespace ChessAI
         public Board PlayRandomMove(out string move, bool color)
         {
             Random rand = new Random(DateTime.Now.Millisecond);
-            List<Board> boards = GetAllStates(color);
+            List<Move> boards = GetAllStates(color);
             Console.WriteLine("Moves Available: " + boards.Count);
             int x = rand.Next(boards.Count);
-            Board b = boards[x];
+            Board b = this.Clone();
+            b.MakeMove(boards[x]);
+            move = detectMove(b);
+            return b;
+        }
+
+        public Board PlayNegaMaxMove(out string move, bool color)
+        {
+            List<Move> moves = GetAllStates(color);
+            Console.WriteLine("Moves Available: " + moves.Count);
+            System.Diagnostics.Stopwatch t = new System.Diagnostics.Stopwatch();
+            Move moveToMake = null;
+            if (moves.Count > 0)
+            {
+                int depth = 1;
+                int score;
+                while (depth < 5)
+                {
+                    t.Reset();
+                    t.Start();
+                    score = Negamax.NEGA_SCORE;
+                    for (int i = 0; i < moves.Count; ++i)
+                    {
+                        MakeMove(moves[i]);
+                        int negaScore = -Negamax.negaMax(this, depth, color);
+                        UndoMove();
+                        if(negaScore > score)
+                        {
+                            score = negaScore;
+                            moveToMake = moves[i];
+                            Console.WriteLine("New move:" + score + " @depth:" + depth);
+                        }
+                    }
+                    Console.WriteLine(depth + t.ElapsedMilliseconds);
+                    ++depth;
+                    t.Stop();
+                }
+            }
+
+            Board b = this.Clone();
+
+            if(moveToMake == null)
+            {
+                Console.WriteLine("No move to make");
+                move = "";
+                return b;
+            }
+
+            b.MakeMove(moveToMake);
             move = detectMove(b);
             return b;
         }
@@ -785,6 +832,71 @@ namespace ChessAI
                 }
             }
             return piece;
+        }
+
+        public int Evaluate(bool color)
+        {
+            const int pawnVal = 1;
+            const int knightVal = 2;
+            const int bishopVal = 3;
+            const int rookVal = 4;
+            const int queenVal = 7; // Give queen preference
+            const int kingVal = 5;
+
+            int blackScore = 0;
+            int whiteScore = 0;
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    int scoreToAdd = 0;
+                    if (board[i, j] % 6 == W_PAWN)
+                    {
+                        scoreToAdd = pawnVal;
+                    }
+                    else if (board[i, j] % 6 == W_KNIGHT)
+                    {
+                        scoreToAdd += knightVal;
+                    }
+                    else if (board[i, j] % 6 == W_ROOK)
+                    {
+                        scoreToAdd += rookVal;
+                    }
+                    else if (board[i, j] % 6 == W_BISHOP)
+                    {
+                        scoreToAdd += bishopVal;
+                    }
+                    else if (board[i, j] % 6 == W_QUEEN)
+                    {
+                        scoreToAdd += queenVal;
+                    }
+                    else if (board[i, j] % 6 == 0) // King
+                    {
+                        scoreToAdd += kingVal;
+                    }
+
+                    if (IsColor(i, j, color))
+                    {
+                        if (color) // White
+                        {
+                            whiteScore += scoreToAdd;
+                        }
+                        else // Black
+                        {
+                            blackScore += scoreToAdd;
+                        }
+                    }
+                }
+            }
+
+            if (color)
+            {
+                return whiteScore - blackScore;
+            }
+            else
+            {
+                return blackScore - whiteScore;
+            }
         }
 
         public string GetFile(int i)
