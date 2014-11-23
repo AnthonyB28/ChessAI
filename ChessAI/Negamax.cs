@@ -15,12 +15,13 @@ namespace ChessAI
         {
             //if you return a score of 10 from white's perspective, 
             // and the last move was a black move, then the score returned should be -10
-            bool nextPlayer = color ? false : true; // Reverse the player role
+            
             if(depth == 0) //TODO: Checkmate end of game test
             {
                 return state.Evaluate(color);
             }
-            
+
+            bool nextPlayer = color ? false : true; // Reverse the player role
             List<Move> moves = state.GetAllStates(nextPlayer);
             for (int i = 0; i < moves.Count; ++i )
             {

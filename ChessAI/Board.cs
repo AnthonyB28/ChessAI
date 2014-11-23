@@ -814,10 +814,10 @@ namespace ChessAI
         public int Evaluate(bool color)
         {
             const int pawnVal = 100;
-            const int knightVal = 300;
+            const int knightVal = 320;
             const int bishopVal = 325;
             const int rookVal = 500;
-            const int queenVal = 950; // Give queen preference
+            const int queenVal = 970;
             const int kingVal = 3000;
 
             int blackScore = 0;
@@ -841,11 +841,11 @@ namespace ChessAI
                         scoreToAdd = pawnVal;
                         if (isWhitePiece)
                         {
-                            wTableScoreToAdd = color ? PieceTables.Pawn[tablePosition] : PieceTables.Pawn[63 - tablePosition];
+                            wTableScoreToAdd = color ? PieceTables.Pawn[63 - tablePosition] : PieceTables.Pawn[tablePosition];
                         }
                         else
                         {
-                            bTableScoreToAdd = color ? PieceTables.Pawn[tablePosition] : PieceTables.Pawn[63 - tablePosition];
+                            bTableScoreToAdd = color ? PieceTables.Pawn[63 - tablePosition] : PieceTables.Pawn[tablePosition];
                         }
                     }
                     else if (pieceToEval == W_KNIGHT)
@@ -854,11 +854,11 @@ namespace ChessAI
                         ++knights;
                         if (isWhitePiece)
                         {
-                            wTableScoreToAdd = color ? PieceTables.Knight[tablePosition] : PieceTables.Knight[63 - tablePosition];
+                            wTableScoreToAdd = color ? PieceTables.Knight[63 - tablePosition] : PieceTables.Knight[tablePosition];
                         }
                         else
                         {
-                            bTableScoreToAdd = color ? PieceTables.Knight[tablePosition] : PieceTables.Knight[63 - tablePosition];
+                            bTableScoreToAdd = color ? PieceTables.Knight[63 - tablePosition] : PieceTables.Knight[tablePosition];
                         }
                     }
                     else if (pieceToEval == W_ROOK)
@@ -870,12 +870,12 @@ namespace ChessAI
                         scoreToAdd = bishopVal;
                         if (isWhitePiece)
                         {
-                            wTableScoreToAdd = color ? PieceTables.Bishop[tablePosition] : PieceTables.Bishop[63 - tablePosition];
+                            wTableScoreToAdd = color ? PieceTables.Bishop[63 - tablePosition] : PieceTables.Bishop[tablePosition];
                             ++wBishops;
                         }
                         else
                         {
-                            bTableScoreToAdd = color ? PieceTables.Bishop[tablePosition] : PieceTables.Bishop[63 - tablePosition];
+                            bTableScoreToAdd = color ? PieceTables.Bishop[63 - tablePosition] : PieceTables.Bishop[tablePosition];
                             ++bBishops;
                         }
                     }
@@ -888,11 +888,11 @@ namespace ChessAI
                         scoreToAdd = kingVal;
                         if (isWhitePiece)
                         {
-                            wTableScoreToAdd = color ? PieceTables.King[tablePosition] : PieceTables.King[63 - tablePosition];
+                            wTableScoreToAdd = color ? PieceTables.King[63 - tablePosition] : PieceTables.King[tablePosition];
                         }
                         else
                         {
-                            bTableScoreToAdd = color ? PieceTables.King[tablePosition] : PieceTables.King[63 - tablePosition];
+                            bTableScoreToAdd = color ? PieceTables.King[63 - tablePosition] : PieceTables.King[tablePosition];
                         }
                     }
 
@@ -920,29 +920,29 @@ namespace ChessAI
 
             // Attack boost
             Move lastMove = moves.Peek();
-            if (lastMove.destinationPiece != 0)
+            if (lastMove.destinationPiece != 0 && !lastMove.promotion)
             {
                 if (lastMove.destinationPiece >= 1 && lastMove.destinationPiece <= 6)
                 {
                     // black took white
                     if (lastMove.originPiece % 6 < lastMove.destinationPiece % 6)
                     {
-                        blackScore += 25; // Lesser piece took bigger piece
+                        blackScore += 20; // Lesser piece took bigger piece
                     }
                     else
                     {
-                        blackScore += 10;
+                        blackScore += 5;
                     }
                 }
                 else // white took black
                 {
                     if (lastMove.originPiece % 6 < lastMove.destinationPiece % 6)
                     {
-                        whiteScore += 25; // Lesser piece took bigger piece
+                        whiteScore += 20; // Lesser piece took bigger piece
                     }
                     else
                     {
-                        whiteScore += 10;
+                        whiteScore += 5;
                     }
                 }
             }
