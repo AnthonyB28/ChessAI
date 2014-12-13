@@ -1063,6 +1063,10 @@ namespace ChessAI
             int whiteScore = 0;
             byte bBishops = 0;
             byte wBishops = 0;
+            byte wQueens = 0;
+            byte bQueens = 0;
+            byte wRooks = 0;
+            byte bRooks = 0;
             byte knights = 0; // TODO use for handling end game
 
             for (int i = 0; i < 8; i++)
@@ -1121,6 +1125,14 @@ namespace ChessAI
                         else if (pieceToEval == W_ROOK)
                         {
                             scoreToAdd = rookVal;
+                            if(isWhitePiece)
+                            {
+                                ++wRooks;
+                            }
+                            else
+                            {
+                                ++bRooks;
+                            }
                         }
                         else if (pieceToEval == W_BISHOP)
                         {
@@ -1146,6 +1158,14 @@ namespace ChessAI
                             if (!endGame)
                             {
                                 scoreToAdd -= 10;
+                            }
+                            if(isWhitePiece)
+                            {
+                                ++wQueens;
+                            }
+                            else
+                            {
+                                ++bQueens;
                             }
                         }
                         else if (pieceToEval == 0 && board[i, j] != 0) // King
@@ -1194,6 +1214,27 @@ namespace ChessAI
                             //whiteScore += wTableScoreToAdd;
                         }
                     }
+                }
+            }
+
+            if(wRooks == 0 && wQueens == 0)
+            {
+                whiteScore -= 500;
+            }
+            if(bRooks == 0 && bQueens == 0)
+            {
+                blackScore -= 500;
+            }
+
+            if(endGame)
+            {
+                if(wRooks >= 1)
+                {
+                    whiteScore += 15;
+                }
+                if(bRooks >= 1)
+                {
+                    blackScore += 15;
                 }
             }
 
