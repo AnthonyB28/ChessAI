@@ -16,20 +16,15 @@ namespace ChessAI
             pruned++;
             //if you return a score of 10 from white's perspective, 
             // and the last move was a black move, then the score returned should be -10
-            
-            if(depth == 0) //TODO: Checkmate end of game test
+            List<Move> moves = state.GetAllStates(color, false);
+            if(depth == 0 || moves.Count == 0 || state.isTerminal()) //TODO: Checkmate end of game test
             {
                 return state.Evaluate(color);
             }
 
             bool nextPlayer = color; // Reverse the player role
-            List<Move> moves = state.GetAllStates(nextPlayer);
-            if (moves.Count == 0) 
-            {
-                return state.Evaluate(color);
-            }
-            else
-            {
+            
+            
                 if (maxDepth - depth <= 1)
                 {
                     state.sortMoves(moves, color);
@@ -53,14 +48,14 @@ namespace ChessAI
                     }
                     if (score < alpha)
                     {
-                        return alpha;
+                        //return alpha;
                     }
                     if (score > alpha)
                     {
                         alpha = score;
                     }
                 }
-            }
+            //}
             return alpha;
         }
     }
