@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Board.cs" />
+    <Compile Include="Diagnostics.cs" />
     <Compile Include="GameState.cs" />
     <Compile Include="Negamax.cs" />
     <Compile Include="NegaMaxMasterThread.cs" />

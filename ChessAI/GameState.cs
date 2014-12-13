@@ -13,6 +13,7 @@ namespace ChessAI
         private int turn;
         private bool gameOver;
         private Network network;
+        private float secondsLeft;
 
         public GameState(bool color, int gameID, int teamID, string teamKey)
         {
@@ -27,7 +28,9 @@ namespace ChessAI
         {
             while (!gameOver)
             {
+                Console.WriteLine("poll");
                 PollForTurn();
+                Console.WriteLine("make move");
                 MakeMove();
             }
             Console.WriteLine("Game Over!");
@@ -50,6 +53,7 @@ namespace ChessAI
 
         public void UpdateBoard(Network.JSONPollResponse response)
         {
+            secondsLeft = response.secondsleft;
             turn = response.lastmovenumber;
             if (response.lastmove != null && !String.IsNullOrWhiteSpace(response.lastmove))
             {
@@ -146,12 +150,36 @@ namespace ChessAI
 
         public void MakeMove()
         {
+            Console.WriteLine("get here");
             String move;
-            Console.WriteLine(board.ToString());
-            board.PlayNegaMaxMove(out move, color);
-            Console.WriteLine("SingleThreaded Move: " + move);
-            board = board.PlayNegaMaxMoveMultiThreaded(out move, color);
-            Console.WriteLine("SingleThreaded Move: " + move);
+            //Console.WriteLine(board.ToString());
+            System.Diagnostics.Stopwatch t = new System.Diagnostics.Stopwatch();
+            t.Reset();
+            t.Start();
+            //board.PlayNegaMaxMove(out move, color);
+            t.Stop();
+            //if (turn > 10)
+            //{
+            //    Diagnostics.singleTime += t.ElapsedMilliseconds;
+            //}
+            t.Reset();
+            t.Start();
+            //Console.WriteLine("SingleThreaded Move: " + move);
+            int depth = 6;
+            if (turn > 30 && secondsLeft > 150)
+            {
+                depth = 8;
+            }
+            board = board.PlayNegaMaxMoveMultiThreaded(out move, color, depth);
+            t.Stop();
+            //Diagnostics.setMaxMulti(t.ElapsedMilliseconds);
+            //if (turn > 20) {
+            //    Diagnostics.multiTime += t.ElapsedMilliseconds;
+            //    Diagnostics.searches += 1;
+            //    Console.WriteLine("Single Current Avg: " + Diagnostics.getAvgSingle());
+            //    Console.WriteLine("Multi Current Avg:" + Diagnostics.getAvgMulti());
+            //}
+            //Console.WriteLine("SinglThreaded Move: " + move);
             turn++;
             network.MakeMove(move);
         }
