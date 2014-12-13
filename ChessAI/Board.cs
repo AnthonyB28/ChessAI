@@ -7,7 +7,6 @@ using System.Runtime.CompilerServices;
 
 namespace ChessAI
 {
-
     class Move
     {
         public int originX;
@@ -82,6 +81,7 @@ namespace ChessAI
 
     class Board
     {
+        static int ENDGAME = 14;
         private static readonly byte BLANK_PIECE = 0;
         private static readonly byte W_PAWN = 1;
         private static readonly byte W_ROOK = 2;
@@ -111,7 +111,7 @@ namespace ChessAI
         {
             moves = new Stack<Move>();
             board = new byte[8, 8];
-            pieceCount = new byte[10];
+            pieceCount = new byte[12];
             for (int i = 0; i < 8; i++) {
                 board[i, 1] = W_PAWN;
                 board[i, 6] = B_PAWN;
@@ -228,7 +228,7 @@ namespace ChessAI
                     {
                         ++pieceCount[move.destinationPiece];
                     }
-                    if (pieces > 14)
+                    if (pieces > ENDGAME)
                     {
                         endGame = false;
                     }
@@ -254,7 +254,7 @@ namespace ChessAI
                 {
                     ++pieceCount[move.destinationPiece];
                     ++pieces;
-                    if(pieces > 14)
+                    if(pieces > ENDGAME)
                     {
                         endGame = false;
                     }
@@ -275,11 +275,11 @@ namespace ChessAI
                 blackKingTaken = true;
             }
             // make promotion
-            if (!move.promotion)
+            if (move.promotion)
             {
                 board[move.originX, move.originY] = BLANK_PIECE;
                 board[move.destX, move.destY] = move.originPiece;
-
+                
                 // Increment queen count, decrement pawn count, decrement destination if capture
                 ++pieceCount[move.originPiece];
                 if ((move.originPiece - 1) / 6 == 0)
@@ -294,7 +294,7 @@ namespace ChessAI
                 {
                     --pieces;
                     --pieceCount[move.destinationPiece];
-                    if (pieces <= 14)
+                    if (pieces <= ENDGAME)
                     {
                         endGame = true;
                     }
@@ -306,7 +306,7 @@ namespace ChessAI
                 board[move.destX, move.destY] = move.originPiece;
                 board[move.originX, move.destY] = BLANK_PIECE;
                 --pieces;
-                if (pieces <= 14)
+                if (pieces <= ENDGAME)
                 {
                     this.endGame = true;
                 }
@@ -337,7 +337,7 @@ namespace ChessAI
                 if(move.destinationPiece != BLANK_PIECE) //decrement pieces count if capture
                 {
                     --pieces;
-                    if(pieces <= 14)
+                    if(pieces <= ENDGAME)
                     {
                         endGame = true;
                     }
@@ -472,16 +472,13 @@ namespace ChessAI
                             {
                                 if (board[x, j] == 0)
                                 {
-                                    
                                     moves.Add(CreateMove(i, j, x, j));
                                 }
                                 else
                                 {
                                     if (IsColor(x, j, !white))
                                     {
-                                        
                                         moves.Add(CreateMove(i, j, x, j));
-                                       
                                     }
                                     break;
                                 }
@@ -504,18 +501,14 @@ namespace ChessAI
                             for (int y = j - 1; y >= 0; y--)
                             {
                                 if (board[i, y] == 0)
-                                {
-                                    
+                                {   
                                     moves.Add(CreateMove(i, j, i, y));
-                                   
                                 }
                                 else
                                 {
                                     if (IsColor(i, y, !white))
                                     {
-                                        
                                         moves.Add(CreateMove(i, j, i, y));
-                                       
                                     }
                                     break;
                                 }
@@ -1346,6 +1339,12 @@ namespace ChessAI
                         }
                     }
                 }
+            }
+
+            if(wRooks != pieceCount[W_ROOK] || bRooks != pieceCount[B_ROOK] || wQueens != pieceCount[W_QUEEN]
+                || bQueens != pieceCount[B_QUEEN] || bBishops != pieceCount[B_BISHOP] || wBishops != pieceCount[W_BISHOP])
+            {
+                Console.WriteLine("incorrect count");
             }
 
             if(wRooks == 0 && wQueens == 0)
