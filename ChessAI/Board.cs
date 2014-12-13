@@ -186,20 +186,45 @@ namespace ChessAI
                 {
                     board[move.originX, move.originY] = B_PAWN;
                 }
-                board[move.destX, move.destY] = move.destinationPiece; // TODO: see Move Promotion TODO
+                board[move.destX, move.destY] = move.destinationPiece;
             }
         }
 
         public void MakeMove(Move move)
         {
             moves.Push(move);
+            // make promotion
             if (!move.promotion)
             {
                 board[move.originX, move.originY] = BLANK_PIECE;
                 board[move.destX, move.destY] = move.originPiece;
             }
+            // make enpassent
+            else if (move.originPiece % 6 == W_PAWN && move.originX != move.destX && move.destinationPiece == 0)
+            {
+                board[move.destX, move.destY] = move.originPiece;
+                board[move.originX, move.destY] = BLANK_PIECE;
+            }
+            // make castle
+            else if(move.originPiece % 6 == 0 && move.destX - move.originX == 2)
+            {
+                board[move.originX, move.originY] = BLANK_PIECE;
+                board[move.destX, move.destY] = move.originPiece;
+                int y = move.originY;
+                int x = 0;
+                int x2 = move.destX + 1;
+                if (move.destX > move.originX)
+                {
+                    x = 7;
+                    x2 = move.destX - 1;
+                }
+                board[x2, y] = board[x, y];
+                board[x, y] = BLANK_PIECE;
+
+            }
             else
             {
+                // make regular move
                 board[move.originX, move.originY] = BLANK_PIECE;
                 board[move.destX, move.destY] = move.originPiece;
             }
