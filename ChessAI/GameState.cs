@@ -27,7 +27,9 @@ namespace ChessAI
         {
             while (!gameOver)
             {
+                Console.WriteLine("poll");
                 PollForTurn();
+                Console.WriteLine("make move");
                 MakeMove();
             }
             Console.WriteLine("Game Over!");
@@ -146,12 +148,36 @@ namespace ChessAI
 
         public void MakeMove()
         {
+            Console.WriteLine("get here");
             String move;
-            Console.WriteLine(board.ToString());
-            board.PlayNegaMaxMove(out move, color);
-            Console.WriteLine("SingleThreaded Move: " + move);
-            board = board.PlayNegaMaxMoveMultiThreaded(out move, color);
-            Console.WriteLine("SingleThreaded Move: " + move);
+            //Console.WriteLine(board.ToString());
+            System.Diagnostics.Stopwatch t = new System.Diagnostics.Stopwatch();
+            t.Reset();
+            t.Start();
+            //board.PlayNegaMaxMove(out move, color);
+            t.Stop();
+            //if (turn > 10)
+            //{
+            //    Diagnostics.singleTime += t.ElapsedMilliseconds;
+            //}
+            t.Reset();
+            t.Start();
+            //Console.WriteLine("SingleThreaded Move: " + move);
+            int depth = 8;
+            if (turn > 20)
+            {
+                depth = 8;
+            }
+            board = board.PlayNegaMaxMoveMultiThreaded(out move, color, depth);
+            t.Stop();
+            //Diagnostics.setMaxMulti(t.ElapsedMilliseconds);
+            if (turn > 20) {
+                Diagnostics.multiTime += t.ElapsedMilliseconds;
+                Diagnostics.searches += 1;
+                Console.WriteLine("Single Current Avg: " + Diagnostics.getAvgSingle());
+                Console.WriteLine("Multi Current Avg:" + Diagnostics.getAvgMulti());
+            }
+            //Console.WriteLine("SinglThreaded Move: " + move);
             turn++;
             network.MakeMove(move);
         }

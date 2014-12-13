@@ -203,7 +203,7 @@ namespace ChessAI
             else if (move.originPiece % 6 == W_PAWN && move.originX != move.destX && move.destinationPiece == 0)
             {
                 board[move.destX, move.destY] = move.originPiece;
-                board[move.originX, move.destY] = BLANK_PIECE;
+                board[move.destX, move.originY] = BLANK_PIECE;
             }
             // make castle
             else if(move.originPiece % 6 == 0 && move.destX - move.originX == 2)
@@ -729,6 +729,35 @@ namespace ChessAI
             return moves;
         }
 
+        public void sortMoves(List<Move> moves, bool color){
+            int[] cache = new int[moves.Count];
+            for (int i = 0; i < moves.Count; i++)
+            {
+                this.MakeMove(moves[i]);
+                cache[i] = this.Evaluate(color); // might just be color?
+                this.UndoMove();
+            }
+            for (int i = 0; i < moves.Count; i++)
+            {
+                int max = -999999999;
+                int loc = 0;
+                for (int j = i; j < moves.Count; j++)
+                {
+                    if (cache[j] > max)
+                    {
+                        loc = j;
+                        max = cache[j];
+                    }
+                }
+                Move moveTemp = moves[i];
+                int cacheTemp = cache[i];
+                moves[i] = moves[loc];
+                cache[i] = cache[loc];
+                moves[loc] = moveTemp;
+                cache[loc] = cacheTemp;
+            }
+        }
+
         public Board PlayRandomMove(out string move, bool color)
         {
             Random rand = new Random(DateTime.Now.Millisecond);
@@ -741,15 +770,17 @@ namespace ChessAI
             return b;
         }
 
-        public Board PlayNegaMaxMove(out string move, bool color)
+        public Board PlayNegaMaxMove(out string move, bool color, int depth)
         {
+            Console.WriteLine("suceed");
             List<Move> moves = GetAllStates(color);
+            this.sortMoves(moves, color);
             Console.WriteLine("Moves Available: " + moves.Count);
             System.Diagnostics.Stopwatch t = new System.Diagnostics.Stopwatch();
             Move moveToMake = null;
             if (moves.Count > 0)
             {
-                int depth = 8;
+                //int depth = 6;
                 int alpha = Negamax.NEGA_SCORE;
                 int beta = -Negamax.NEGA_SCORE;
                 //while loop here to do multiple depths
@@ -759,7 +790,8 @@ namespace ChessAI
                 for (int i = 0; i < moves.Count; ++i)
                 {
                     MakeMove(moves[i]);
-                    int score = -Negamax.negaMax(this, depth - 1, -beta, -alpha, !color);
+                    int score = -Negamax.negaMax(this, depth - 1, -beta, -alpha, !color, depth);
+                    Console.WriteLine(score);
                     UndoMove();
                     if (score > alpha)
                     {
@@ -767,9 +799,14 @@ namespace ChessAI
                         moveToMake = moves[i];
                         Console.WriteLine("New move:" + score + " @depth:" + depth);
                     }
+                    else if (score < alpha)
+                    {
+                        break;
+                    }
                 }
-                Console.WriteLine("Pruned: " + Negamax.pruned);
+                Console.WriteLine("Searched: " + Negamax.pruned);
                 Console.WriteLine("time at depth: " + depth +" = " + t.ElapsedMilliseconds);
+                //Diagnostics.singleTime += t.ElapsedMilliseconds;
                 //++depth; Use while loop to do multiple depths
                 t.Stop();
             }
@@ -790,18 +827,18 @@ namespace ChessAI
             return b;
         }
 
-        public Board PlayNegaMaxMoveMultiThreaded(out string move, bool color)
+        public Board PlayNegaMaxMoveMultiThreaded(out string move, bool color, int depth)
         {
             List<Move> moves = GetAllStates(color);
             Console.WriteLine("Moves Available: " + moves.Count);
             System.Diagnostics.Stopwatch t = new System.Diagnostics.Stopwatch();
             t.Reset();
             t.Start();
-            NegaMaxMasterThread negaThread = new NegaMaxMasterThread(this, color);
+            NegaMaxMasterThread negaThread = new NegaMaxMasterThread(this, color, depth);
             Move moveToMake = negaThread.Run();
             t.Stop();
             Console.WriteLine("MultiThread Time: " + t.ElapsedMilliseconds);
-
+            //Diagnostics.multiTime += t.ElapsedMilliseconds;
             Board b = this.Clone();
 
             if (moveToMake == null)
@@ -810,7 +847,7 @@ namespace ChessAI
                 move = "";
                 return b;
             }
-            Console.WriteLine(b.ToString());
+            //Console.WriteLine(b.ToString());
             b.MakeMove(moveToMake);
             //Console.WriteLine(moveToMake.ToString());
             //Console.WriteLine(b.ToString());
