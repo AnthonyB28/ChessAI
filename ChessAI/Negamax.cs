@@ -9,10 +9,11 @@ namespace ChessAI
     class Negamax
     {
         public const int NEGA_SCORE = -999999999;
-        public static int pruned = 0;
+        public static long pruned = 0;
 
-        public static int negaMax(Board state, int depth, int alpha, int beta, bool color)
+        public static int negaMax(Board state, int depth, int alpha, int beta, bool color, int maxDepth)
         {
+            pruned++;
             //if you return a score of 10 from white's perspective, 
             // and the last move was a black move, then the score returned should be -10
             
@@ -29,21 +30,30 @@ namespace ChessAI
             }
             else
             {
+                if (maxDepth - depth <= 1)
+                {
+                    state.sortMoves(moves, color);
+                }
                 for (int i = 0; i < moves.Count; ++i)
                 {
                     Board backUp = state.Clone();
                     state.MakeMove(moves[i]);
-                    int score = -negaMax(state, depth - 1, -beta, -alpha, !color);
+                    int score = -negaMax(state, depth - 1, -beta, -alpha, !color, maxDepth);
+                    
                     state.UndoMove();
-                    if (!state.Equals(backUp))
-                    {
-                        Console.WriteLine("WARNING: UNDO FAILED ON MOVE");
-                        Console.WriteLine(moves[i].ToString());
-                    }
+                    //if (!state.Equals(backUp))
+                    //{
+                    //    Console.WriteLine("WARNING: UNDO FAILED ON MOVE");
+                    //    Console.WriteLine(moves[i].ToString());
+                    //}
                     if (score >= beta)
                     {
-                        pruned += moves.Count - i;
+                        
                         return score;
+                    }
+                    if (score < alpha)
+                    {
+                        return alpha;
                     }
                     if (score > alpha)
                     {

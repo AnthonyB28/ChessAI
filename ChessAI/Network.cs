@@ -24,9 +24,9 @@ namespace ChessAI
         private string pollingServer;
         // Append move string with trailing "/" to make a move
         private string moveServerPrefix;
-        private bool receivedResponse;
+        private volatile bool receivedResponse;
         private JSONPollResponse lastResponse;
-        private bool moveSending;
+        private volatile bool moveSending;
         //private WebClient downloader;
 
         // FOR TEST

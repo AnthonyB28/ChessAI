@@ -17,13 +17,13 @@ namespace ChessAI
         private bool finished;
         private int depth;
 
-        public NegaMaxThread(Board board, bool color, NegaMaxMasterThread master)
+        public NegaMaxThread(Board board, bool color, NegaMaxMasterThread master, int depth)
         {
             this.board = board;
             this.color = color;
             this.master = master;
             this.finished = false;
-            depth = 8;
+            this.depth = depth;
             alpha = Negamax.NEGA_SCORE;
             beta = -Negamax.NEGA_SCORE;
         }
@@ -42,7 +42,7 @@ namespace ChessAI
                 //for (int i = 0; i < moves.Count; ++i)
                 //{
                 board.MakeMove(move);
-                int score = -Negamax.negaMax(board, depth - 1, -beta, -alpha, !color);
+                int score = -Negamax.negaMax(board, depth - 1, -beta, -alpha, !color, depth);
                 board.UndoMove();
                 if (score > alpha)
                 {
