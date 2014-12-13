@@ -64,6 +64,11 @@ namespace ChessAI
             return sb.ToString();
 
         }
+
+        public bool Equals(Move move)
+        {
+            return originPiece == move.originPiece && destinationPiece == move.destinationPiece && originX == move.originX && originY == move.originY && destX == move.destX && destY == move.destY;
+        }
     }
 
     class Board
@@ -130,7 +135,12 @@ namespace ChessAI
 
         public Board Clone()
         {
-            return new Board((byte[,])board.Clone(), new Stack<Move>(), endGame, blackKingTaken, whiteKingTaken);
+
+            Stack<Move> moveStack = new Stack<Move>();
+            foreach(Move m in moves.Reverse()){
+                moveStack.Push(m);
+            }
+            return new Board((byte[,])board.Clone(), moveStack, endGame, blackKingTaken, whiteKingTaken);
         }
 
 //         public void MovePiece(int x1, int y1, int x2, int y2)
@@ -252,7 +262,7 @@ namespace ChessAI
             }
         }
 
-        public List<Move> GetAllStates(bool white)
+        public List<Move> GetAllStates(bool white, bool first)
         {
             List<Move> moves = new List<Move>();
             //generate all moves
@@ -747,7 +757,33 @@ namespace ChessAI
                     }
                 }
             }
-
+            if (first && this.moves.Count >= 6)
+            {
+                Stack<Move> tempStack = new Stack<Move>();
+                foreach (Move m in this.moves.Reverse())
+                {
+                    tempStack.Push(m);
+                }
+                tempStack.Pop();
+                Move m1 = tempStack.Pop();
+                tempStack.Pop();
+                Move m2 = tempStack.Pop();
+                tempStack.Pop();
+                if (m1.Equals(tempStack.Pop()))
+                {
+                    for (int i = 0; i < moves.Count; )
+                    {
+                        if (m2.Equals(moves[i]))
+                        {
+                            moves.RemoveAt(i);
+                        }
+                        else
+                        {
+                            i++;
+                        }
+                    }
+                }
+            }
             return moves;
         }
 
@@ -783,7 +819,7 @@ namespace ChessAI
         public Board PlayRandomMove(out string move, bool color)
         {
             Random rand = new Random(DateTime.Now.Millisecond);
-            List<Move> boards = GetAllStates(color);
+            List<Move> boards = GetAllStates(color, true);
             Console.WriteLine("Moves Available: " + boards.Count);
             int x = rand.Next(boards.Count);
             Board b = this.Clone();
@@ -792,10 +828,15 @@ namespace ChessAI
             return b;
         }
 
+        public bool isTerminal()
+        {
+            return blackKingTaken || whiteKingTaken;
+        }
+
         public Board PlayNegaMaxMove(out string move, bool color, int depth)
         {
             Console.WriteLine("suceed");
-            List<Move> moves = GetAllStates(color);
+            List<Move> moves = GetAllStates(color, true);
             this.sortMoves(moves, color);
             Console.WriteLine("Moves Available: " + moves.Count);
             System.Diagnostics.Stopwatch t = new System.Diagnostics.Stopwatch();
@@ -832,7 +873,7 @@ namespace ChessAI
                 //++depth; Use while loop to do multiple depths
                 t.Stop();
             }
-
+            
             Board b = this.Clone();
 
             if(moveToMake == null)
@@ -851,8 +892,8 @@ namespace ChessAI
 
         public Board PlayNegaMaxMoveMultiThreaded(out string move, bool color, int depth)
         {
-            List<Move> moves = GetAllStates(color);
-            Console.WriteLine("Moves Available: " + moves.Count);
+            //List<Move> moves = GetAllStates(color);
+            //Console.WriteLine("Moves Available: " + moves.Count);
             System.Diagnostics.Stopwatch t = new System.Diagnostics.Stopwatch();
             t.Reset();
             t.Start();
