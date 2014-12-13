@@ -88,8 +88,8 @@ namespace ChessAI
         private byte[,] board;
         private Stack<Move> moves;
         private bool endGame = false;
-        private bool blackKingTaken = false;
-        private bool whiteKingTaken = false;
+        public bool blackKingTaken = false;
+        public bool whiteKingTaken = false;
 
         public Board()
         {

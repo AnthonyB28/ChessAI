@@ -33,7 +33,15 @@ namespace ChessAI
                 {
                     Board backUp = state.Clone();
                     state.MakeMove(moves[i]);
-                    int score = -negaMax(state, depth - 1, -beta, -alpha, !color);
+                    int score = 0;
+                    if (state.whiteKingTaken || state.blackKingTaken)
+                    {
+                        score = state.Evaluate(color);
+                    }
+                    else
+                    {
+                       score = -negaMax(state, depth - 1, -beta, -alpha, !color);
+                    }
                     state.UndoMove();
                     if (!state.Equals(backUp))
                     {
