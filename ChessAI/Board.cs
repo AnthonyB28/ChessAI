@@ -1148,6 +1148,11 @@ namespace ChessAI
                             scoreToAdd = kingVal;
                             if (isWhitePiece)
                             {
+                                if(CheckForKingCheck(i, j, true))
+                                {
+                                    whiteScore -= 100;
+                                    Console.WriteLine("White In Check");
+                                }
                                 if (endGame)
                                 {
                                     wTableScoreToAdd = color ? PieceTables.KingEndGame[63 - tablePosition] : PieceTables.KingEndGame[tablePosition];
@@ -1159,6 +1164,11 @@ namespace ChessAI
                             }
                             else
                             {
+                                if(CheckForKingCheck(i, j, false))
+                                {
+                                    blackScore -= 100;
+                                    Console.WriteLine("White In Check");
+                                }
                                 if (endGame)
                                 {
                                     bTableScoreToAdd = color ? PieceTables.KingEndGame[63 - tablePosition] : PieceTables.KingEndGame[tablePosition];
@@ -1230,6 +1240,357 @@ namespace ChessAI
             {
                 return blackScore - whiteScore;
             }
+        }
+
+        public bool CheckForKingCheck(int x, int y, bool color)
+        {
+            int i = x;
+            for (; i < 8; ++i) // CHECKING VERTICLE
+            {
+                if (board[i, y] != BLANK_PIECE)
+                {
+                    if (color)
+                    {
+                        if (board[i, y] == B_KING || board[i, y] == B_ROOK || board[i, y] == B_QUEEN)
+                        {
+                            return true;
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        if (board[i, y] == W_KING || board[i, y] == W_ROOK || board[i, y] == W_QUEEN)
+                        {
+                            return true;
+                        }
+                        break;
+                    }
+                }
+            }
+            i = x;
+            for (; i >= 0; --i)
+            {
+                if (board[i, y] != BLANK_PIECE)
+                {
+                    if (color)
+                    {
+                        if (board[i, y] == B_KING || board[i, y] == B_ROOK || board[i, y] == B_QUEEN)
+                        {
+                            return true;
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        if (board[i, y] == W_KING || board[i, y] == W_ROOK || board[i, y] == W_QUEEN)
+                        {
+                            return true;
+                        }
+                        break;
+                    }
+                }
+            }
+            int j = y;
+            for (; j < 8; ++j)
+            {
+                if (board[x, j] != BLANK_PIECE)
+                {
+                    if (color)
+                    {
+                        if (board[x, j] == B_KING || board[i, y] == B_ROOK || board[i, y] == B_QUEEN)
+                        {
+                            return true;
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        if (board[x, j] == W_KING || board[i, y] == W_ROOK || board[i, y] == W_QUEEN)
+                        {
+                            return true;
+                        }
+                        break;
+                    }
+                }
+            }
+            j = y;
+            for (; j >= 0; --j)
+            {
+                if (board[x, j] != BLANK_PIECE)
+                {
+                    if (color)
+                    {
+                        if (board[x, j] == B_KING || board[i, y] == B_ROOK || board[i, y] == B_QUEEN)
+                        {
+                            return true;
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        if (board[x, j] == W_KING || board[i, y] == W_ROOK || board[i, y] == W_QUEEN)
+                        {
+                            return true;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            // CHECKING DIAGONAL
+            i = x;
+            j = y;
+            for (; j < 8 && i < 8; ++j, ++i)
+            {
+                if (board[i, j] != BLANK_PIECE)
+                {
+                    if (color)
+                    {
+                        if (board[i, j] == B_KING || board[i, y] == B_BISHOP || board[i, y] == B_QUEEN)
+                        {
+                            return true;
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        if (board[i, j] == W_KING || board[i, y] == W_BISHOP || board[i, y] == W_QUEEN)
+                        {
+                            return true;
+                        }
+                        break;
+                    }
+                }
+            }
+            i = x;
+            j = y;
+            for (; j < 8 && i >= 0; ++j, --i)
+            {
+                if (board[i, j] != BLANK_PIECE)
+                {
+                    if (color)
+                    {
+                        if (board[i, j] == B_KING || board[i, y] == B_BISHOP || board[i, y] == B_QUEEN)
+                        {
+                            return true;
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        if (board[i, j] == W_KING || board[i, y] == W_BISHOP || board[i, y] == W_QUEEN)
+                        {
+                            return true;
+                        }
+                        break;
+                    }
+                }
+            }
+            i = x;
+            j = y;
+            for (; j >= 0 && i < 8; --j, ++i)
+            {
+                if (board[i, j] != BLANK_PIECE)
+                {
+                    if (color)
+                    {
+                        if (board[i, j] == B_KING || board[i, y] == B_BISHOP || board[i, y] == B_QUEEN)
+                        {
+                            return true;
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        if (board[i, j] == W_KING || board[i, y] == W_BISHOP || board[i, y] == W_QUEEN)
+                        {
+                            return true;
+                        }
+                        break;
+                    }
+                }
+            }
+            i = x;
+            j = y;
+            for (; j >= 0 && i >= 0; --j, --i)
+            {
+                if (board[i, j] != BLANK_PIECE)
+                {
+                    if (color)
+                    {
+                        if (board[i, j] == B_KING || board[i, y] == B_BISHOP || board[i, y] == B_QUEEN)
+                        {
+                            return true;
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        if (board[i, j] == W_KING || board[i, y] == W_BISHOP || board[i, y] == W_QUEEN)
+                        {
+                            return true;
+                        }
+                        break;
+                    }
+                }
+            }
+            
+            // CHECK FOR KNIGHTS
+            if (y - 2 >= 0) //over 2 up 1
+            {
+                if (x + 1 < 8)
+                {
+                    if (color && board[x + 1, y - 2] == B_KNIGHT)
+                    {
+                        return true;
+                    }
+                    else if (!color && board[x + 1, y - 2] == W_KNIGHT)
+                    {
+                        return true;
+                    }
+                }
+                if (x - 1 >= 0)
+                {
+                    if (color && board[x - 1, y - 2] == B_KNIGHT)
+                    {
+                        return true;
+                    }
+                    else if (!color && board[x - 1, y - 2] == W_KNIGHT)
+                    {
+                        return true;
+                    }
+                }
+            }
+            if (y + 2 < 8) //over 2 up 1
+            {
+                if (x + 1 < 8)
+                {
+                    if (color && board[x + 1, y + 2] == B_KNIGHT)
+                    {
+                        return true;
+                    }
+                    else if (!color && board[x + 1, y + 2] == W_KNIGHT)
+                    {
+                        return true;
+                    }
+                }
+                if (x - 1 >= 0)
+                {
+                    if (color && board[x - 1, y + 2] == B_KNIGHT)
+                    {
+                        return true;
+                    }
+                    else if (!color && board[x - 1, y + 2] == W_KNIGHT)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            if (x + 2 < 8) //up 2 over 1
+            {
+                if (y + 1 < 8)
+                {
+                    if (color && board[x + 2, y + 1] == B_KNIGHT)
+                    {
+                        return true;
+                    }
+                    else if (!color && board[x + 2, y + 1] == W_KNIGHT)
+                    {
+                        return true;
+                    }
+                }
+                if (y - 1 >= 0)
+                {
+                    if (color && board[x + 2, y - 1] == B_KNIGHT)
+                    {
+                        return true;
+                    }
+                    else if (!color && board[x + 2, y - 1] == W_KNIGHT)
+                    {
+                        return true;
+                    }
+                }
+            }
+            if (x - 2 >= 0)
+            {
+                if (y + 1 < 8)
+                {
+                    if (color && board[x - 2, y + 1] == B_KNIGHT)
+                    {
+                        return true;
+                    }
+                    else if (!color && board[x - 2, y + 1] == W_KING)
+                    {
+                        return true;
+                    }
+                }
+                if (y - 1 >= 0)
+                {
+                    if (color && board[x - 2, y - 1] == B_KNIGHT)
+                    {
+                        return true;
+                    }
+                    else if (!color && board[x - 2, y - 1] == W_KNIGHT)
+                    {
+                        return true;
+                    }
+                }
+            }
+            
+            // PAWN CHECK
+            if (x + 1 < 8)
+            {
+                if (y + 1 < 8)
+                {
+                    if (color && board[x + 1, y + 1] == B_PAWN)
+                    {
+                        return true;
+                    }
+                    else if (!color && board[x + 1, y + 1] == W_PAWN)
+                    {
+                        return true;
+                    }
+                }
+                if (y - 1 >= 0)
+                {
+                    if (color && board[x + 1, y - 1] == B_PAWN)
+                    {
+                        return true;
+                    }
+                    else if (!color && board[x + 1, y - 1] == W_PAWN)
+                    {
+                        return true;
+                    }
+                }
+            }
+            if (x - 1 >= 0)
+            {
+                if (y + 1 < 8)
+                {
+                    if (color && board[x - 1, y + 1] == B_PAWN)
+                    {
+                        return true;
+                    }
+                    else if (!color && board[x - 1, y + 1] == W_PAWN)
+                    {
+                        return true;
+                    }
+                }
+                if (y - 1 >= 0)
+                {
+                    if (color && board[x - 1, y - 1] == B_PAWN)
+                    {
+                        return true;
+                    }
+                    else if (!color && board[x - 1, y - 1] == W_PAWN)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         public string GetFile(int i)
