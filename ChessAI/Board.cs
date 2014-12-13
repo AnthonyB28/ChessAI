@@ -1152,7 +1152,6 @@ namespace ChessAI
                                 if(CheckForKingCheck(i, j, true))
                                 {
                                     whiteScore -= 100;
-                                    Console.WriteLine("White In Check");
                                 }
                                 if (endGame)
                                 {
@@ -1168,7 +1167,6 @@ namespace ChessAI
                                 if(CheckForKingCheck(i, j, false))
                                 {
                                     blackScore -= 100;
-                                    Console.WriteLine("White In Check");
                                 }
                                 if (endGame)
                                 {
@@ -1298,7 +1296,7 @@ namespace ChessAI
                 {
                     if (color)
                     {
-                        if (board[x, j] == B_KING || board[i, y] == B_ROOK || board[i, y] == B_QUEEN)
+                        if (board[x, j] == B_KING || board[x, y] == B_ROOK || board[x, y] == B_QUEEN)
                         {
                             return true;
                         }
@@ -1306,7 +1304,7 @@ namespace ChessAI
                     }
                     else
                     {
-                        if (board[x, j] == W_KING || board[i, y] == W_ROOK || board[i, y] == W_QUEEN)
+                        if (board[x, j] == W_KING || board[x, y] == W_ROOK || board[x, y] == W_QUEEN)
                         {
                             return true;
                         }
@@ -1321,7 +1319,7 @@ namespace ChessAI
                 {
                     if (color)
                     {
-                        if (board[x, j] == B_KING || board[i, y] == B_ROOK || board[i, y] == B_QUEEN)
+                        if (board[x, j] == B_KING || board[x, y] == B_ROOK || board[x, y] == B_QUEEN)
                         {
                             return true;
                         }
@@ -1329,7 +1327,7 @@ namespace ChessAI
                     }
                     else
                     {
-                        if (board[x, j] == W_KING || board[i, y] == W_ROOK || board[i, y] == W_QUEEN)
+                        if (board[x, j] == W_KING || board[x, y] == W_ROOK || board[x, y] == W_QUEEN)
                         {
                             return true;
                         }
