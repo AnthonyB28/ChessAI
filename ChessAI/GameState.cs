@@ -135,11 +135,11 @@ namespace ChessAI
                     {
                         z += 6;
                     }
-                    board.MovePiece(x1, y1, x2, y2, z);
+                    board.MakeMove(board.CreateMove(x1, y1, x2, y2, z));
                 }
                 else
                 {
-                    board.MovePiece(x1, y1, x2, y2);
+                    board.MakeMove(board.CreateMove(x1, y1, x2, y2));
                 }
             }
         }
@@ -147,7 +147,11 @@ namespace ChessAI
         public void MakeMove()
         {
             String move;
-            board = board.PlayRandomMove(out move, color);
+            Console.WriteLine(board.ToString());
+            board.PlayNegaMaxMove(out move, color);
+            Console.WriteLine("SingleThreaded Move: " + move);
+            board = board.PlayNegaMaxMoveMultiThreaded(out move, color);
+            Console.WriteLine("SingleThreaded Move: " + move);
             turn++;
             network.MakeMove(move);
         }
