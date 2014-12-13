@@ -33,15 +33,36 @@ namespace ChessAI
         
         // Promotion
         // TODO: Can there be a move where we remove an enemy piece AND promote? Need to save it.
-        public Move(int x1, int y1, int x2, int y2, byte pieceToMove, byte pieceToSave)
+        public Move(int x1, int y1, int x2, int y2, byte[,] board, byte promote)
         {
             originX = x1;
             originY = y1;
             destX = x2;
             destY = y2;
-            originPiece = pieceToMove;
-            destinationPiece = pieceToSave;
+            originPiece = promote;
+            destinationPiece = board[x2,y2];
             promotion = true;
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("x1 " + originX);
+            sb.AppendLine();
+            sb.Append("y1 "+ originY);
+            sb.AppendLine();
+            sb.Append("x2 " + destX);
+            sb.AppendLine();
+            sb.Append("y2 " + destY);
+            sb.AppendLine();
+            sb.Append("dest " + destinationPiece);
+            sb.AppendLine();
+            sb.Append("orig " + originPiece);
+            sb.AppendLine();
+            sb.Append("promote " + promotion);
+            return sb.ToString();
+
         }
     }
 
@@ -104,7 +125,7 @@ namespace ChessAI
 
         public Board Clone()
         {
-            return new Board((byte[,])board.Clone(), moves);
+            return new Board((byte[,])board.Clone(), new Stack<Move>());
         }
 
 //         public void MovePiece(int x1, int y1, int x2, int y2)
@@ -144,7 +165,7 @@ namespace ChessAI
 
         public Move CreateMove(int x1, int y1, int x2, int y2, byte promote)
         {
-            return new Move(x1, y1, x2, y2, board[x1,y1], promote);
+            return new Move(x1, y1, x2, y2, board, promote);
         }
 
         public void UndoMove()
@@ -157,8 +178,15 @@ namespace ChessAI
             }
             else
             {
-                board[move.originX, move.originY] = move.originPiece;
-                board[move.destX, move.destY] = BLANK_PIECE; // TODO: see Move Promotion TODO
+                if ((move.originPiece - 1) / 6 == 0)
+                {
+                    board[move.originX, move.originY] = W_PAWN;
+                }
+                else
+                {
+                    board[move.originX, move.originY] = B_PAWN;
+                }
+                board[move.destX, move.destY] = move.destinationPiece; // TODO: see Move Promotion TODO
             }
         }
 
@@ -173,7 +201,7 @@ namespace ChessAI
             else
             {
                 board[move.originX, move.originY] = BLANK_PIECE;
-                board[move.destX, move.destY] = move.destinationPiece;
+                board[move.destX, move.destY] = move.originPiece;
             }
         }
 
@@ -696,8 +724,9 @@ namespace ChessAI
             Move moveToMake = null;
             if (moves.Count > 0)
             {
-                int depth = 6;
+                int depth = 8;
                 int alpha = Negamax.NEGA_SCORE;
+                int beta = -Negamax.NEGA_SCORE;
                 //while loop here to do multiple depths
                 t.Reset();
                 t.Start();
@@ -705,7 +734,7 @@ namespace ChessAI
                 for (int i = 0; i < moves.Count; ++i)
                 {
                     MakeMove(moves[i]);
-                    int score = Negamax.negaMax(this, depth, alpha, -Negamax.NEGA_SCORE, color);
+                    int score = -Negamax.negaMax(this, depth - 1, -beta, -alpha, !color);
                     UndoMove();
                     if (score > alpha)
                     {
@@ -715,7 +744,7 @@ namespace ChessAI
                     }
                 }
                 Console.WriteLine("Pruned: " + Negamax.pruned);
-                Console.WriteLine(depth + t.ElapsedMilliseconds);
+                Console.WriteLine("time at depth: " + depth +" = " + t.ElapsedMilliseconds);
                 //++depth; Use while loop to do multiple depths
                 t.Stop();
             }
@@ -728,10 +757,69 @@ namespace ChessAI
                 move = "";
                 return b;
             }
-
+            //Console.WriteLine(b.ToString());
             b.MakeMove(moveToMake);
+            //Console.WriteLine(moveToMake.ToString());
+            //Console.WriteLine(b.ToString());
             move = detectMove(b);
             return b;
+        }
+
+        public Board PlayNegaMaxMoveMultiThreaded(out string move, bool color)
+        {
+            List<Move> moves = GetAllStates(color);
+            Console.WriteLine("Moves Available: " + moves.Count);
+            System.Diagnostics.Stopwatch t = new System.Diagnostics.Stopwatch();
+            t.Reset();
+            t.Start();
+            NegaMaxMasterThread negaThread = new NegaMaxMasterThread(this, color);
+            Move moveToMake = negaThread.Run();
+            t.Stop();
+            Console.WriteLine("MultiThread Time: " + t.ElapsedMilliseconds);
+
+            Board b = this.Clone();
+
+            if (moveToMake == null)
+            {
+                Console.WriteLine("No move to make");
+                move = "";
+                return b;
+            }
+            Console.WriteLine(b.ToString());
+            b.MakeMove(moveToMake);
+            //Console.WriteLine(moveToMake.ToString());
+            //Console.WriteLine(b.ToString());
+            move = detectMove(b);
+            return b;
+        }
+
+        public bool Equals(Board obj)
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    if (board[i, j] != obj.board[i, j])
+                    {
+                        return false;
+                    }
+                }
+            }
+                return true;
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 7; i >= 0; i--)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    sb.Append(" " + board[j,i]);
+                }
+                sb.AppendLine();
+            }
+            return sb.ToString();
         }
 
         public string detectMove(Board b)
