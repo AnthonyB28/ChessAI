@@ -125,13 +125,14 @@ namespace ChessAI
             board[7, 7] = B_ROOK;
         }
 
-        public Board(byte[,] board, Stack<Move> moves, bool endGame, bool blackKingTaken, bool whiteKingTaken)
+        public Board(byte[,] board, Stack<Move> moves, byte pieces, bool endGame, bool blackKingTaken, bool whiteKingTaken)
         {
             this.board = board;
             this.moves = moves;
             this.endGame = endGame;
             this.blackKingTaken = blackKingTaken;
             this.whiteKingTaken = whiteKingTaken;
+            this.pieces = pieces;
         }
 
         public Board Clone()
@@ -141,7 +142,7 @@ namespace ChessAI
             foreach(Move m in moves.Reverse()){
                 moveStack.Push(m);
             }
-            return new Board((byte[,])board.Clone(), moveStack, endGame, blackKingTaken, whiteKingTaken);
+            return new Board((byte[,])board.Clone(), moveStack, pieces, endGame, blackKingTaken, whiteKingTaken);
         }
 
 //         public void MovePiece(int x1, int y1, int x2, int y2)
