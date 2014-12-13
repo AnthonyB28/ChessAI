@@ -1125,6 +1125,10 @@ namespace ChessAI
                         else if (pieceToEval == W_BISHOP)
                         {
                             scoreToAdd = bishopVal;
+                            if(endGame)
+                            {
+                                scoreToAdd += 10;
+                            }
                             if (isWhitePiece)
                             {
                                 wTableScoreToAdd = color ? PieceTables.Bishop[63 - tablePosition] : PieceTables.Bishop[tablePosition];
