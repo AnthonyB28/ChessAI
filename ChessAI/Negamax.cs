@@ -21,21 +21,34 @@ namespace ChessAI
                 return state.Evaluate(color);
             }
 
-            bool nextPlayer = color ? false : true; // Reverse the player role
+            bool nextPlayer = color; // Reverse the player role
             List<Move> moves = state.GetAllStates(nextPlayer);
-            for (int i = 0; i < moves.Count; ++i )
+            if (moves.Count == 0) 
             {
-                state.MakeMove(moves[i]);
-                int score = -negaMax(state, depth - 1, -beta, -alpha, nextPlayer);
-                state.UndoMove();
-                if(score >= beta)
+                return state.Evaluate(color);
+            }
+            else
+            {
+                for (int i = 0; i < moves.Count; ++i)
                 {
-                    pruned += moves.Count - i;
-                    return score;
-                }
-                if (score > alpha)
-                {
-                    alpha = score;
+                    Board backUp = state.Clone();
+                    state.MakeMove(moves[i]);
+                    int score = -negaMax(state, depth - 1, -beta, -alpha, !color);
+                    state.UndoMove();
+                    if (!state.Equals(backUp))
+                    {
+                        Console.WriteLine("WARNING: UNDO FAILED ON MOVE");
+                        Console.WriteLine(moves[i].ToString());
+                    }
+                    if (score >= beta)
+                    {
+                        pruned += moves.Count - i;
+                        return score;
+                    }
+                    if (score > alpha)
+                    {
+                        alpha = score;
+                    }
                 }
             }
             return alpha;

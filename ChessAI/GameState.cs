@@ -147,7 +147,11 @@ namespace ChessAI
         public void MakeMove()
         {
             String move;
-            board = board.PlayNegaMaxMove(out move, color);
+            Console.WriteLine(board.ToString());
+            board.PlayNegaMaxMove(out move, color);
+            Console.WriteLine("SingleThreaded Move: " + move);
+            board = board.PlayNegaMaxMoveMultiThreaded(out move, color);
+            Console.WriteLine("SingleThreaded Move: " + move);
             turn++;
             network.MakeMove(move);
         }
