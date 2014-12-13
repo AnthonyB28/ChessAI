@@ -154,10 +154,9 @@ namespace ChessAI
             String move;
             //Console.WriteLine(board.ToString());
             System.Diagnostics.Stopwatch t = new System.Diagnostics.Stopwatch();
-            t.Reset();
-            t.Start();
+            //t.Reset();
+            //t.Start();
             //board.PlayNegaMaxMove(out move, color);
-            t.Stop();
             //if (turn > 10)
             //{
             //    Diagnostics.singleTime += t.ElapsedMilliseconds;
@@ -165,20 +164,19 @@ namespace ChessAI
             t.Reset();
             t.Start();
             //Console.WriteLine("SingleThreaded Move: " + move);
-            int depth = 6;
+            int depth = 8;
             if (turn > 30 && secondsLeft > 150)
             {
                 depth = 8;
             }
             board = board.PlayNegaMaxMoveMultiThreaded(out move, color, depth);
             t.Stop();
-            //Diagnostics.setMaxMulti(t.ElapsedMilliseconds);
-            //if (turn > 20) {
-            //    Diagnostics.multiTime += t.ElapsedMilliseconds;
-            //    Diagnostics.searches += 1;
-            //    Console.WriteLine("Single Current Avg: " + Diagnostics.getAvgSingle());
-            //    Console.WriteLine("Multi Current Avg:" + Diagnostics.getAvgMulti());
-            //}
+            Diagnostics.setMaxMulti(t.ElapsedMilliseconds);
+            //if)
+                Diagnostics.multiTime += t.ElapsedMilliseconds;
+                Diagnostics.searches += 1;
+                //Console.WriteLine("Single Current Avg: " + Diagnostics.getAvgSingle());
+                Console.WriteLine("Multi Current Avg:" + Diagnostics.getAvgMulti());
             //Console.WriteLine("SinglThreaded Move: " + move);
             turn++;
             network.MakeMove(move);

@@ -780,33 +780,33 @@ namespace ChessAI
                     }
                 }
             }
-            if (first && this.moves.Count >= 6)
-            {
-                Stack<Move> tempStack = new Stack<Move>();
-                foreach (Move m in this.moves.Reverse())
-                {
-                    tempStack.Push(m);
-                }
-                tempStack.Pop();
-                Move m1 = tempStack.Pop();
-                tempStack.Pop();
-                Move m2 = tempStack.Pop();
-                tempStack.Pop();
-                if (m1.Equals(tempStack.Pop()))
-                {
-                    for (int i = 0; i < moves.Count; )
-                    {
-                        if (m2.Equals(moves[i]))
-                        {
-                            moves.RemoveAt(i);
-                        }
-                        else
-                        {
-                            i++;
-                        }
-                    }
-                }
-            }
+            //if (first && this.moves.Count >= 6)
+            //{
+            //    Stack<Move> tempStack = new Stack<Move>();
+            //    foreach (Move m in this.moves.Reverse())
+            //    {
+            //        tempStack.Push(m);
+            //    }
+            //    tempStack.Pop();
+            //    Move m1 = tempStack.Pop();
+            //    tempStack.Pop();
+            //    Move m2 = tempStack.Pop();
+            //    tempStack.Pop();
+            //    if (m1.Equals(tempStack.Pop()))
+            //    {
+            //        for (int i = 0; i < moves.Count; )
+            //        {
+            //            if (m2.Equals(moves[i]))
+            //            {
+            //                moves.RemoveAt(i);
+            //            }
+            //            else
+            //            {
+            //                i++;
+            //            }
+            //        }
+            //    }
+            //}
             return moves;
         }
 
