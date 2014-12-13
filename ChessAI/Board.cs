@@ -88,6 +88,8 @@ namespace ChessAI
         private byte[,] board;
         private Stack<Move> moves;
         private bool endGame = false;
+        private bool blackKingTaken = false;
+        private bool whiteKingTaken = false;
 
         public Board()
         {
@@ -117,15 +119,18 @@ namespace ChessAI
             board[7, 7] = B_ROOK;
         }
 
-        public Board(byte[,] board, Stack<Move> moves)
+        public Board(byte[,] board, Stack<Move> moves, bool endGame, bool blackKingTaken, bool whiteKingTaken)
         {
             this.board = board;
             this.moves = moves;
+            this.endGame = endGame;
+            this.blackKingTaken = blackKingTaken;
+            this.whiteKingTaken = whiteKingTaken;
         }
 
         public Board Clone()
         {
-            return new Board((byte[,])board.Clone(), new Stack<Move>());
+            return new Board((byte[,])board.Clone(), new Stack<Move>(), endGame, blackKingTaken, whiteKingTaken);
         }
 
 //         public void MovePiece(int x1, int y1, int x2, int y2)
@@ -171,6 +176,15 @@ namespace ChessAI
         public void UndoMove()
         {
             Move move = moves.Pop();
+            if(move.destinationPiece == W_KING)
+            {
+                this.whiteKingTaken = false;
+            }
+            else if(move.destinationPiece == B_KING)
+            {
+                this.blackKingTaken = false;
+            }
+
             if(!move.promotion)
             {
                 board[move.originX, move.originY] = move.originPiece;
@@ -193,6 +207,14 @@ namespace ChessAI
         public void MakeMove(Move move)
         {
             moves.Push(move);
+            if(move.destinationPiece == W_KING)
+            {
+                this.whiteKingTaken = true;
+            }
+            else if(move.destinationPiece == B_KING)
+            {
+                this.blackKingTaken = true;
+            }
             // make promotion
             if (!move.promotion)
             {
