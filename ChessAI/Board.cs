@@ -95,6 +95,7 @@ namespace ChessAI
         private bool endGame = false;
         private bool blackKingTaken = false;
         private bool whiteKingTaken = false;
+        private byte pieces = 32;
 
         public Board()
         {
@@ -186,6 +187,14 @@ namespace ChessAI
         public void UndoMove()
         {
             Move move = moves.Pop();
+            if(move.destinationPiece != BLANK_PIECE)
+            {
+                ++pieces;
+                if(pieces >= 10)
+                {
+                    endGame = false;
+                }
+            }
             if(move.destinationPiece == W_KING)
             {
                 this.whiteKingTaken = false;
@@ -217,13 +226,21 @@ namespace ChessAI
         public void MakeMove(Move move)
         {
             moves.Push(move);
+            if(move.destinationPiece != BLANK_PIECE)
+            {
+                --pieces;
+                if (pieces < 10)
+                {
+                    this.endGame = true;
+                }
+            }
             if(move.destinationPiece == W_KING)
             {
-                this.whiteKingTaken = true;
+                whiteKingTaken = true;
             }
             else if(move.destinationPiece == B_KING)
             {
-                this.blackKingTaken = true;
+                blackKingTaken = true;
             }
             // make promotion
             if (!move.promotion)
@@ -235,6 +252,12 @@ namespace ChessAI
             else if (move.originPiece % 6 == W_PAWN && move.originX != move.destX && move.destinationPiece == 0)
             {
                 board[move.destX, move.destY] = move.originPiece;
+                board[move.originX, move.destY] = BLANK_PIECE;
+                --pieces;
+                if (pieces < 10)
+                {
+                    this.endGame = true;
+                }
                 board[move.destX, move.originY] = BLANK_PIECE;
             }
             // make castle
@@ -1037,23 +1060,21 @@ namespace ChessAI
 
             int blackScore = 0;
             int whiteScore = 0;
-            short bBishops = 0;
-            short wBishops = 0;
-            short knights = 0; // TODO use for handling end game
-            int totalPieces = 0;
+            byte bBishops = 0;
+            byte wBishops = 0;
+            byte knights = 0; // TODO use for handling end game
 
             for (int i = 0; i < 8; i++)
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    if (board[i,j] != BLANK_PIECE)
+                    if (board[i, j] != BLANK_PIECE)
                     {
                         int scoreToAdd = 0;
                         int bTableScoreToAdd = 0;
                         int wTableScoreToAdd = 0;
                         int pieceToEval = board[i, j] % 6;
                         int tablePosition = j * 8 + i;
-                        ++totalPieces;
                         bool isWhitePiece = IsColor(i, j, true);
                         if (pieceToEval == W_PAWN)
                         {
@@ -1083,6 +1104,10 @@ namespace ChessAI
                         {
                             scoreToAdd = knightVal;
                             ++knights;
+                            if (endGame)
+                            {
+                                scoreToAdd -= 10;
+                            }
                             if (isWhitePiece)
                             {
                                 wTableScoreToAdd = color ? PieceTables.Knight[63 - tablePosition] : PieceTables.Knight[tablePosition];
@@ -1113,7 +1138,7 @@ namespace ChessAI
                         else if (pieceToEval == W_QUEEN)
                         {
                             scoreToAdd = queenVal;
-                            if(!endGame)
+                            if (!endGame)
                             {
                                 scoreToAdd -= 10;
                             }
@@ -1159,11 +1184,11 @@ namespace ChessAI
                 }
             }
 
-            if(wBishops >= 2)
+            if (wBishops >= 2)
             {
                 whiteScore += 20;
             }
-            if(bBishops >= 2)
+            if (bBishops >= 2)
             {
                 blackScore += 20;
             }
@@ -1195,15 +1220,6 @@ namespace ChessAI
                         whiteScore += 5;
                     }
                 }
-            }
-
-            if(totalPieces < 10)
-            {
-                this.endGame = true;
-            }
-            else 
-            { 
-                this.endGame = false;
             }
 
             if (color)
