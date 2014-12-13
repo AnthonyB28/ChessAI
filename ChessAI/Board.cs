@@ -1052,12 +1052,12 @@ namespace ChessAI
         // TODO: Speed this fucker up. He's the 80%
         public int Evaluate(bool color)
         {
-            const int pawnVal = 150;
-            const int knightVal = 320;
-            const int bishopVal = 325;
-            const int rookVal = 500;
-            const int queenVal = 970;
-            const int kingVal = 3300;
+            const int pawnVal = 100;
+            const int knightVal = 350;
+            const int bishopVal = 350;
+            const int rookVal = 525;
+            const int queenVal = 1000;
+            const int kingVal = 10000;
 
             int blackScore = 0;
             int whiteScore = 0;
@@ -1186,12 +1186,12 @@ namespace ChessAI
                         if (isWhitePiece)
                         {
                             whiteScore += scoreToAdd + wTableScoreToAdd;
-                            blackScore += bTableScoreToAdd;
+                            //blackScore += bTableScoreToAdd;
                         }
                         else
                         {
                             blackScore += scoreToAdd + bTableScoreToAdd;
-                            whiteScore += wTableScoreToAdd;
+                            //whiteScore += wTableScoreToAdd;
                         }
                     }
                 }
