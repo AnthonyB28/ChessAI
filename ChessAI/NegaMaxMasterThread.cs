@@ -26,11 +26,16 @@ namespace ChessAI
             this.board = board;
             this.color = color;
             this.moves = this.board.GetAllStates(this.color, true);
+            
             Console.WriteLine("Moves available: " + this.moves.Count);
             this.board.sortMoves(this.moves, this.color);
             this.threads = new List<NegaMaxThread>();
             alpha = Negamax.NEGA_SCORE;
             this.depth = depth;
+            if (this.moves.Count < 9)
+            {
+                this.depth += 6;
+            }
         }
 
         public Move Run()
@@ -103,13 +108,13 @@ namespace ChessAI
                         this.alpha = alpha;
                         Console.WriteLine("New move:" + alpha + " @depth:" + depth);
                     }
-                    if (alpha < this.alpha)
-                    {
-                        lock (_lockerGet)
-                        {
-                            this.moves = new List<Move>();
-                        }
-                    }
+                    //if (alpha < this.alpha)
+                    //{
+                    //    lock (_lockerGet)
+                    //    {
+                    //        this.moves = new List<Move>();
+                    //    }
+                    //}
                 }
             //}
         }

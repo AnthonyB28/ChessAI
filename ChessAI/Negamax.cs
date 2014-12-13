@@ -11,13 +11,28 @@ namespace ChessAI
         public const int NEGA_SCORE = -999999999;
         public static long pruned = 0;
 
-        public static int negaMax(Board state, int depth, int alpha, int beta, bool color, int maxDepth)
+        public static int negaMax(Board state, int depth, int alpha, int beta, bool color, bool qs)
         {
             pruned++;
             //if you return a score of 10 from white's perspective, 
             // and the last move was a black move, then the score returned should be -10
+            if (state.isTerminal())
+            {
+                return state.Evaluate(color);
+            }
+            if(depth == 0 ) //TODO: Checkmate end of game test
+            {
+                if (qs) 
+                {
+                    depth += 1;
+                }
+                else
+                {
+                    return state.Evaluate(color);
+                }
+            }
             List<Move> moves = state.GetAllStates(color, false);
-            if(depth == 0 || moves.Count == 0 || state.isTerminal()) //TODO: Checkmate end of game test
+            if (moves.Count == 0)
             {
                 return state.Evaluate(color);
             }
@@ -25,15 +40,15 @@ namespace ChessAI
             bool nextPlayer = color; // Reverse the player role
             
             
-                if (maxDepth - depth <= 1)
-                {
-                    state.sortMoves(moves, color);
-                }
+                //if (maxDepth - depth <= 1)
+                //{
+                //    //state.sortMoves(moves, color);
+                //}
                 for (int i = 0; i < moves.Count; ++i)
                 {
                     Board backUp = state.Clone();
                     state.MakeMove(moves[i]);
-                    int score = -negaMax(state, depth - 1, -beta, -alpha, !color, maxDepth);
+                    int score = -negaMax(state, depth - 1, -beta, -alpha, !color, (qs && moves[i].destinationPiece != 0));
                     
                     state.UndoMove();
                     //if (!state.Equals(backUp))
@@ -46,10 +61,10 @@ namespace ChessAI
                         
                         return score;
                     }
-                    if (score < alpha)
-                    {
-                        //return alpha;
-                    }
+                    //if (score < alpha)
+                    //{
+                    //    //return beta;
+                    //}
                     if (score > alpha)
                     {
                         alpha = score;

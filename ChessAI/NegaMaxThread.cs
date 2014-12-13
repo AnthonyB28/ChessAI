@@ -42,7 +42,7 @@ namespace ChessAI
                 //for (int i = 0; i < moves.Count; ++i)
                 //{
                 board.MakeMove(move);
-                int score = -Negamax.negaMax(board, depth - 1, -beta, -alpha, !color, depth);
+                int score = -Negamax.negaMax(board, depth - 1, -beta, -alpha, !color, move.destinationPiece != 0);
                 board.UndoMove();
                 if (score > alpha)
                 {

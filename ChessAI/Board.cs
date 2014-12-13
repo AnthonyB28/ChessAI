@@ -48,19 +48,28 @@ namespace ChessAI
         {
             StringBuilder sb = new StringBuilder();
 
-            sb.Append("x1 " + originX);
-            sb.AppendLine();
-            sb.Append("y1 "+ originY);
-            sb.AppendLine();
-            sb.Append("x2 " + destX);
-            sb.AppendLine();
-            sb.Append("y2 " + destY);
-            sb.AppendLine();
-            sb.Append("dest " + destinationPiece);
-            sb.AppendLine();
-            sb.Append("orig " + originPiece);
-            sb.AppendLine();
-            sb.Append("promote " + promotion);
+            //sb.Append("x1 " + originX);
+            //sb.AppendLine();
+            //sb.Append("y1 "+ originY);
+            //sb.AppendLine();
+            //sb.Append("x2 " + destX);
+            //sb.AppendLine();
+            //sb.Append("y2 " + destY);
+            //sb.AppendLine();
+            //sb.Append("dest " + destinationPiece);
+            //sb.AppendLine();
+            //sb.Append("orig " + originPiece);
+            //sb.AppendLine();
+            //sb.Append("promote " + promotion);
+            sb.Append(originPiece);
+            sb.Append(originX);
+            sb.Append(originY);
+            sb.Append(destX);
+            sb.Append(destY);
+            if (promotion)
+            {
+                sb.Append("Q");
+            }
             return sb.ToString();
 
         }
@@ -708,7 +717,7 @@ namespace ChessAI
                                 
                                 moves.Add(CreateMove(i, j, i + 1, j + 1));
                             }
-                            if ((j < 7) && (board[i, j + 1] == 0 || IsColor(i, j, !white)))
+                            if ((j < 7) && (board[i, j + 1] == 0 || IsColor(i, j + 1, !white)))
                             {
                                 
                                 moves.Add(CreateMove(i, j, i, j + 1));
@@ -810,12 +819,18 @@ namespace ChessAI
             return moves;
         }
 
+        public bool isCapture()
+        {
+            return this.moves.Peek().destinationPiece != 0;
+        }
+
         public void sortMoves(List<Move> moves, bool color){
             int[] cache = new int[moves.Count];
             for (int i = 0; i < moves.Count; i++)
             {
+                String m;
                 this.MakeMove(moves[i]);
-                cache[i] = this.Evaluate(color); // might just be color?
+                cache[i] = this.Evaluate(color);// this.PlayNegaMaxMoveVal(!color, 1); // might just be color?
                 this.UndoMove();
             }
             for (int i = 0; i < moves.Count; i++)
@@ -876,7 +891,7 @@ namespace ChessAI
                 for (int i = 0; i < moves.Count; ++i)
                 {
                     MakeMove(moves[i]);
-                    int score = -Negamax.negaMax(this, depth - 1, -beta, -alpha, !color, depth);
+                    int score = -Negamax.negaMax(this, depth - 1, -beta, -alpha, !color, moves[i].destinationPiece != 0);
                     Console.WriteLine(score);
                     UndoMove();
                     if (score > alpha)
@@ -896,6 +911,8 @@ namespace ChessAI
                 //++depth; Use while loop to do multiple depths
                 t.Stop();
             }
+
+
             
             Board b = this.Clone();
 
@@ -911,6 +928,66 @@ namespace ChessAI
             //Console.WriteLine(b.ToString());
             move = detectMove(b);
             return b;
+        }
+
+        public int PlayNegaMaxMoveVal(bool color, int depth)
+        {
+            //Console.WriteLine("suceed");
+            List<Move> moves = GetAllStates(color, true);
+            //this.sortMoves(moves, color);
+            //Console.WriteLine("Moves Available: " + moves.Count);
+            //System.Diagnostics.Stopwatch t = new System.Diagnostics.Stopwatch();
+            //Move moveToMake = null;
+            if (moves.Count > 0)
+            {
+                //int depth = 6;
+                int alpha = Negamax.NEGA_SCORE;
+                int beta = -Negamax.NEGA_SCORE;
+                //while loop here to do multiple depths
+                //t.Reset();
+                //t.Start();
+                Negamax.pruned = 0;
+                for (int i = 0; i < moves.Count; ++i)
+                {
+                    MakeMove(moves[i]);
+                    int score = -Negamax.negaMax(this, depth - 1, -beta, -alpha, !color, moves[i].destinationPiece != 0);
+                    //Console.WriteLine(score);
+                    UndoMove();
+                    if (score > alpha)
+                    {
+                        alpha = score;
+                        //moveToMake = moves[i];
+                        //Console.WriteLine("New move:" + score + " @depth:" + depth);
+                    }
+                    else if (score < alpha)
+                    {
+                        break;
+                    }
+                }
+                //Console.WriteLine("Searched: " + Negamax.pruned);
+                //Console.WriteLine("time at depth: " + depth + " = " + t.ElapsedMilliseconds);
+                ////Diagnostics.singleTime += t.ElapsedMilliseconds;
+                ////++depth; Use while loop to do multiple depths
+                //t.Stop();
+                return alpha;
+            }
+            return this.Evaluate(color);
+
+
+            //Board b = this.Clone();
+
+            //if (moveToMake == null)
+            //{
+            //    Console.WriteLine("No move to make");
+            //    move = "";
+            //    return b;
+            //}
+            ////Console.WriteLine(b.ToString());
+            //b.MakeMove(moveToMake);
+            ////Console.WriteLine(moveToMake.ToString());
+            ////Console.WriteLine(b.ToString());
+            //move = detectMove(b);
+            //return b;
         }
 
         public Board PlayNegaMaxMoveMultiThreaded(out string move, bool color, int depth)
@@ -1089,7 +1166,7 @@ namespace ChessAI
                                 {
                                     scoreToAdd += 25;
                                 }
-                                wTableScoreToAdd = color ? PieceTables.Pawn[63 - tablePosition] : PieceTables.Pawn[tablePosition];
+                                wTableScoreToAdd = isWhitePiece ? PieceTables.Pawn[63 - tablePosition] : PieceTables.Pawn[tablePosition];
                             }
                             else
                             {
@@ -1097,7 +1174,7 @@ namespace ChessAI
                                 {
                                     scoreToAdd += 25;
                                 }
-                                bTableScoreToAdd = color ? PieceTables.Pawn[63 - tablePosition] : PieceTables.Pawn[tablePosition];
+                                bTableScoreToAdd = isWhitePiece ? PieceTables.Pawn[63 - tablePosition] : PieceTables.Pawn[tablePosition];
                             }
                         }
                         else if (pieceToEval == W_KNIGHT)
@@ -1110,11 +1187,11 @@ namespace ChessAI
                             }
                             if (isWhitePiece)
                             {
-                                wTableScoreToAdd = color ? PieceTables.Knight[63 - tablePosition] : PieceTables.Knight[tablePosition];
+                                wTableScoreToAdd = isWhitePiece ? PieceTables.Knight[63 - tablePosition] : PieceTables.Knight[tablePosition];
                             }
                             else
                             {
-                                bTableScoreToAdd = color ? PieceTables.Knight[63 - tablePosition] : PieceTables.Knight[tablePosition];
+                                bTableScoreToAdd = isWhitePiece ? PieceTables.Knight[63 - tablePosition] : PieceTables.Knight[tablePosition];
                             }
                         }
                         else if (pieceToEval == W_ROOK)
@@ -1126,12 +1203,12 @@ namespace ChessAI
                             scoreToAdd = bishopVal;
                             if (isWhitePiece)
                             {
-                                wTableScoreToAdd = color ? PieceTables.Bishop[63 - tablePosition] : PieceTables.Bishop[tablePosition];
+                                wTableScoreToAdd = isWhitePiece ? PieceTables.Bishop[63 - tablePosition] : PieceTables.Bishop[tablePosition];
                                 ++wBishops;
                             }
                             else
                             {
-                                bTableScoreToAdd = color ? PieceTables.Bishop[63 - tablePosition] : PieceTables.Bishop[tablePosition];
+                                bTableScoreToAdd = isWhitePiece ? PieceTables.Bishop[63 - tablePosition] : PieceTables.Bishop[tablePosition];
                                 ++bBishops;
                             }
                         }
@@ -1150,22 +1227,22 @@ namespace ChessAI
                             {
                                 if (endGame)
                                 {
-                                    wTableScoreToAdd = color ? PieceTables.KingEndGame[63 - tablePosition] : PieceTables.KingEndGame[tablePosition];
+                                    wTableScoreToAdd = isWhitePiece ? PieceTables.KingEndGame[63 - tablePosition] : PieceTables.KingEndGame[tablePosition];
                                 }
                                 else
                                 {
-                                    wTableScoreToAdd = color ? PieceTables.King[63 - tablePosition] : PieceTables.King[tablePosition];
+                                    wTableScoreToAdd = isWhitePiece ? PieceTables.King[63 - tablePosition] : PieceTables.King[tablePosition];
                                 }
                             }
                             else
                             {
                                 if (endGame)
                                 {
-                                    bTableScoreToAdd = color ? PieceTables.KingEndGame[63 - tablePosition] : PieceTables.KingEndGame[tablePosition];
+                                    bTableScoreToAdd = isWhitePiece ? PieceTables.KingEndGame[63 - tablePosition] : PieceTables.KingEndGame[tablePosition];
                                 }
                                 else
                                 {
-                                    bTableScoreToAdd = color ? PieceTables.King[63 - tablePosition] : PieceTables.King[tablePosition];
+                                    bTableScoreToAdd = isWhitePiece ? PieceTables.King[63 - tablePosition] : PieceTables.King[tablePosition];
                                 }
                             }
                         }
