@@ -3,23 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
 
 namespace ChessAI
 {
     class GameState
     {
+
         private Board board;
         private bool color;
         private int turn;
         private bool gameOver;
         private Network network;
+        private String[,] zobristHash;
 
         public GameState(bool color, int gameID, int teamID, string teamKey)
         {
             board = new Board();
+            zobristHash = new String[64,12];
             this.color = color;
             turn = -1;
             gameOver = false;
+            InitHash();
             this.network = new Network(gameID, teamID, teamKey);
         }
 
@@ -142,6 +147,20 @@ namespace ChessAI
                     board.MakeMove(board.CreateMove(x1, y1, x2, y2));
                 }
             }
+        }
+
+        public void InitHash()
+        {
+            var rng = new RNGCryptoServiceProvider();
+            for(int i = 0; i < 64; ++i)
+            {
+                for(int j = 0; j < 12; ++j)
+                {
+                    byte[] bytes = new byte[16];
+                    rng.GetBytes(bytes);
+                    zobristHash[i,j] = Convert.ToBase64String(bytes);
+                }
+            }   
         }
 
         public void MakeMove()
