@@ -1206,6 +1206,8 @@ namespace ChessAI
 
             int blackScore = 0;
             int whiteScore = 0;
+            byte[] whitePawnFiles = new byte[8];
+            byte[] blackPawnFiles = new byte[8];
 
             for (int i = 0; i < 8; i++)
             {
@@ -1219,6 +1221,10 @@ namespace ChessAI
                         int pieceToEval = board[i, j] % 6;
                         int tablePosition = j * 8 + i;
                         bool isWhitePiece = IsColor(i, j, true);
+                        if(isWhitePiece)
+                        {
+                            tablePosition = 63 - tablePosition;
+                        }
                         if (pieceToEval == W_PAWN)
                         {
                             scoreToAdd = pawnVal;
@@ -1228,19 +1234,13 @@ namespace ChessAI
                             }
                             if (isWhitePiece)
                             {
-                                if (j == 2) // Whites in 3rd row are bonus
-                                {
-                                    scoreToAdd += 25;
-                                }
-                                wTableScoreToAdd = isWhitePiece ? PieceTables.Pawn[63 - tablePosition] : PieceTables.Pawn[tablePosition];
+                                ++whitePawnFiles[i];
+                                wTableScoreToAdd = PieceTables.Pawn[tablePosition];
                             }
                             else
                             {
-                                if (j == 5) // Blacks in 6th row are bonus
-                                {
-                                    scoreToAdd += 25;
-                                }
-                                bTableScoreToAdd = isWhitePiece ? PieceTables.Pawn[63 - tablePosition] : PieceTables.Pawn[tablePosition];
+                                ++blackPawnFiles[i];
+                                bTableScoreToAdd = PieceTables.Pawn[tablePosition];
                             }
                         }
                         else if (pieceToEval == W_KNIGHT)
@@ -1252,11 +1252,11 @@ namespace ChessAI
                             }
                             if (isWhitePiece)
                             {
-                                wTableScoreToAdd = isWhitePiece ? PieceTables.Knight[63 - tablePosition] : PieceTables.Knight[tablePosition];
+                                wTableScoreToAdd = PieceTables.Knight[tablePosition];
                             }
                             else
                             {
-                                bTableScoreToAdd = isWhitePiece ? PieceTables.Knight[63 - tablePosition] : PieceTables.Knight[tablePosition];
+                                bTableScoreToAdd = PieceTables.Knight[tablePosition];
                             }
                         }
                         else if (pieceToEval == W_ROOK)
@@ -1272,17 +1272,17 @@ namespace ChessAI
                             }
                             if (isWhitePiece)
                             {
-                                wTableScoreToAdd = isWhitePiece ? PieceTables.Bishop[63 - tablePosition] : PieceTables.Bishop[tablePosition];
+                                wTableScoreToAdd = PieceTables.Bishop[tablePosition];
                             }
                             else
                             {
-                                bTableScoreToAdd = isWhitePiece ? PieceTables.Bishop[63 - tablePosition] : PieceTables.Bishop[tablePosition];
+                                bTableScoreToAdd = PieceTables.Bishop[tablePosition];
                             }
                         }
                         else if (pieceToEval == W_QUEEN)
                         {
                             scoreToAdd = queenVal;
-                            if (!endGame)
+                            if (!endGame && ((j != 0 || j != 8) || i != 3) )
                             {
                                 scoreToAdd -= 10;
                             }
@@ -1290,6 +1290,69 @@ namespace ChessAI
                         else if (pieceToEval == 0 && board[i, j] != 0) // King
                         {
                             scoreToAdd = kingVal;
+                            byte kingMoves = 0;
+                            bool moveUp = j + 1 < 8;
+                            bool moveDown = j - 1 >= 0;
+                            if(moveUp)
+                            {
+                                if(board[i, j+1] == BLANK_PIECE)
+                                {
+                                    ++kingMoves;
+                                }
+                            }
+                            if(moveDown)
+                            {
+                                if (board[i, j - 1] == BLANK_PIECE)
+                                {
+                                    ++kingMoves;
+                                }
+                            }
+                            if(i+1 < 8)
+                            {
+                                if (board[i + 1, j] == BLANK_PIECE)
+                                {
+                                    ++kingMoves;
+                                }
+                                if(moveUp)
+                                {
+                                    if(board[i+1,j+1] == BLANK_PIECE)
+                                    {
+                                        ++kingMoves;
+                                    }
+                                }
+                                if(moveDown)
+                                {
+                                    if(board[i+1,j-1] == BLANK_PIECE)
+                                    {
+                                        ++kingMoves;
+                                    }
+                                }
+                            }
+                            if(i-1 >= 0)
+                            {
+                                if (board[i - 1, j] == BLANK_PIECE)
+                                {
+                                    ++kingMoves;
+                                }
+                                if (moveUp)
+                                {
+                                    if (board[i - 1, j + 1] == BLANK_PIECE)
+                                    {
+                                        ++kingMoves;
+                                    }
+                                }
+                                if (moveDown)
+                                {
+                                    if (board[i - 1, j - 1] == BLANK_PIECE)
+                                    {
+                                        ++kingMoves;
+                                    }
+                                }
+                            }
+                            if(kingMoves < 2)
+                            {
+                                scoreToAdd -= 5;
+                            }
                             if (isWhitePiece)
                             { 
 //                                 if(CheckForKingCheck(i, j, true))
@@ -1298,11 +1361,11 @@ namespace ChessAI
 //                                 }
                                 if (endGame)
                                 {
-                                    wTableScoreToAdd = isWhitePiece ? PieceTables.KingEndGame[63 - tablePosition] : PieceTables.KingEndGame[tablePosition];
+                                    wTableScoreToAdd = PieceTables.KingEndGame[tablePosition];
                                 }
                                 else
                                 {
-                                    wTableScoreToAdd = isWhitePiece ? PieceTables.King[63 - tablePosition] : PieceTables.King[tablePosition];
+                                    wTableScoreToAdd = PieceTables.King[tablePosition];
                                 }
                             }
                             else
@@ -1313,11 +1376,11 @@ namespace ChessAI
 //                                 }
                                 if (endGame)
                                 {
-                                    bTableScoreToAdd = isWhitePiece ? PieceTables.KingEndGame[63 - tablePosition] : PieceTables.KingEndGame[tablePosition];
+                                    bTableScoreToAdd = PieceTables.KingEndGame[tablePosition];
                                 }
                                 else
                                 {
-                                    bTableScoreToAdd = isWhitePiece ? PieceTables.King[63 - tablePosition] : PieceTables.King[tablePosition];
+                                    bTableScoreToAdd = PieceTables.King[tablePosition];
                                 }
                             }
                         }
@@ -1369,6 +1432,57 @@ namespace ChessAI
                     blackScore += 20;
                 }
             }
+
+            //Pawn bonuses
+            for (int x = 0; x < 8; ++x )
+            {
+                byte blackPawnsInFile = blackPawnFiles[x];
+                byte whitePawnsInFile = whitePawnFiles[x];
+                if (blackPawnsInFile >= 1 && whitePawnsInFile == 0)
+                {
+                    whiteScore -= blackPawnsInFile;
+                }
+                if (blackPawnsInFile >= 1 && whitePawnsInFile == 0)
+                {
+                    blackScore -= whitePawnsInFile;
+                }
+                // Isolated Pawns
+                if(x == 0)
+                {
+                    if (blackPawnsInFile >= 1 && blackPawnFiles[x + 1] == 0)
+                    {
+                        blackScore -= 12;
+                    }
+                    if (whitePawnsInFile >= 1 && whitePawnFiles[x + 1] == 0)
+                    {
+                        whiteScore -= 12;
+                    }
+                }
+                else if(x == 7)
+                {
+                    if (blackPawnsInFile >= 1 && blackPawnFiles[x - 1] == 0)
+                    {
+                        blackScore -= 12;
+                    }
+                    if (blackPawnsInFile >= 1 && whitePawnFiles[x - 1] == 0)
+                    {
+                        whiteScore -= 12;
+                    }
+                }
+                else
+                {
+                    if (blackPawnsInFile >= 1 && blackPawnFiles[x - 1] == 0 && blackPawnFiles[x + 1] == 0)
+                    {
+                        blackScore -= 15;
+                    }
+                    if (whitePawnsInFile >= 1 && whitePawnFiles[x - 1] == 0 && whitePawnFiles[x + 1] == 0)
+                    {
+                        whiteScore -= 15;
+                    }
+                }
+            }
+                
+            
 
             if (color)
             {
