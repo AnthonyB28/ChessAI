@@ -12,11 +12,6 @@ namespace ChessAI
         public static long[, , ,] TABLE;
         public static long SIDE;
 
-        public Zobrist()
-        {
-            
-        }
-
         public static void InitTable()
         {
             TABLE = new long[6, 2, 8, 8];

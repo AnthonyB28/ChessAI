@@ -167,6 +167,11 @@ namespace ChessAI
                 moveStack, pieces, endGame, blackKingTaken, whiteKingTaken);
         }
 
+        public Move GetLastMove()
+        {
+            return moves.Peek();
+        }
+
         
 
 //         public void MovePiece(int x1, int y1, int x2, int y2)

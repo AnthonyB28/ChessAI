@@ -22,16 +22,17 @@ namespace ChessAI
             turn = -1;
             gameOver = false;
             Zobrist.InitTable();
-            Console.WriteLine("Default table: " + Zobrist.GetKey(board.board, true).ToString());
-            board.MakeMove(new Move(0, 1, 0, 2, board.board));
-            Console.WriteLine("Make move: " + Zobrist.GetKey(board.board, false).ToString());
-            board.UndoMove();
-            Console.WriteLine("Undo move: " + Zobrist.GetKey(board.board, true).ToString());
-            long key = Zobrist.GetKey(board.board, true);
-            key ^= Zobrist.TABLE[0, 0, 0, 1];
-            key ^= Zobrist.TABLE[0, 0, 0, 2];
-            key ^= Zobrist.SIDE;
-            Console.Write("Make move: " + key.ToString());
+            Transposition.InitTable();
+//             Console.WriteLine("Default table: " + Zobrist.GetKey(board.board, true).ToString());
+//             board.MakeMove(new Move(0, 1, 0, 2, board.board));
+//             Console.WriteLine("Make move: " + Zobrist.GetKey(board.board, false).ToString());
+//             board.UndoMove();
+//             Console.WriteLine("Undo move: " + Zobrist.GetKey(board.board, true).ToString());
+//             long key = Zobrist.GetKey(board.board, true);
+//             key ^= Zobrist.TABLE[0, 0, 0, 1];
+//             key ^= Zobrist.TABLE[0, 0, 0, 2];
+//             key ^= Zobrist.SIDE;
+//            Console.Write("Make move: " + key.ToString());
             this.network = new Network(gameID, teamID, teamKey);
         }
 
