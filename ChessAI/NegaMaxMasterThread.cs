@@ -34,11 +34,11 @@ namespace ChessAI
             this.depth = depth;
             if (this.moves.Count < 16)
             {
-                this.depth += 2;
+                //this.depth += 2;
             }
             if (this.moves.Count < 10)
             {
-                this.depth += 2;
+                //this.depth += 2;
             }
         }
 

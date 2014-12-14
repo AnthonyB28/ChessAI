@@ -106,6 +106,16 @@ namespace ChessAI
         private bool blackKingTaken = false;
         private bool whiteKingTaken = false;
         private byte pieces = 32;
+        /**
+         * Material Values
+         * Pawn -  100
+         * Bishop - 350
+         * Knight - 350
+         * Rook - 525
+         * Queen - 1000
+         * King - 10000
+         */
+        public static readonly int[] OFFSET_TABLE = new int[13]{ 0, 0, -350, -100, -100, -400, 0, 0, -350, -100, -100, -400, 0 };
 
         public Board()
         {
@@ -884,7 +894,7 @@ namespace ChessAI
             for (int i = 0; i < moves.Count; i++)
             {
                 this.MakeMove(moves[i]);
-                cache[i] = this.Evaluate(color);// this.PlayNegaMaxMoveVal(!color, 1); // might just be color?
+                cache[i] = this.Evaluate(color, 0);// this.PlayNegaMaxMoveVal(!color, 1); // might just be color?
                 this.UndoMove();
             }
             for (int i = 0; i < moves.Count; i++)
@@ -945,7 +955,7 @@ namespace ChessAI
                 for (int i = 0; i < moves.Count; ++i)
                 {
                     MakeMove(moves[i]);
-                    int score = -Negamax.negaMax(this, depth - 1, -beta, -alpha, !color, moves[i].destinationPiece != 0);
+                    int score = -Negamax.negaMax(this, depth - 1, -beta, -alpha, !color, moves[i].destinationPiece != 0, 0);
                     Console.WriteLine(score);
                     UndoMove();
                     if (score > alpha)
@@ -984,6 +994,11 @@ namespace ChessAI
             return b;
         }
 
+        public Move LastMove()
+        {
+            return this.moves.Peek();
+        }
+
         public int PlayNegaMaxMoveVal(bool color, int depth)
         {
             //Console.WriteLine("suceed");
@@ -1004,7 +1019,7 @@ namespace ChessAI
                 for (int i = 0; i < moves.Count; ++i)
                 {
                     MakeMove(moves[i]);
-                    int score = -Negamax.negaMax(this, depth - 1, -beta, -alpha, !color, moves[i].destinationPiece != 0);
+                    int score = -Negamax.negaMax(this, depth - 1, -beta, -alpha, !color, moves[i].destinationPiece != 0, 0);
                     //Console.WriteLine(score);
                     UndoMove();
                     if (score > alpha)
@@ -1025,7 +1040,7 @@ namespace ChessAI
                 //t.Stop();
                 return alpha;
             }
-            return this.Evaluate(color);
+            return this.Evaluate(color, 0);
 
 
             //Board b = this.Clone();
@@ -1180,7 +1195,7 @@ namespace ChessAI
         }
 
         // TODO: Speed this fucker up. He's the 80%
-        public int Evaluate(bool color)
+        public int Evaluate(bool color, int offset)
         {
             const int pawnVal = 100;
             const int knightVal = 350;
@@ -1357,11 +1372,11 @@ namespace ChessAI
 
             if (color)
             {
-                return whiteScore - blackScore;
+                return (whiteScore - blackScore) + offset;
             }
             else
             {
-                return blackScore - whiteScore;
+                return (blackScore - whiteScore) + offset;
             }
         }
 
