@@ -17,12 +17,12 @@ namespace ChessAI
 
         public GameState(bool color, int gameID, int teamID, string teamKey)
         {
+            Zobrist.InitTable();
+            Transposition.InitTable();
             board = new Board();
             this.color = color;
             turn = -1;
             gameOver = false;
-            Zobrist.InitTable();
-            Transposition.InitTable();
 //             Console.WriteLine("Default table: " + Zobrist.GetKey(board.board, true).ToString());
 //             board.MakeMove(new Move(0, 1, 0, 2, board.board));
 //             Console.WriteLine("Make move: " + Zobrist.GetKey(board.board, false).ToString());
@@ -33,6 +33,16 @@ namespace ChessAI
 //             key ^= Zobrist.TABLE[0, 0, 0, 2];
 //             key ^= Zobrist.SIDE;
 //            Console.Write("Make move: " + key.ToString());
+
+//             Console.WriteLine("Default table: " + board.GetKey().ToString());
+//             board.MakeMove(new Move(0, 1, 0, 2, board.board));
+//             Console.WriteLine("Make move white: " + board.GetKey().ToString());
+//             board.MakeMove(new Move(0, 6, 0, 4, board.board));
+//             Console.WriteLine("Make move black: " + board.GetKey().ToString());
+//             board.UndoMove();
+//             Console.WriteLine("Undo move black: " + board.GetKey().ToString());
+//             board.UndoMove();
+//             Console.WriteLine("Undo move white: " + board.GetKey().ToString());
             this.network = new Network(gameID, teamID, teamKey);
         }
 

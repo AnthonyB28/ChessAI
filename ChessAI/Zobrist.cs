@@ -72,5 +72,19 @@ namespace ChessAI
             return zobristKey;
         }
 
+        public static long MakeMoveKey(long oldKey, int x, int y, byte piece, bool isWhitePiece)
+        {
+            if(isWhitePiece)
+            {
+                oldKey ^= Zobrist.TABLE[piece - 1, 0, x, y];
+            }
+            else
+            {
+                oldKey ^= Zobrist.TABLE[(piece - 1) % 6, 1, x, y];
+            }
+
+            return oldKey;
+        }
+
     }
 }

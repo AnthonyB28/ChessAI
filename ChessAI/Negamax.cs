@@ -15,9 +15,9 @@ namespace ChessAI
         {
             pruned++;
             byte type = Entry.ALPHA;
-            long key = Zobrist.GetKey(state.board, color);
+            long key = state.GetKey(); // Use Zobrist.GetKey(state.board, color) instead if there appears to be issues, slower as its linear
             int transposeEval = Transposition.Probe(key, depth, alpha, beta);
-            if(transposeEval != Int32.MaxValue)
+            if (transposeEval != Int32.MinValue)
             {
                 return transposeEval;
             }
