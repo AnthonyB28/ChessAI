@@ -293,7 +293,10 @@ namespace ChessAI
                 if (move.destinationPiece != BLANK_PIECE)
                 {
                     --pieces;
-                    --pieceCount[move.destinationPiece];
+                    if(move.destinationPiece != B_KING && move.destinationPiece != W_KING)
+                    {
+                        --pieceCount[move.destinationPiece];
+                    }
                     if (pieces <= ENDGAME)
                     {
                         endGame = true;
