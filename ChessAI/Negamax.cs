@@ -11,6 +11,72 @@ namespace ChessAI
         public const int NEGA_SCORE = -999999999;
         public static long pruned = 0;
 
+        public static int Quiesce(Board state, int alpha, int beta, bool color, int depth)
+        {
+            //List<Move> moves = state.GetAllCaptureStates(color);
+            //if (moves.Count == 0)
+            //{
+            //    return state.Evaluate(color, 0);
+            //}
+            //foreach (Move move in moves)
+            //{
+            //    state.MakeMove(move);
+            //    int score = -Quiesce(state, -beta, -alpha, !color);
+            //    state.UndoMove();
+
+            //    if (score >= beta)
+            //    {
+
+            //        return score;
+            //    }
+            //    //if (score < alpha)
+            //    //{
+            //    //    //return beta;
+            //    //}
+            //    if (score > alpha)
+            //    {
+            //        alpha = score;
+            //    }
+            //}
+
+            //return alpha;
+            if (state.isTerminal())
+            {
+                return state.Evaluate(color, 0);
+            }
+            int stand_pat = state.Evaluate(color, 0);
+            if (stand_pat >= beta)
+            {
+                return beta;
+            }
+            if (alpha < stand_pat)
+            {
+                alpha = stand_pat;
+            }
+
+
+            List<Move> moves = state.GetAllCaptureStates(color);
+            if (moves.Count == 0)
+            {
+                return state.Evaluate(color, 0);
+            }
+            foreach (Move move in moves)
+            {
+                state.MakeMove(move);
+                int score = -Quiesce(state, -beta, -alpha, !color, depth + 1);
+                state.UndoMove();
+                if (score >= beta)
+                {
+                    return beta;
+                }
+                if (score > alpha)
+                {
+                    alpha = score;
+                }
+            }
+            return alpha;
+        }
+
         public static int negaMax(Board state, int depth, int alpha, int beta, bool color, bool qs, int offset)
         {
             pruned++;
@@ -18,23 +84,17 @@ namespace ChessAI
             // and the last move was a black move, then the score returned should be -10
             if (state.isTerminal())
             {
-                return state.Evaluate(color, offset);
+                return state.Evaluate(color, 0);
             }
             if(depth == 0 ) //TODO: Checkmate end of game test
             {
-                if (qs) 
-                {
-                    depth += 1;
-                }
-                else
-                {
-                    return state.Evaluate(color, offset);
-                }
+                //
+                return Quiesce(state, alpha, beta, color, 0);
             }
             List<Move> moves = state.GetAllStates(color, false);
             if (moves.Count == 0)
             {
-                return state.Evaluate(color, offset);
+                return state.Evaluate(color, 0);
             }
 
             bool nextPlayer = color; // Reverse the player role

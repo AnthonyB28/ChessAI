@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace ChessAI
 {
-    class Move
+    class Move : IComparable<Move>
     {
         public int originX;
         public int originY;
@@ -16,6 +16,8 @@ namespace ChessAI
         public byte destinationPiece;
         public byte originPiece;
         public bool promotion;
+
+        public static readonly int[] MATERIAL_TABLE = new int[13] { 0, 100, 525, 350, 350, 1000, 10000, 100, 525, 350, 350, 1000, 10000 };
 
         // Regular move
         // TODO: Special moves aren't considered. Saving only destination piece as opposed to any possible "jumps" like enpassant?
@@ -60,11 +62,12 @@ namespace ChessAI
             //sb.Append("orig " + originPiece);
             //sb.AppendLine();
             //sb.Append("promote " + promotion);
-            sb.Append(originPiece);
+            sb.Append(originPiece + " ");
             sb.Append(originX);
             sb.Append(originY);
             sb.Append(destX);
             sb.Append(destY);
+            sb.Append(" " + destinationPiece);
             if (promotion)
             {
                 sb.Append("Q");
@@ -76,6 +79,34 @@ namespace ChessAI
         public bool Equals(Move move)
         {
             return originPiece == move.originPiece && destinationPiece == move.destinationPiece && originX == move.originX && originY == move.originY && destX == move.destX && destY == move.destY;
+        }
+
+        public int CompareTo(Move m)
+        {
+            //current move is capturing
+            if (destinationPiece != 0)
+            {
+                if (m.destinationPiece != 0)
+                {
+                    return (MATERIAL_TABLE[m.destinationPiece] - MATERIAL_TABLE[m.originPiece]) - (MATERIAL_TABLE[destinationPiece] - MATERIAL_TABLE[originPiece]);
+                }
+                else
+                {
+                    return -1;
+                }
+            }
+            else
+            {
+                if (m.destinationPiece != 0)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            //return 0;
         }
     }
 
@@ -175,6 +206,20 @@ namespace ChessAI
             }
             return new Board((byte[,])board.Clone(), (byte[])pieceCount.Clone(), 
                 moveStack, pieces, endGame, blackKingTaken, whiteKingTaken);
+        }
+
+        public List<Move> GetAllCaptureStates(bool color)
+        {
+            List<Move> allMoves = this.GetAllStates(color, false);
+            List<Move> capMoves = new List<Move>();
+            foreach (Move move in allMoves)
+            {
+                if (move.destinationPiece != 0)
+                {
+                    capMoves.Add(move);
+                }
+            }
+            return capMoves;
         }
 
 //         public void MovePiece(int x1, int y1, int x2, int y2)
