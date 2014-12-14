@@ -80,11 +80,21 @@ namespace ChessAI
         public static int negaMax(Board state, int depth, int alpha, int beta, bool color, bool qs, int offset)
         {
             pruned++;
+            byte type = Entry.ALPHA;
+            long key = state.GetKey(); // Use Zobrist.GetKey(state.board, color) instead if there appears to be issues, slower as its linear
+            int transposeEval = Transposition.Probe(key, depth, alpha, beta);
+            if (transposeEval != Int32.MinValue)
+            {
+                return transposeEval;
+            }
             //if you return a score of 10 from white's perspective, 
             // and the last move was a black move, then the score returned should be -10
             if (state.isTerminal())
             {
-                return state.Evaluate(color, 0);
+                int eval = state.Evaluate(color, 0);
+                Transposition.Insert(key, (byte)depth, Entry.
+                    EXACT, eval, state.LastMove());
+                return eval;
             }
             if(depth == 0 ) //TODO: Checkmate end of game test
             {
@@ -94,7 +104,9 @@ namespace ChessAI
             List<Move> moves = state.GetAllStates(color, false);
             if (moves.Count == 0)
             {
-                return state.Evaluate(color, 0);
+                int eval = state.Evaluate(color, 0);
+                Transposition.Insert(key, (byte)depth, Entry.EXACT, eval, state.LastMove());
+                return eval;
             }
 
             bool nextPlayer = color; // Reverse the player role
@@ -135,7 +147,7 @@ namespace ChessAI
                     //}
                     if (score >= beta)
                     {
-                        
+                        Transposition.Insert(key, (byte)depth, Entry.BETA, beta, state.LastMove());
                         return score;
                     }
                     //if (score < alpha)
@@ -144,10 +156,12 @@ namespace ChessAI
                     //}
                     if (score > alpha)
                     {
+                        type = Entry.EXACT;
                         alpha = score;
                     }
                 }
             //}
+            Transposition.Insert(key, (byte)depth, type, alpha, state.LastMove());
             return alpha;
         }
     }

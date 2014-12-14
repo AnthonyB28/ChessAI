@@ -52,6 +52,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Network.cs" />
+    <Compile Include="Transposition.cs" />
+    <Compile Include="Zobrist.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

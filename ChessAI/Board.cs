@@ -137,6 +137,7 @@ namespace ChessAI
         private bool blackKingTaken = false;
         private bool whiteKingTaken = false;
         private byte pieces = 32;
+        private long zobristKey = long.MinValue;
         /**
          * Material Values
          * Pawn -  100
@@ -185,9 +186,10 @@ namespace ChessAI
             board[5, 7] = B_BISHOP;
             board[6, 7] = B_KNIGHT;
             board[7, 7] = B_ROOK;
+            zobristKey = Zobrist.GetKey(board, true);
         }
 
-        public Board(byte[,] board, byte[] pieceCount, Stack<Move> moves, byte pieces, bool endGame, bool blackKingTaken, bool whiteKingTaken)
+        public Board(byte[,] board, byte[] pieceCount, Stack<Move> moves, byte pieces, bool endGame, bool blackKingTaken, bool whiteKingTaken, long key)
         {
             this.board = board;
             this.pieceCount = pieceCount;
@@ -196,6 +198,7 @@ namespace ChessAI
             this.blackKingTaken = blackKingTaken;
             this.whiteKingTaken = whiteKingTaken;
             this.pieces = pieces;
+            this.zobristKey = key;
         }
 
         public Board Clone()
@@ -205,7 +208,12 @@ namespace ChessAI
                 moveStack.Push(m);
             }
             return new Board((byte[,])board.Clone(), (byte[])pieceCount.Clone(), 
-                moveStack, pieces, endGame, blackKingTaken, whiteKingTaken);
+                moveStack, pieces, endGame, blackKingTaken, whiteKingTaken, zobristKey);
+        }
+
+        public long GetKey()
+        {
+            return zobristKey;
         }
 
         public List<Move> GetAllCaptureStates(bool color)
@@ -265,20 +273,24 @@ namespace ChessAI
         public void UndoMove()
         {
             Move move = moves.Pop();
-            if(move.destinationPiece == W_KING)
+            bool isWhitePiece = (move.originPiece - 1) / 6 == 0; // turn color being undone
+            if (move.destinationPiece == W_KING)
             {
                 this.whiteKingTaken = false;
             }
-            else if(move.destinationPiece == B_KING)
+            else if (move.destinationPiece == B_KING)
             {
                 this.blackKingTaken = false;
             }
 
-            if(!move.promotion)
+            if (!move.promotion)
             {
+                zobristKey = Zobrist.MakeMoveKey(zobristKey, move.originX, move.originY, move.originPiece, isWhitePiece);
+                zobristKey = Zobrist.MakeMoveKey(zobristKey, move.destX, move.destY, move.originPiece, isWhitePiece);
                 if (move.destinationPiece != BLANK_PIECE)
                 {
                     ++pieces;
+                    zobristKey = Zobrist.MakeMoveKey(zobristKey, move.destX, move.destY, move.destinationPiece, !isWhitePiece);
                     if (move.destinationPiece != B_KING && move.destinationPiece != W_KING)
                     {
                         ++pieceCount[move.destinationPiece];
@@ -293,39 +305,54 @@ namespace ChessAI
             }
             else
             {
-                if ((move.originPiece - 1) / 6 == 0)
+                if (isWhitePiece)
                 {
+                    zobristKey = Zobrist.MakeMoveKey(zobristKey, move.originX, move.originY, W_PAWN, isWhitePiece);
+                    zobristKey = Zobrist.MakeMoveKey(zobristKey, move.destX, move.destY, W_QUEEN, isWhitePiece);
                     board[move.originX, move.originY] = W_PAWN;
                     ++pieceCount[W_PAWN];
                     --pieceCount[W_QUEEN];
                 }
                 else
                 {
+                    zobristKey = Zobrist.MakeMoveKey(zobristKey, move.originX, move.originY, B_PAWN, isWhitePiece);
+                    zobristKey = Zobrist.MakeMoveKey(zobristKey, move.destX, move.destY, B_QUEEN, isWhitePiece);
                     board[move.originX, move.originY] = B_PAWN;
                     ++pieceCount[B_PAWN];
                     --pieceCount[B_QUEEN];
                 }
-                if(move.destinationPiece != BLANK_PIECE && move.destinationPiece != B_KING && move.destinationPiece != W_KING)
+                if (move.destinationPiece != BLANK_PIECE)
                 {
-                    ++pieceCount[move.destinationPiece];
-                    ++pieces;
-                    if(pieces > ENDGAME)
+                    zobristKey = Zobrist.MakeMoveKey(zobristKey, move.originX, move.originY, move.destinationPiece, !isWhitePiece);
+                    if (move.destinationPiece != B_KING && move.destinationPiece != W_KING)
                     {
-                        endGame = false;
+                        ++pieceCount[move.destinationPiece];
+                        ++pieces;
+                        if (pieces > ENDGAME)
+                        {
+                            endGame = false;
+                        }
                     }
                 }
                 board[move.destX, move.destY] = move.destinationPiece;
+            }
+            // Make sure we movetoside on the key
+            // We use black in make move, so if white on unmake move, we takeout the Side
+            if (!isWhitePiece)
+            {
+                zobristKey ^= Zobrist.SIDE;
             }
         }
 
         public void MakeMove(Move move)
         {
             moves.Push(move);
-            if(move.destinationPiece == W_KING)
+            bool isWhitePiece = IsColor(move.originX, move.originY, true);
+            if (move.destinationPiece == W_KING)
             {
                 whiteKingTaken = true;
             }
-            else if(move.destinationPiece == B_KING)
+            else if (move.destinationPiece == B_KING)
             {
                 blackKingTaken = true;
             }
@@ -334,24 +361,26 @@ namespace ChessAI
             {
                 board[move.originX, move.originY] = BLANK_PIECE;
                 board[move.destX, move.destY] = move.originPiece;
-                
+
                 // Increment queen count, decrement pawn count, decrement destination if capture
                 ++pieceCount[move.originPiece];
-                if ((move.originPiece - 1) / 6 == 0)
+                if (isWhitePiece)
                 {
                     --pieceCount[W_PAWN];
+                    zobristKey = Zobrist.MakeMoveKey(zobristKey, move.originX, move.originY, W_PAWN, isWhitePiece);
+                    zobristKey = Zobrist.MakeMoveKey(zobristKey, move.destX, move.destY, W_QUEEN, isWhitePiece);
                 }
                 else
                 {
                     --pieceCount[B_PAWN];
+                    zobristKey = Zobrist.MakeMoveKey(zobristKey, move.originX, move.originY, B_PAWN, isWhitePiece);
+                    zobristKey = Zobrist.MakeMoveKey(zobristKey, move.destX, move.destY, B_QUEEN, isWhitePiece);
                 }
                 if (move.destinationPiece != BLANK_PIECE)
                 {
                     --pieces;
-                    if(move.destinationPiece != B_KING && move.destinationPiece != W_KING)
-                    {
-                        --pieceCount[move.destinationPiece];
-                    }
+                    --pieceCount[move.destinationPiece];
+                    zobristKey = Zobrist.MakeMoveKey(zobristKey, move.destX, move.destY, move.destinationPiece, !isWhitePiece);
                     if (pieces <= ENDGAME)
                     {
                         endGame = true;
@@ -361,6 +390,8 @@ namespace ChessAI
             // make enpassent
             else if (move.originPiece % 6 == W_PAWN && move.originX != move.destX && move.destinationPiece == 0)
             {
+                zobristKey = Zobrist.MakeMoveKey(zobristKey, move.originX, move.destY, move.originPiece, isWhitePiece);
+                zobristKey = Zobrist.MakeMoveKey(zobristKey, move.destX, move.destY, move.originPiece, isWhitePiece);
                 board[move.destX, move.destY] = move.originPiece;
                 board[move.originX, move.destY] = BLANK_PIECE;
                 --pieces;
@@ -368,13 +399,16 @@ namespace ChessAI
                 {
                     this.endGame = true;
                 }
-                board[move.destX, move.originY] = BLANK_PIECE;
+                zobristKey = Zobrist.MakeMoveKey(zobristKey, move.destX, move.originY, board[move.destX, move.originY], !isWhitePiece);
+                board[move.destX, move.originY] = BLANK_PIECE; // piece being removed
             }
             // make castle
-            else if(move.originPiece % 6 == 0 && move.destX - move.originX == 2)
+            else if (move.originPiece % 6 == 0 && move.destX - move.originX == 2)
             {
                 board[move.originX, move.originY] = BLANK_PIECE;
                 board[move.destX, move.destY] = move.originPiece;
+                zobristKey = Zobrist.MakeMoveKey(zobristKey, move.originX, move.originY, move.originPiece, isWhitePiece);
+                zobristKey = Zobrist.MakeMoveKey(zobristKey, move.destX, move.destY, move.originPiece, isWhitePiece);
                 int y = move.originY;
                 int x = 0;
                 int x2 = move.destX + 1;
@@ -383,27 +417,36 @@ namespace ChessAI
                     x = 7;
                     x2 = move.destX - 1;
                 }
+                zobristKey = Zobrist.MakeMoveKey(zobristKey, x2, y, board[x, y], isWhitePiece);
+                zobristKey = Zobrist.MakeMoveKey(zobristKey, x, y, board[x, y], isWhitePiece);
                 board[x2, y] = board[x, y];
                 board[x, y] = BLANK_PIECE;
-
             }
             else
             {
                 // make regular move
+                zobristKey = Zobrist.MakeMoveKey(zobristKey, move.originX, move.originY, move.originPiece, isWhitePiece);
+                zobristKey = Zobrist.MakeMoveKey(zobristKey, move.destX, move.destY, move.originPiece, isWhitePiece);
                 board[move.originX, move.originY] = BLANK_PIECE;
                 board[move.destX, move.destY] = move.originPiece;
-                if(move.destinationPiece != BLANK_PIECE) //decrement pieces count if capture
+                if (move.destinationPiece != BLANK_PIECE) //decrement pieces count if capture
                 {
+                    zobristKey = Zobrist.MakeMoveKey(zobristKey, move.destX, move.destY, move.destinationPiece, !isWhitePiece);
                     --pieces;
-                    if(pieces <= ENDGAME)
+                    if (pieces <= ENDGAME)
                     {
                         endGame = true;
                     }
-                    if(move.destinationPiece != W_KING && move.destinationPiece != B_KING)
+                    if (move.destinationPiece != W_KING && move.destinationPiece != B_KING)
                     {
                         --pieceCount[move.destinationPiece];
                     }
                 }
+            }
+            // Make sure we movetoside on the key
+            if (!isWhitePiece)
+            {
+                zobristKey ^= Zobrist.SIDE;
             }
         }
 
@@ -1041,7 +1084,7 @@ namespace ChessAI
 
         public Move LastMove()
         {
-            return this.moves.Peek();
+            return moves.Peek();
         }
 
         public int PlayNegaMaxMoveVal(bool color, int depth)

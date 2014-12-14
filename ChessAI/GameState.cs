@@ -21,6 +21,8 @@ namespace ChessAI
 
         public GameState(bool color, int gameID, int teamID, string teamKey)
         {
+            Zobrist.InitTable();
+            Transposition.InitTable();
             board = new Board();
             this.color = color;
             turn = -1;
