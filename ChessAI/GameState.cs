@@ -186,10 +186,10 @@ namespace ChessAI
             t.Reset();
             t.Start();
             //Console.WriteLine("SingleThreaded Move: " + move);
-            int depth = 6;
+            int depth = 8;
             if (turn > 35 && secondsLeft > 200)
             {
-                depth = 6;
+                depth = 8;
             }//else if(secondsLeft > 100 && )
             board = board.PlayNegaMaxMoveMultiThreaded(out move, color, depth);
             t.Stop();

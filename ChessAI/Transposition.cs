@@ -14,21 +14,28 @@ namespace ChessAI
 
     class Transposition
     {
-        public static EntryW[] TABLE; // Not a real hashmap, but w/e
+        public static volatile EntryW[] TABLE; // Not a real hashmap, but w/e
         public static readonly int SIZE = 1048583;
 
         public static void InitTable()
         {
             TABLE = new EntryW[SIZE];
-            for(int i = 0; i < SIZE; ++i)
+            for(int i = 0; i < SIZE; i++)
             {
                 TABLE[i] = new EntryW();
             }
+            Console.WriteLine("create");
         }
 
         public static void Insert(long key, byte depth, byte flag, int eval, Move move)
         {
-            int hash = (int) key % SIZE;
+            long hashKey = key;
+            if (key < 0)
+            {
+                hashKey = -key;
+            }
+            int hash = (int) (hashKey % SIZE);
+            //Console.WriteLine("hash: "+ hash);
             Entry toSave = new Entry();
             //toSave.key = key;
             toSave.depth = depth;
@@ -43,10 +50,19 @@ namespace ChessAI
 
         public static int Probe(long key, int depth, int alpha, int beta)
         {
-            int hash = (int) key % SIZE;
-            if ((TABLE[hash].key ^ TABLE[hash].data) == key)
+            long hashKey = key;
+            if (key < 0)
             {
-                Entry toTest = Entry.Desserialize(TABLE[hash].data);
+                hashKey = -key;
+            }
+            int hash = (int) (hashKey % SIZE);
+            //Console.WriteLine("hash: " + key);
+            
+            long tableKey = TABLE[hash].key;
+            long tableData = TABLE[hash].data;
+            if ((tableKey ^ tableData) == key)
+            {
+                Entry toTest = Entry.Desserialize(tableData);
                 if (toTest.flag == Entry.EXACT)
                 {
                     return toTest.eval;
