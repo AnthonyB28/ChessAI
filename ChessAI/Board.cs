@@ -876,7 +876,6 @@ namespace ChessAI
             int[] cache = new int[moves.Count];
             for (int i = 0; i < moves.Count; i++)
             {
-                String m;
                 this.MakeMove(moves[i]);
                 cache[i] = this.Evaluate(color);// this.PlayNegaMaxMoveVal(!color, 1); // might just be color?
                 this.UndoMove();
@@ -1185,13 +1184,6 @@ namespace ChessAI
 
             int blackScore = 0;
             int whiteScore = 0;
-            byte bBishops = 0;
-            byte wBishops = 0;
-            byte wQueens = 0;
-            byte bQueens = 0;
-            byte wRooks = 0;
-            byte bRooks = 0;
-            byte knights = 0; // TODO use for handling end game
 
             for (int i = 0; i < 8; i++)
             {
@@ -1232,7 +1224,6 @@ namespace ChessAI
                         else if (pieceToEval == W_KNIGHT)
                         {
                             scoreToAdd = knightVal;
-                            ++knights;
                             if (endGame)
                             {
                                 scoreToAdd -= 10;
@@ -1249,14 +1240,6 @@ namespace ChessAI
                         else if (pieceToEval == W_ROOK)
                         {
                             scoreToAdd = rookVal;
-                            if(isWhitePiece)
-                            {
-                                ++wRooks;
-                            }
-                            else
-                            {
-                                ++bRooks;
-                            }
                         }
                         else if (pieceToEval == W_BISHOP)
                         {
@@ -1268,12 +1251,10 @@ namespace ChessAI
                             if (isWhitePiece)
                             {
                                 wTableScoreToAdd = isWhitePiece ? PieceTables.Bishop[63 - tablePosition] : PieceTables.Bishop[tablePosition];
-                                ++wBishops;
                             }
                             else
                             {
                                 bTableScoreToAdd = isWhitePiece ? PieceTables.Bishop[63 - tablePosition] : PieceTables.Bishop[tablePosition];
-                                ++bBishops;
                             }
                         }
                         else if (pieceToEval == W_QUEEN)
@@ -1282,14 +1263,6 @@ namespace ChessAI
                             if (!endGame)
                             {
                                 scoreToAdd -= 10;
-                            }
-                            if(isWhitePiece)
-                            {
-                                ++wQueens;
-                            }
-                            else
-                            {
-                                ++bQueens;
                             }
                         }
                         else if (pieceToEval == 0 && board[i, j] != 0) // King
@@ -1330,52 +1303,44 @@ namespace ChessAI
                         if (isWhitePiece)
                         {
                             whiteScore += scoreToAdd + wTableScoreToAdd;
-                            //blackScore += bTableScoreToAdd;
                         }
                         else
                         {
                             blackScore += scoreToAdd + bTableScoreToAdd;
-                            //whiteScore += wTableScoreToAdd;
                         }
                     }
                 }
             }
 
-            if(wRooks != pieceCount[W_ROOK] || bRooks != pieceCount[B_ROOK] || wQueens != pieceCount[W_QUEEN]
-                || bQueens != pieceCount[B_QUEEN] || bBishops != pieceCount[B_BISHOP] || wBishops != pieceCount[W_BISHOP])
-            {
-                Console.WriteLine("incorrect count");
-            }
-
-            if(wRooks == 0 && wQueens == 0)
+            if(pieceCount[W_ROOK] == 0 && pieceCount[W_QUEEN] == 0)
             {
                 whiteScore -= 500;
             }
-            if(bRooks == 0 && bQueens == 0)
+            if(pieceCount[B_ROOK] == 0 && pieceCount[B_QUEEN] == 0)
             {
                 blackScore -= 500;
             }
 
             if(endGame)
             {
-                if(wRooks >= 1)
+                if(pieceCount[W_ROOK] >= 1)
                 {
                     whiteScore += 15;
                 }
-                if(bRooks >= 1)
+                if(pieceCount[B_ROOK] >= 1)
                 {
                     blackScore += 15;
                 }
             }
 
-            if (wBishops >= 2)
+            if (pieceCount[W_BISHOP] >= 2)
             {
                 if (!endGame)
                 {
                     whiteScore += 20;
                 }
             }
-            if (bBishops >= 2)
+            if (pieceCount[B_BISHOP] >= 2)
             {
                 if(!endGame)
                 {
