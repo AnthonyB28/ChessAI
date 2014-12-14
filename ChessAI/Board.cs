@@ -99,7 +99,7 @@ namespace ChessAI
         private static readonly bool WHITE = true;
         private static readonly bool BLACK = false;
 
-        private byte[,] board;
+        public byte[,] board;
         private byte[] pieceCount;
         private Stack<Move> moves;
         private bool endGame = false;
@@ -166,6 +166,8 @@ namespace ChessAI
             return new Board((byte[,])board.Clone(), (byte[])pieceCount.Clone(), 
                 moveStack, pieces, endGame, blackKingTaken, whiteKingTaken);
         }
+
+        
 
 //         public void MovePiece(int x1, int y1, int x2, int y2)
 //         {
@@ -349,530 +351,12 @@ namespace ChessAI
             }
         }
 
-        public List<Move> GetAllStates(bool white, bool first)
-        {
-            List<Move> moves = new List<Move>();
-            //generate all moves
-            for(int i = 0; i < 8; i++){
-                for(int j = 0; j < 8; j++){
-                    if((board[i,j] != 0) && IsColor(i, j, white) ){
-                        //PAWN
-                        if (board[i, j] % 6 == W_PAWN)
-                        {
-                            if (white)
-                            {
-                                if (board[i, j + 1] == 0)
-                                {
-                                    if (j == 6) 
-                                    {
-                                        moves.Add(CreateMove(i, j, i, j + 1, W_QUEEN));
-                                    }
-                                    else
-                                    {
-                                        moves.Add(CreateMove(i, j, i, j + 1));
-                                    }
-                                }
-                                if (j == 1 && board[i,j+1] == 0 && board[i, j + 2] == 0)
-                                {
-                                    
-                                    moves.Add(CreateMove(i, j, i, j + 2));
-                                }
-                                if ((i < 7) && board[i+1,j+1] != 0 && (IsColor(i + 1, j + 1, !white)))
-                                {
-                                    
-                                    if (j == 6)
-                                    {
-                                        moves.Add(CreateMove(i, j, i + 1, j + 1, W_QUEEN));
-                                    }
-                                    else
-                                    {
-                                        moves.Add(CreateMove(i, j, i + 1, j + 1));
-                                    }
-                                }
-                                if ((i > 0) && board[i-1,j+1] != 0 && (IsColor(i - 1, j + 1, !white)))
-                                {
-                                    
-                                    if (j == 6)
-                                    {
-                                        moves.Add(CreateMove(i, j, i - 1, j + 1, W_QUEEN));
-                                    }
-                                    else
-                                    {
-                                        moves.Add(CreateMove(i, j, i - 1, j + 1));
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if (board[i, j - 1] == 0)
-                                {
-                                    
-                                    if (j == 1)
-                                    {
-                                        moves.Add(CreateMove(i, j, i, j - 1, B_QUEEN));
-                                    }
-                                    else
-                                    {
-                                        moves.Add(CreateMove(i, j, i, j - 1));
-                                    }
-                                }
-                                if (j == 6 && board[i,j-1] == 0 && board[i, j - 2] == 0)
-                                {
-                                    
-                                    moves.Add(CreateMove(i, j, i, j - 2));
-                                }
-                                if ((i < 7) && board[i+1,j-1] != 0 && (IsColor(i + 1, j - 1, !white)))
-                                {
-                                    
-                                    if (j == 1)
-                                    {
-                                        moves.Add(CreateMove(i, j, i + 1, j - 1, B_QUEEN));
-                                    }
-                                    else
-                                    {
-                                        moves.Add(CreateMove(i, j, i + 1, j - 1));
-                                    }
-                                }
-                                if ((i > 0) && board[i-1,j-1] !=0 && (IsColor(i - 1, j - 1, !white)))
-                                {
-                                    
-                                    if (j == 1)
-                                    {
-                                        moves.Add(CreateMove(i, j, i - 1, j - 1, B_QUEEN));
-                                    }
-                                    else
-                                    {
-                                        moves.Add(CreateMove(i, j, i - 1, j - 1));
-                                    }
-
-                                }
-                            }
-                        }
-                        //ROOK
-                        else if (board[i, j] % 6 == W_ROOK)
-                        {
-                            for (int x = i + 1; x < 8; x++)
-                            {
-                                if (board[x, j] == 0)
-                                {
-                                    
-                                    moves.Add(CreateMove(i, j, x, j));
-                                }
-                                else
-                                {
-                                    if (IsColor(x, j, !white))
-                                    {
-                                        
-                                        moves.Add(CreateMove(i, j, x, j));
-                                    }
-                                    break;
-                                }
-                            }
-                            for (int x = i - 1; x >= 0; x--)
-                            {
-                                if (board[x, j] == 0)
-                                {
-                                    moves.Add(CreateMove(i, j, x, j));
-                                }
-                                else
-                                {
-                                    if (IsColor(x, j, !white))
-                                    {
-                                        moves.Add(CreateMove(i, j, x, j));
-                                    }
-                                    break;
-                                }
-                            }
-                            for (int y = j + 1; y < 8; y++)
-                            {
-                                if (board[i, y] == 0)
-                                {
-                                    moves.Add(CreateMove(i, j, i, y));
-                                }
-                                else
-                                {
-                                    if (IsColor(i, y, !white))
-                                    {
-                                        moves.Add(CreateMove(i, j, i, y));
-                                    }
-                                    break;
-                                }
-                            }
-                            for (int y = j - 1; y >= 0; y--)
-                            {
-                                if (board[i, y] == 0)
-                                {   
-                                    moves.Add(CreateMove(i, j, i, y));
-                                }
-                                else
-                                {
-                                    if (IsColor(i, y, !white))
-                                    {
-                                        moves.Add(CreateMove(i, j, i, y));
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                        else if (board[i, j] % 6 == W_BISHOP)
-                        {
-                            for (int x = i + 1, y = j + 1; x < 8 && y < 8; x++, y++)
-                            {
-                                if (board[x, y] == 0)
-                                {
-                                    
-                                    moves.Add(CreateMove(i, j, x, y));
-                                   
-                                }
-                                else
-                                {
-                                    if (IsColor(x, y, !white))
-                                    {
-                                        
-                                        moves.Add(CreateMove(i, j, x, y));
-                                       
-                                    }
-                                    break;
-                                }
-                            }
-                            for (int x = i - 1, y = j - 1; x >= 0 && y >= 0; x--, y--)
-                            {
-                                if (board[x, y] == 0)
-                                {
-                                    
-                                    moves.Add(CreateMove(i, j, x, y));
-                                   
-                                }
-                                else
-                                {
-                                    if (IsColor(x, y, !white))
-                                    {
-                                        
-                                        moves.Add(CreateMove(i, j, x, y));
-                                       
-                                    }
-                                    break;
-                                }
-                            }
-                            for (int x = i + 1, y = j - 1; x < 8 && y >= 0; x++, y--)
-                            {
-                                if (board[x, y] == 0)
-                                {
-                                    
-                                    moves.Add(CreateMove(i, j, x, y));
-                                   
-                                }
-                                else
-                                {
-                                    if (IsColor(x, y, !white))
-                                    {
-                                        
-                                        moves.Add(CreateMove(i, j, x, y));
-                                       
-                                    }
-                                    break;
-                                }
-                            }
-                            for (int x = i - 1, y = j + 1; x >= 0 && y < 8; x--, y++)
-                            {
-                                if (board[x, y] == 0)
-                                {
-                                    
-                                    moves.Add(CreateMove(i, j, x, y));
-                                   
-                                }
-                                else
-                                {
-                                    if (IsColor(x, y, !white))
-                                    {
-                                        
-                                        moves.Add(CreateMove(i, j, x, y));
-                                       
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                        else if (board[i, j] % 6 == W_QUEEN)
-                        {
-                            for (int x = i + 1; x < 8; x++)
-                            {
-                                if (board[x, j] == 0)
-                                {
-                                    
-                                    moves.Add(CreateMove(i, j, x, j));
-                                   
-                                }
-                                else
-                                {
-                                    if (IsColor(x, j, !white))
-                                    {
-                                        
-                                        moves.Add(CreateMove(i, j, x, j));
-                                       
-                                    }
-                                    break;
-                                }
-                            }
-                            for (int x = i - 1; x >= 0; x--)
-                            {
-                                if (board[x, j] == 0)
-                                {
-                                    
-                                    moves.Add(CreateMove(i, j, x, j));
-                                   
-                                }
-                                else
-                                {
-                                    if (IsColor(x, j, !white))
-                                    {
-                                        
-                                        moves.Add(CreateMove(i, j, x, j));
-                                       
-                                    }
-                                    break;
-                                }
-                            }
-                            for (int y = j + 1; y < 8; y++)
-                            {
-                                if (board[i, y] == 0)
-                                {
-                                    
-                                    moves.Add(CreateMove(i, j, i, y));
-                                   
-                                }
-                                else
-                                {
-                                    if (IsColor(i, y, !white))
-                                    {
-                                        
-                                        moves.Add(CreateMove(i, j, i, y));
-                                       
-                                    }
-                                    break;
-                                }
-                            }
-                            for (int y = j - 1; y >= 0; y--)
-                            {
-                                if (board[i, y] == 0)
-                                {
-                                    
-                                    moves.Add(CreateMove(i, j, i, y));
-                                   
-                                }
-                                else
-                                {
-                                    if (IsColor(i, y, !white))
-                                    {
-                                        
-                                        moves.Add(CreateMove(i, j, i, y));
-                                       
-                                    }
-                                    break;
-                                }
-                            }
-                            for (int x = i + 1, y = j + 1; x < 8 && y < 8; x++, y++)
-                            {
-                                if (board[x, y] == 0)
-                                {
-                                    
-                                    moves.Add(CreateMove(i, j, x, y));
-                                   
-                                }
-                                else
-                                {
-                                    if (IsColor(x, y, !white))
-                                    {
-                                        
-                                        moves.Add(CreateMove(i, j, x, y));
-                                       
-                                    }
-                                    break;
-                                }
-                            }
-                            for (int x = i - 1, y = j - 1; x >= 0 && y >= 0; x--, y--)
-                            {
-                                if (board[x, y] == 0)
-                                {
-                                    
-                                    moves.Add(CreateMove(i, j, x, y));
-                                   
-                                }
-                                else
-                                {
-                                    if (IsColor(x, y, !white))
-                                    {
-                                        
-                                        moves.Add(CreateMove(i, j, x, y));
-                                       
-                                    }
-                                    break;
-                                }
-                            }
-                            for (int x = i + 1, y = j - 1; x < 8 && y >= 0; x++, y--)
-                            {
-                                if (board[x, y] == 0)
-                                {
-                                    
-                                    moves.Add(CreateMove(i, j, x, y));
-                                   
-                                }
-                                else
-                                {
-                                    if (IsColor(x, y, !white))
-                                    {
-                                        
-                                        moves.Add(CreateMove(i, j, x, y));
-                                       
-                                    }
-                                    break;
-                                }
-                            }
-                            for (int x = i - 1, y = j + 1; x >= 0 && y < 8; x--, y++)
-                            {
-                                if (board[x, y] == 0)
-                                {
-                                    
-                                    moves.Add(CreateMove(i, j, x, y));
-                                   
-                                }
-                                else
-                                {
-                                    if (IsColor(x, y, !white))
-                                    {
-                                        
-                                        moves.Add(CreateMove(i, j, x, y));
-                                       
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                        else if (board[i, j] % 6 == 0)
-                        {
-                            if ((i < 7) && (board[i + 1, j] == 0 || IsColor(i + 1, j, !white)))
-                            {
-                                
-                                moves.Add(CreateMove(i, j, i + 1, j));
-                            }
-                            if ((i < 7) && (j > 0) && (board[i + 1, j - 1] == 0 || IsColor(i + 1, j - 1, !white)))
-                            {
-                                
-                                moves.Add(CreateMove(i, j, i + 1, j - 1));
-                            }
-                            if ((i < 7) && (j < 7) && (board[i + 1, j + 1] == 0 || IsColor(i + 1, j + 1, !white)))
-                            {
-                                
-                                moves.Add(CreateMove(i, j, i + 1, j + 1));
-                            }
-                            if ((j < 7) && (board[i, j + 1] == 0 || IsColor(i, j + 1, !white)))
-                            {
-                                
-                                moves.Add(CreateMove(i, j, i, j + 1));
-                            }
-                            if ((j > 0) && (board[i, j - 1] == 0 || IsColor(i, j - 1, !white)))
-                            {
-                                
-                                moves.Add(CreateMove(i, j, i, j - 1));
-                            }
-                            if ((i > 0) && (board[i - 1, j] == 0 || IsColor(i - 1, j, !white)))
-                            {
-                                
-                                moves.Add(CreateMove(i, j, i - 1, j));
-                            }
-                            if ((i > 0) && (j < 7) && (board[i - 1, j + 1] == 0 || IsColor(i - 1, j + 1, !white)))
-                            {
-                                
-                                moves.Add(CreateMove(i, j, i - 1, j + 1));
-                            }
-                            if ((i > 0) && (j > 0) && (board[i - 1, j - 1] == 0 || IsColor(i - 1, j - 1, !white)))
-                            {
-                                
-                                moves.Add(CreateMove(i, j, i - 1, j - 1));
-                            }
-                        }
-                        else if (board[i, j] % 6 == W_KNIGHT)
-                        {
-                            if ((i < 6) && (j < 7) && (board[i + 2, j + 1] == 0 || IsColor(i + 2, j + 1, !white)))
-                            {
-                                
-                                moves.Add(CreateMove(i, j, i + 2, j + 1));
-                            }
-                            if ((i < 6) && (j > 0) && (board[i + 2, j - 1] == 0 || IsColor(i + 2, j - 1, !white)))
-                            {
-                                
-                                moves.Add(CreateMove(i, j, i + 2, j - 1));
-                            }
-                            if ((i < 7) && (j < 6) && (board[i + 1, j + 2] == 0 || IsColor(i + 1, j + 2, !white)))
-                            {
-                                
-                                moves.Add(CreateMove(i, j, i + 1, j + 2));
-                            }
-                            if ((i < 7) && (j > 1) && (board[i + 1, j - 2] == 0 || IsColor(i + 1, j - 2, !white)))
-                            {
-                                
-                                moves.Add(CreateMove(i, j, i + 1, j - 2));
-                            }
-                            if ((i > 0) && (j < 6) && (board[i - 1, j + 2] == 0 || IsColor(i - 1, j + 2, !white)))
-                            {
-                                
-                                moves.Add(CreateMove(i, j, i - 1, j + 2));
-                            }
-                            if ((i > 0) && (j > 1) && (board[i - 1, j - 2] == 0 || IsColor(i - 1, j - 2, !white)))
-                            {
-                                
-                                moves.Add(CreateMove(i, j, i - 1, j - 2));
-                            }
-                            if ((i > 1) && (j < 7) && (board[i - 2, j + 1] == 0 || IsColor(i - 2, j + 1, !white)))
-                            {
-                                
-                                moves.Add(CreateMove(i, j, i - 2, j + 1));
-                            }
-                            if ((i > 1) && (j > 0) && (board[i - 2, j - 1] == 0 || IsColor(i - 2, j - 1, !white)))
-                            {
-                                
-                                moves.Add(CreateMove(i, j, i - 2, j - 1));
-                            }
-                        }
-                    }
-                }
-            }
-            if (first && this.moves.Count >= 6)
-            {
-                Stack<Move> tempStack = new Stack<Move>();
-                foreach (Move m in this.moves.Reverse())
-                {
-                    tempStack.Push(m);
-                }
-                tempStack.Pop();
-                Move m1 = tempStack.Pop();
-                tempStack.Pop();
-                Move m2 = tempStack.Pop();
-                tempStack.Pop();
-                if (m1.Equals(tempStack.Pop()))
-                {
-                    for (int i = 0; i < moves.Count; )
-                    {
-                        if (m2.Equals(moves[i]))
-                        {
-                            moves.RemoveAt(i);
-                        }
-                        else
-                        {
-                            i++;
-                        }
-                    }
-                }
-            }
-            return moves;
-        }
-
-        public bool isCapture()
+        public bool IsCapture()
         {
             return this.moves.Peek().destinationPiece != 0;
         }
 
-        public void sortMoves(List<Move> moves, bool color){
+        public void SortMoves(List<Move> moves, bool color){
             int[] cache = new int[moves.Count];
             for (int i = 0; i < moves.Count; i++)
             {
@@ -913,16 +397,16 @@ namespace ChessAI
             return b;
         }
 
-        public bool isTerminal()
+        public bool IsTerminal()
         {
             return blackKingTaken || whiteKingTaken;
         }
 
         public Board PlayNegaMaxMove(out string move, bool color, int depth)
         {
-            Console.WriteLine("suceed");
+            Console.WriteLine("succeed");
             List<Move> moves = GetAllStates(color, true);
-            this.sortMoves(moves, color);
+            this.SortMoves(moves, color);
             Console.WriteLine("Moves Available: " + moves.Count);
             System.Diagnostics.Stopwatch t = new System.Diagnostics.Stopwatch();
             Move moveToMake = null;
@@ -1470,6 +954,528 @@ namespace ChessAI
             {
                 return blackScore - whiteScore;
             }
+        }
+
+
+        public List<Move> GetAllStates(bool white, bool first)
+        {
+            List<Move> moves = new List<Move>();
+            //generate all moves
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    if ((board[i, j] != 0) && IsColor(i, j, white))
+                    {
+                        //PAWN
+                        if (board[i, j] % 6 == W_PAWN)
+                        {
+                            if (white)
+                            {
+                                if (board[i, j + 1] == 0)
+                                {
+                                    if (j == 6)
+                                    {
+                                        moves.Add(CreateMove(i, j, i, j + 1, W_QUEEN));
+                                    }
+                                    else
+                                    {
+                                        moves.Add(CreateMove(i, j, i, j + 1));
+                                    }
+                                }
+                                if (j == 1 && board[i, j + 1] == 0 && board[i, j + 2] == 0)
+                                {
+
+                                    moves.Add(CreateMove(i, j, i, j + 2));
+                                }
+                                if ((i < 7) && board[i + 1, j + 1] != 0 && (IsColor(i + 1, j + 1, !white)))
+                                {
+
+                                    if (j == 6)
+                                    {
+                                        moves.Add(CreateMove(i, j, i + 1, j + 1, W_QUEEN));
+                                    }
+                                    else
+                                    {
+                                        moves.Add(CreateMove(i, j, i + 1, j + 1));
+                                    }
+                                }
+                                if ((i > 0) && board[i - 1, j + 1] != 0 && (IsColor(i - 1, j + 1, !white)))
+                                {
+
+                                    if (j == 6)
+                                    {
+                                        moves.Add(CreateMove(i, j, i - 1, j + 1, W_QUEEN));
+                                    }
+                                    else
+                                    {
+                                        moves.Add(CreateMove(i, j, i - 1, j + 1));
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (board[i, j - 1] == 0)
+                                {
+
+                                    if (j == 1)
+                                    {
+                                        moves.Add(CreateMove(i, j, i, j - 1, B_QUEEN));
+                                    }
+                                    else
+                                    {
+                                        moves.Add(CreateMove(i, j, i, j - 1));
+                                    }
+                                }
+                                if (j == 6 && board[i, j - 1] == 0 && board[i, j - 2] == 0)
+                                {
+
+                                    moves.Add(CreateMove(i, j, i, j - 2));
+                                }
+                                if ((i < 7) && board[i + 1, j - 1] != 0 && (IsColor(i + 1, j - 1, !white)))
+                                {
+
+                                    if (j == 1)
+                                    {
+                                        moves.Add(CreateMove(i, j, i + 1, j - 1, B_QUEEN));
+                                    }
+                                    else
+                                    {
+                                        moves.Add(CreateMove(i, j, i + 1, j - 1));
+                                    }
+                                }
+                                if ((i > 0) && board[i - 1, j - 1] != 0 && (IsColor(i - 1, j - 1, !white)))
+                                {
+
+                                    if (j == 1)
+                                    {
+                                        moves.Add(CreateMove(i, j, i - 1, j - 1, B_QUEEN));
+                                    }
+                                    else
+                                    {
+                                        moves.Add(CreateMove(i, j, i - 1, j - 1));
+                                    }
+
+                                }
+                            }
+                        }
+                        //ROOK
+                        else if (board[i, j] % 6 == W_ROOK)
+                        {
+                            for (int x = i + 1; x < 8; x++)
+                            {
+                                if (board[x, j] == 0)
+                                {
+
+                                    moves.Add(CreateMove(i, j, x, j));
+                                }
+                                else
+                                {
+                                    if (IsColor(x, j, !white))
+                                    {
+
+                                        moves.Add(CreateMove(i, j, x, j));
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int x = i - 1; x >= 0; x--)
+                            {
+                                if (board[x, j] == 0)
+                                {
+                                    moves.Add(CreateMove(i, j, x, j));
+                                }
+                                else
+                                {
+                                    if (IsColor(x, j, !white))
+                                    {
+                                        moves.Add(CreateMove(i, j, x, j));
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int y = j + 1; y < 8; y++)
+                            {
+                                if (board[i, y] == 0)
+                                {
+                                    moves.Add(CreateMove(i, j, i, y));
+                                }
+                                else
+                                {
+                                    if (IsColor(i, y, !white))
+                                    {
+                                        moves.Add(CreateMove(i, j, i, y));
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int y = j - 1; y >= 0; y--)
+                            {
+                                if (board[i, y] == 0)
+                                {
+                                    moves.Add(CreateMove(i, j, i, y));
+                                }
+                                else
+                                {
+                                    if (IsColor(i, y, !white))
+                                    {
+                                        moves.Add(CreateMove(i, j, i, y));
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                        else if (board[i, j] % 6 == W_BISHOP)
+                        {
+                            for (int x = i + 1, y = j + 1; x < 8 && y < 8; x++, y++)
+                            {
+                                if (board[x, y] == 0)
+                                {
+
+                                    moves.Add(CreateMove(i, j, x, y));
+
+                                }
+                                else
+                                {
+                                    if (IsColor(x, y, !white))
+                                    {
+
+                                        moves.Add(CreateMove(i, j, x, y));
+
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int x = i - 1, y = j - 1; x >= 0 && y >= 0; x--, y--)
+                            {
+                                if (board[x, y] == 0)
+                                {
+
+                                    moves.Add(CreateMove(i, j, x, y));
+
+                                }
+                                else
+                                {
+                                    if (IsColor(x, y, !white))
+                                    {
+
+                                        moves.Add(CreateMove(i, j, x, y));
+
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int x = i + 1, y = j - 1; x < 8 && y >= 0; x++, y--)
+                            {
+                                if (board[x, y] == 0)
+                                {
+
+                                    moves.Add(CreateMove(i, j, x, y));
+
+                                }
+                                else
+                                {
+                                    if (IsColor(x, y, !white))
+                                    {
+
+                                        moves.Add(CreateMove(i, j, x, y));
+
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int x = i - 1, y = j + 1; x >= 0 && y < 8; x--, y++)
+                            {
+                                if (board[x, y] == 0)
+                                {
+
+                                    moves.Add(CreateMove(i, j, x, y));
+
+                                }
+                                else
+                                {
+                                    if (IsColor(x, y, !white))
+                                    {
+
+                                        moves.Add(CreateMove(i, j, x, y));
+
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                        else if (board[i, j] % 6 == W_QUEEN)
+                        {
+                            for (int x = i + 1; x < 8; x++)
+                            {
+                                if (board[x, j] == 0)
+                                {
+
+                                    moves.Add(CreateMove(i, j, x, j));
+
+                                }
+                                else
+                                {
+                                    if (IsColor(x, j, !white))
+                                    {
+
+                                        moves.Add(CreateMove(i, j, x, j));
+
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int x = i - 1; x >= 0; x--)
+                            {
+                                if (board[x, j] == 0)
+                                {
+
+                                    moves.Add(CreateMove(i, j, x, j));
+
+                                }
+                                else
+                                {
+                                    if (IsColor(x, j, !white))
+                                    {
+
+                                        moves.Add(CreateMove(i, j, x, j));
+
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int y = j + 1; y < 8; y++)
+                            {
+                                if (board[i, y] == 0)
+                                {
+
+                                    moves.Add(CreateMove(i, j, i, y));
+
+                                }
+                                else
+                                {
+                                    if (IsColor(i, y, !white))
+                                    {
+
+                                        moves.Add(CreateMove(i, j, i, y));
+
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int y = j - 1; y >= 0; y--)
+                            {
+                                if (board[i, y] == 0)
+                                {
+
+                                    moves.Add(CreateMove(i, j, i, y));
+
+                                }
+                                else
+                                {
+                                    if (IsColor(i, y, !white))
+                                    {
+
+                                        moves.Add(CreateMove(i, j, i, y));
+
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int x = i + 1, y = j + 1; x < 8 && y < 8; x++, y++)
+                            {
+                                if (board[x, y] == 0)
+                                {
+
+                                    moves.Add(CreateMove(i, j, x, y));
+
+                                }
+                                else
+                                {
+                                    if (IsColor(x, y, !white))
+                                    {
+
+                                        moves.Add(CreateMove(i, j, x, y));
+
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int x = i - 1, y = j - 1; x >= 0 && y >= 0; x--, y--)
+                            {
+                                if (board[x, y] == 0)
+                                {
+
+                                    moves.Add(CreateMove(i, j, x, y));
+
+                                }
+                                else
+                                {
+                                    if (IsColor(x, y, !white))
+                                    {
+
+                                        moves.Add(CreateMove(i, j, x, y));
+
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int x = i + 1, y = j - 1; x < 8 && y >= 0; x++, y--)
+                            {
+                                if (board[x, y] == 0)
+                                {
+
+                                    moves.Add(CreateMove(i, j, x, y));
+
+                                }
+                                else
+                                {
+                                    if (IsColor(x, y, !white))
+                                    {
+
+                                        moves.Add(CreateMove(i, j, x, y));
+
+                                    }
+                                    break;
+                                }
+                            }
+                            for (int x = i - 1, y = j + 1; x >= 0 && y < 8; x--, y++)
+                            {
+                                if (board[x, y] == 0)
+                                {
+
+                                    moves.Add(CreateMove(i, j, x, y));
+
+                                }
+                                else
+                                {
+                                    if (IsColor(x, y, !white))
+                                    {
+
+                                        moves.Add(CreateMove(i, j, x, y));
+
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                        else if (board[i, j] % 6 == 0)
+                        {
+                            if ((i < 7) && (board[i + 1, j] == 0 || IsColor(i + 1, j, !white)))
+                            {
+
+                                moves.Add(CreateMove(i, j, i + 1, j));
+                            }
+                            if ((i < 7) && (j > 0) && (board[i + 1, j - 1] == 0 || IsColor(i + 1, j - 1, !white)))
+                            {
+
+                                moves.Add(CreateMove(i, j, i + 1, j - 1));
+                            }
+                            if ((i < 7) && (j < 7) && (board[i + 1, j + 1] == 0 || IsColor(i + 1, j + 1, !white)))
+                            {
+
+                                moves.Add(CreateMove(i, j, i + 1, j + 1));
+                            }
+                            if ((j < 7) && (board[i, j + 1] == 0 || IsColor(i, j + 1, !white)))
+                            {
+
+                                moves.Add(CreateMove(i, j, i, j + 1));
+                            }
+                            if ((j > 0) && (board[i, j - 1] == 0 || IsColor(i, j - 1, !white)))
+                            {
+
+                                moves.Add(CreateMove(i, j, i, j - 1));
+                            }
+                            if ((i > 0) && (board[i - 1, j] == 0 || IsColor(i - 1, j, !white)))
+                            {
+
+                                moves.Add(CreateMove(i, j, i - 1, j));
+                            }
+                            if ((i > 0) && (j < 7) && (board[i - 1, j + 1] == 0 || IsColor(i - 1, j + 1, !white)))
+                            {
+
+                                moves.Add(CreateMove(i, j, i - 1, j + 1));
+                            }
+                            if ((i > 0) && (j > 0) && (board[i - 1, j - 1] == 0 || IsColor(i - 1, j - 1, !white)))
+                            {
+
+                                moves.Add(CreateMove(i, j, i - 1, j - 1));
+                            }
+                        }
+                        else if (board[i, j] % 6 == W_KNIGHT)
+                        {
+                            if ((i < 6) && (j < 7) && (board[i + 2, j + 1] == 0 || IsColor(i + 2, j + 1, !white)))
+                            {
+
+                                moves.Add(CreateMove(i, j, i + 2, j + 1));
+                            }
+                            if ((i < 6) && (j > 0) && (board[i + 2, j - 1] == 0 || IsColor(i + 2, j - 1, !white)))
+                            {
+
+                                moves.Add(CreateMove(i, j, i + 2, j - 1));
+                            }
+                            if ((i < 7) && (j < 6) && (board[i + 1, j + 2] == 0 || IsColor(i + 1, j + 2, !white)))
+                            {
+
+                                moves.Add(CreateMove(i, j, i + 1, j + 2));
+                            }
+                            if ((i < 7) && (j > 1) && (board[i + 1, j - 2] == 0 || IsColor(i + 1, j - 2, !white)))
+                            {
+
+                                moves.Add(CreateMove(i, j, i + 1, j - 2));
+                            }
+                            if ((i > 0) && (j < 6) && (board[i - 1, j + 2] == 0 || IsColor(i - 1, j + 2, !white)))
+                            {
+
+                                moves.Add(CreateMove(i, j, i - 1, j + 2));
+                            }
+                            if ((i > 0) && (j > 1) && (board[i - 1, j - 2] == 0 || IsColor(i - 1, j - 2, !white)))
+                            {
+
+                                moves.Add(CreateMove(i, j, i - 1, j - 2));
+                            }
+                            if ((i > 1) && (j < 7) && (board[i - 2, j + 1] == 0 || IsColor(i - 2, j + 1, !white)))
+                            {
+
+                                moves.Add(CreateMove(i, j, i - 2, j + 1));
+                            }
+                            if ((i > 1) && (j > 0) && (board[i - 2, j - 1] == 0 || IsColor(i - 2, j - 1, !white)))
+                            {
+
+                                moves.Add(CreateMove(i, j, i - 2, j - 1));
+                            }
+                        }
+                    }
+                }
+            }
+            if (first && this.moves.Count >= 6)
+            {
+                Stack<Move> tempStack = new Stack<Move>();
+                foreach (Move m in this.moves.Reverse())
+                {
+                    tempStack.Push(m);
+                }
+                tempStack.Pop();
+                Move m1 = tempStack.Pop();
+                tempStack.Pop();
+                Move m2 = tempStack.Pop();
+                tempStack.Pop();
+                if (m1.Equals(tempStack.Pop()))
+                {
+                    for (int i = 0; i < moves.Count; )
+                    {
+                        if (m2.Equals(moves[i]))
+                        {
+                            moves.RemoveAt(i);
+                        }
+                        else
+                        {
+                            i++;
+                        }
+                    }
+                }
+            }
+            return moves;
         }
 
         public bool CheckForKingCheck(int x, int y, bool color)

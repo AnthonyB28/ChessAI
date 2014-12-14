@@ -16,7 +16,7 @@ namespace ChessAI
             pruned++;
             //if you return a score of 10 from white's perspective, 
             // and the last move was a black move, then the score returned should be -10
-            if (state.isTerminal())
+            if (state.IsTerminal())
             {
                 return state.Evaluate(color);
             }

@@ -28,7 +28,7 @@ namespace ChessAI
             this.moves = this.board.GetAllStates(this.color, true);
             
             Console.WriteLine("Moves available: " + this.moves.Count);
-            this.board.sortMoves(this.moves, this.color);
+            this.board.SortMoves(this.moves, this.color);
             this.threads = new List<NegaMaxThread>();
             alpha = Negamax.NEGA_SCORE;
             this.depth = depth;
