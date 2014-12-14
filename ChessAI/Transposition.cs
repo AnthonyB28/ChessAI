@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace ChessAI
 {
+    // http://web.archive.org/web/20070809015843/http://www.seanet.com/~brucemo/topics/hashing.htm
+    // http://sourceforge.net/p/mediocrechess/code/HEAD/tree/branches/evaluationoverhaul/src/main/java/mediocrechess/mediocre/transtable/TranspositionTable.java#l51
+
     class Entry
     {
         public static readonly byte EXACT = 0;
