@@ -1269,11 +1269,11 @@ namespace ChessAI
                         {
                             scoreToAdd = kingVal;
                             if (isWhitePiece)
-                            {
-                                if(CheckForKingCheck(i, j, true))
-                                {
-                                    whiteScore -= 100;
-                                }
+                            { 
+//                                 if(CheckForKingCheck(i, j, true))
+//                                 {
+//                                     whiteScore -= 100;
+//                                 }
                                 if (endGame)
                                 {
                                     wTableScoreToAdd = isWhitePiece ? PieceTables.KingEndGame[63 - tablePosition] : PieceTables.KingEndGame[tablePosition];
@@ -1285,10 +1285,10 @@ namespace ChessAI
                             }
                             else
                             {
-                                if(CheckForKingCheck(i, j, false))
-                                {
-                                    blackScore -= 100;
-                                }
+//                                 if(CheckForKingCheck(i, j, false))
+//                                 {
+//                                     blackScore -= 100;
+//                                 }
                                 if (endGame)
                                 {
                                     bTableScoreToAdd = isWhitePiece ? PieceTables.KingEndGame[63 - tablePosition] : PieceTables.KingEndGame[tablePosition];
