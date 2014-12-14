@@ -27,10 +27,10 @@ namespace ChessAI
             this.color = color;
             turn = -1;
             gameOver = false;
-            this.network = new Network(gameID, teamID, teamKey);
-            this.lastMoveDepth = 0;
-            this.lastMoveTime = 0;
-            this.lastOpponentMoveCount = 0;
+            lastMoveDepth = 0;
+            lastMoveTime = 0;
+            lastOpponentMoveCount = 0;
+            network = new Network(gameID, teamID, teamKey);
         }
 
         public void Run()
