@@ -867,6 +867,10 @@ namespace ChessAI
             return moves;
         }
 
+        public bool IsEndGame()
+        {
+            return this.endGame;
+        }
         public bool isCapture()
         {
             return this.moves.Peek().destinationPiece != 0;
