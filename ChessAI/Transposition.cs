@@ -15,7 +15,7 @@ namespace ChessAI
     class Transposition
     {
         public static volatile EntryW[] TABLE; // Not a real hashmap, but w/e
-        public static readonly int SIZE = 1048583;
+        public static readonly int SIZE = 104858300;
 
         public static void InitTable()
         {
@@ -27,7 +27,7 @@ namespace ChessAI
             Console.WriteLine("create");
         }
 
-        public static void Insert(long key, byte depth, byte flag, int eval, Move move)
+        public static void Insert(long key, short depth, byte flag, int eval)
         {
             long hashKey = key;
             if (key < 0)
@@ -35,7 +35,6 @@ namespace ChessAI
                 hashKey = -key;
             }
             int hash = (int) (hashKey % SIZE);
-            //Console.WriteLine("hash: "+ hash);
             Entry toSave = new Entry();
             //toSave.key = key;
             toSave.depth = depth;
@@ -48,7 +47,7 @@ namespace ChessAI
             TABLE[hash].data = data;
         }
 
-        public static int Probe(long key, int depth, int alpha, int beta)
+        public static Entry Probe(long key)
         {
             long hashKey = key;
             if (key < 0)
@@ -56,27 +55,15 @@ namespace ChessAI
                 hashKey = -key;
             }
             int hash = (int) (hashKey % SIZE);
-            //Console.WriteLine("hash: " + key);
             
             long tableKey = TABLE[hash].key;
             long tableData = TABLE[hash].data;
             if ((tableKey ^ tableData) == key)
             {
                 Entry toTest = Entry.Desserialize(tableData);
-                if (toTest.flag == Entry.EXACT)
-                {
-                    return toTest.eval;
-                }
-                if (toTest.flag == Entry.ALPHA && toTest.eval <= alpha)
-                {
-                    return alpha;
-                }
-                if (toTest.flag == Entry.BETA && toTest.eval >= beta)
-                {
-                    return beta;
-                }
+                return toTest;
             }
-            return Int32.MinValue;
+            return null;
         }
     }
 

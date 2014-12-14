@@ -82,18 +82,41 @@ namespace ChessAI
             pruned++;
             byte type = Entry.ALPHA;
             long key = state.GetKey(); // Use Zobrist.GetKey(state.board, color) instead if there appears to be issues, slower as its linear
-            int transposeEval = Transposition.Probe(key, depth, alpha, beta);
-            if (transposeEval != Int32.MinValue)
+            Entry transposeEval = Transposition.Probe(key);
+            if (transposeEval != null)
             {
-                return transposeEval;
+                if (transposeEval.depth >= depth)
+                {
+                    if (transposeEval.flag == Entry.EXACT)
+                    {
+                        return transposeEval.eval;
+                    }
+                    if (transposeEval.flag == Entry.ALPHA)
+                    {
+                        if(transposeEval.eval > alpha)
+                        {
+                            alpha = transposeEval.eval;
+                        }
+                    }
+                    if (transposeEval.flag == Entry.BETA)
+                    {
+                        if(transposeEval.eval < beta)
+                        {
+                            beta = transposeEval.eval;
+                        }
+                    }
+                    if (alpha >= beta)
+                    {
+                        return alpha;
+                    }
+                }
             }
             //if you return a score of 10 from white's perspective, 
             // and the last move was a black move, then the score returned should be -10
             if (state.isTerminal())
             {
                 int eval = state.Evaluate(color, 0);
-                Transposition.Insert(key, (byte)depth, Entry.
-                    EXACT, eval, state.LastMove());
+                Transposition.Insert(key, (short)depth, Entry.EXACT, eval);
                 return eval;
             }
             if(depth == 0 ) //TODO: Checkmate end of game test
@@ -105,7 +128,7 @@ namespace ChessAI
             if (moves.Count == 0)
             {
                 int eval = state.Evaluate(color, 0);
-                Transposition.Insert(key, (byte)depth, Entry.EXACT, eval, state.LastMove());
+                Transposition.Insert(key, (short)depth, Entry.EXACT, eval);
                 return eval;
             }
 
@@ -147,7 +170,7 @@ namespace ChessAI
                     //}
                     if (score >= beta)
                     {
-                        Transposition.Insert(key, (byte)depth, Entry.BETA, beta, state.LastMove());
+                        Transposition.Insert(key, (short)depth, Entry.BETA, beta);
                         return score;
                     }
                     //if (score < alpha)
@@ -161,7 +184,7 @@ namespace ChessAI
                     }
                 }
             //}
-            Transposition.Insert(key, (byte)depth, type, alpha, state.LastMove());
+                Transposition.Insert(key, (short)depth, type, alpha);
             return alpha;
         }
     }
