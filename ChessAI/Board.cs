@@ -253,7 +253,7 @@ namespace ChessAI
                 blackKingTaken = true;
             }
             // make promotion
-            if (!move.promotion)
+            if (move.promotion)
             {
                 board[move.originX, move.originY] = BLANK_PIECE;
                 board[move.destX, move.destY] = move.originPiece;
