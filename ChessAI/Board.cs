@@ -1269,16 +1269,36 @@ namespace ChessAI
                         {
                             scoreToAdd = kingVal;
                             byte kingMoves = 0;
+                            bool moveUp = j + 1 < 8;
+                            bool moveDown = j - 1 >= 0;
+                            if(moveUp)
+                            {
+                                if(board[i, j+1] == BLANK_PIECE)
+                                {
+                                    ++kingMoves;
+                                }
+                            }
+                            if(moveDown)
+                            {
+                                if (board[i, j - 1] == BLANK_PIECE)
+                                {
+                                    ++kingMoves;
+                                }
+                            }
                             if(i+1 < 8)
                             {
-                                if(j + 1 < 8)
+                                if (board[i + 1, j] == BLANK_PIECE)
+                                {
+                                    ++kingMoves;
+                                }
+                                if(moveUp)
                                 {
                                     if(board[i+1,j+1] == BLANK_PIECE)
                                     {
                                         ++kingMoves;
                                     }
                                 }
-                                if(j - 1 >= 0)
+                                if(moveDown)
                                 {
                                     if(board[i+1,j-1] == BLANK_PIECE)
                                     {
@@ -1288,14 +1308,18 @@ namespace ChessAI
                             }
                             if(i-1 >= 0)
                             {
-                                if (j + 1 < 8)
+                                if (board[i - 1, j] == BLANK_PIECE)
+                                {
+                                    ++kingMoves;
+                                }
+                                if (moveUp)
                                 {
                                     if (board[i - 1, j + 1] == BLANK_PIECE)
                                     {
                                         ++kingMoves;
                                     }
                                 }
-                                if (j - 1 >= 0)
+                                if (moveDown)
                                 {
                                     if (board[i - 1, j - 1] == BLANK_PIECE)
                                     {
