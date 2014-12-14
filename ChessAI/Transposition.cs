@@ -3,11 +3,66 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization;
+using System.IO;
 
 namespace ChessAI
 {
     // http://web.archive.org/web/20070809015843/http://www.seanet.com/~brucemo/topics/hashing.htm
     // http://sourceforge.net/p/mediocrechess/code/HEAD/tree/branches/evaluationoverhaul/src/main/java/mediocrechess/mediocre/transtable/TranspositionTable.java#l51
+
+    class Transposition
+    {
+        public static EntryW[] TABLE; // Not a real hashmap, but w/e
+        public static readonly int SIZE = 1048583;
+
+        public static void InitTable()
+        {
+            TABLE = new EntryW[SIZE];
+            for(int i = 0; i < SIZE; ++i)
+            {
+                TABLE[i] = new EntryW();
+            }
+        }
+
+        public static void Insert(long key, byte depth, byte flag, int eval, Move move)
+        {
+            int hash = (int) key % SIZE;
+            Entry toSave = new Entry();
+            //toSave.key = key;
+            toSave.depth = depth;
+            toSave.flag = flag;
+            toSave.eval = eval;
+            //toSave.move = move;
+            //toSave.dirty = false;
+            long data = toSave.Serialize();
+            TABLE[hash].key = key ^ data;
+            TABLE[hash].data = data;
+        }
+
+        public static int Probe(long key, int depth, int alpha, int beta)
+        {
+            int hash = (int) key % SIZE;
+            if ((TABLE[hash].key ^ TABLE[hash].data) == key)
+            {
+                Entry toTest = Entry.Desserialize(TABLE[hash].data);
+                if (toTest.flag == Entry.EXACT)
+                {
+                    return toTest.eval;
+                }
+                if (toTest.flag == Entry.ALPHA && toTest.eval <= alpha)
+                {
+                    return alpha;
+                }
+                if (toTest.flag == Entry.BETA && toTest.eval >= beta)
+                {
+                    return beta;
+                }
+            }
+            return Int32.MinValue;
+        }
+    }
 
     class Entry
     {
@@ -15,65 +70,46 @@ namespace ChessAI
         public static readonly byte ALPHA = 1;
         public static readonly byte BETA = 2;
 
-        // depth replacement
-        public long key;
-        public int depth;
+        //public long key;
         public int eval;
-        public byte flag; // EXACT, BETA, ALPHA
-        public bool dirty; // old entry
-        public Move move;
-    }
+        public short depth;
+        public short flag; // EXACT, BETA, ALPHA
 
-    class Transposition
-    {
-        public static Dictionary<int,Entry> TABLE; // Not a real hashmap, but w/e
-        public static readonly int SIZE = 1048583;
-
-        public static void InitTable()
+        public long Serialize()
         {
-            TABLE = new Dictionary<int, Entry>(SIZE);
-        }
-
-        public static int GetEval(long key)
-        {
-            return TABLE[(int)key % SIZE].eval;
-        }
-
-        public static void Insert(long key, int depth, byte flag, int eval, Move move)
-        {
-            int hash = (int) key % SIZE;
-            Entry toSave = new Entry();
-            toSave.key = key;
-            toSave.depth = depth;
-            toSave.flag = flag;
-            toSave.eval = eval;
-            toSave.move = move;
-            toSave.dirty = false;
-            TABLE[hash] = toSave;
-        }
-
-        public static int Probe(long key, int depth, int alpha, int beta)
-        {
-            int hash = (int) key % SIZE;
-            if (TABLE.ContainsKey(hash))
+            using (MemoryStream m = new MemoryStream())
             {
-                Entry toTest = TABLE[hash];
-                if(toTest.flag == Entry.EXACT)
+                using (BinaryWriter writer = new BinaryWriter(m))
                 {
-                    return toTest.eval;
+                    writer.Write(eval);
+                    writer.Write(depth);
+                    writer.Write(flag);
                 }
-                if(toTest.flag == Entry.ALPHA && toTest.eval <= alpha)
+                byte[] arr = m.ToArray();
+                return BitConverter.ToInt64(arr, 0);
+            }
+        }
+
+        public static Entry Desserialize(long data)
+        {
+            byte[] bytes = BitConverter.GetBytes(data);
+            Entry result = new Entry();
+            using (MemoryStream m = new MemoryStream(bytes))
+            {
+                using (BinaryReader reader = new BinaryReader(m))
                 {
-                    return alpha;
-                }
-                if(toTest.flag == Entry.BETA && toTest.eval >= beta)
-                {
-                    return beta;
+                    result.eval = reader.ReadInt32();
+                    result.depth = reader.ReadInt16();
+                    result.flag = reader.ReadInt16();
                 }
             }
-            return Int32.MinValue;
+            return result;
         }
+    }
 
-
+    struct EntryW
+    {
+        public long key;
+        public long data;
     }
 }

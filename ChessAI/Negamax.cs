@@ -27,7 +27,8 @@ namespace ChessAI
             if (state.IsTerminal())
             {
                 int eval = state.Evaluate(color);
-                Transposition.Insert(key, depth, Entry.EXACT, eval, state.GetLastMove());
+                Transposition.Insert(key, (byte)depth, Entry.
+                    EXACT, eval, state.GetLastMove());
                 return eval;
             }
             if(depth == 0 ) //TODO: Checkmate end of game test
@@ -39,7 +40,7 @@ namespace ChessAI
                 else
                 {
                     int eval = state.Evaluate(color);
-                    Transposition.Insert(key, depth, Entry.EXACT, eval, state.GetLastMove());
+                    Transposition.Insert(key, (byte)depth, Entry.EXACT, eval, state.GetLastMove());
                     return eval;
                 }
             }
@@ -47,7 +48,7 @@ namespace ChessAI
             if (moves.Count == 0)
             {
                 int eval = state.Evaluate(color);
-                Transposition.Insert(key, depth, Entry.EXACT, eval, state.GetLastMove());
+                Transposition.Insert(key, (byte)depth, Entry.EXACT, eval, state.GetLastMove());
                 return eval;
             }
 
@@ -62,7 +63,7 @@ namespace ChessAI
                 {
                     Board backUp = state.Clone();
                     state.MakeMove(moves[i]);
-                    int score = -negaMax(state, depth - 1, -beta, -alpha, !color, (qs && moves[i].destinationPiece != 0));
+                    int score = -negaMax(state, (byte)depth - 1, -beta, -alpha, !color, (qs && moves[i].destinationPiece != 0));
                     
                     state.UndoMove();
                     //if (!state.Equals(backUp))
@@ -72,7 +73,7 @@ namespace ChessAI
                     //}
                     if (score >= beta)
                     {
-                        Transposition.Insert(key, depth, Entry.BETA, beta, state.GetLastMove());
+                        Transposition.Insert(key, (byte)depth, Entry.BETA, beta, state.GetLastMove());
                         return score;
                     }
                     //if (score < alpha)
@@ -86,7 +87,7 @@ namespace ChessAI
                     }
                 }
             //}
-            Transposition.Insert(key, depth, type, alpha, state.GetLastMove());
+                Transposition.Insert(key, (byte)depth, type, alpha, state.GetLastMove());
             return alpha;
         }
     }
