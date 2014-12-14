@@ -330,8 +330,11 @@ namespace ChessAI
                 }
                 if (move.destinationPiece != BLANK_PIECE)
                 {
-                    --pieces;
-                    --pieceCount[move.destinationPiece];
+                    if (move.destinationPiece != B_KING && move.destinationPiece != W_KING)
+                    {
+                        --pieces;
+                        --pieceCount[move.destinationPiece];
+                    }
                     zobristKey = Zobrist.MakeMoveKey(zobristKey, move.destX, move.destY, move.destinationPiece, !isWhitePiece);
                     if (pieces <= ENDGAME)
                     {
