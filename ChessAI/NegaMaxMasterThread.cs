@@ -32,9 +32,13 @@ namespace ChessAI
             this.threads = new List<NegaMaxThread>();
             alpha = Negamax.NEGA_SCORE;
             this.depth = depth;
-            if (this.moves.Count < 9)
+            if (this.moves.Count < 16)
             {
-                this.depth += 6;
+                //this.depth += 2;
+            }
+            if (this.moves.Count < 10)
+            {
+                //this.depth += 2;
             }
         }
 

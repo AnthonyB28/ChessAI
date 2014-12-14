@@ -30,7 +30,7 @@ namespace ChessAI
 
         public void Run()
         {
-            
+            bool first = true;
             while (master.hasMoves(out move))
             {
                 //move = master.get
@@ -41,9 +41,32 @@ namespace ChessAI
                 Negamax.pruned = 0;
                 //for (int i = 0; i < moves.Count; ++i)
                 //{
-                board.MakeMove(move);
-                int score = -Negamax.negaMax(board, depth - 1, -beta, -alpha, !color, move.destinationPiece != 0);
-                board.UndoMove();
+                int score = Negamax.NEGA_SCORE;
+                int offset = 0;
+                if (board.LastMove().destinationPiece == 0)
+                {
+                    if (move.destinationPiece != 0 && Board.OFFSET_TABLE[move.originPiece] == Board.OFFSET_TABLE[move.destinationPiece])
+                    {
+                        offset = Board.OFFSET_TABLE[move.originPiece];
+                    }
+                }
+                if (!first) 
+                {
+                    board.MakeMove(move);
+                    score = -Negamax.negaMax(board, depth - 1, -(alpha + 1), -alpha, !color, move.destinationPiece != 0, offset);
+                    if (alpha < score && score < beta)
+                    {
+                        score = -Negamax.negaMax(board, depth - 1, -beta, -score, !color, move.destinationPiece != 0, offset);
+                    }
+                    board.UndoMove();
+                }
+                else
+                {
+                    board.MakeMove(move);
+                    score = -Negamax.negaMax(board, depth - 1, -beta, -alpha, !color, move.destinationPiece != 0, offset);
+                    board.UndoMove();
+                    first = false;
+                }
                 if (score > alpha)
                 {
                     alpha = score;
