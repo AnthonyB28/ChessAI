@@ -10,6 +10,14 @@ namespace ChessAI
     {
         static void Main(string[] args)
         {
+            //List<Move> moves = new List<Move>();
+            //Board board = new Board();
+            //moves = board.GetAllStates(true, false);
+            //moves.Sort();
+            //foreach (Move m in moves)
+            //{
+            //    Console.WriteLine(m);
+            //}
             //byte[,] data = new byte[8, 8];
             //data[7, 7] = 8;
             //data[0, 7] = 8;

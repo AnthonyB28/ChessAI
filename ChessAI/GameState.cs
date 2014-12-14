@@ -158,6 +158,13 @@ namespace ChessAI
         public void MakeMove()
         {
             Console.WriteLine("get here");
+            //List<Move> moves = board.GetAllStates(color, false);
+            //moves.Sort();
+            //foreach (Move m in moves)
+            //{
+            //    Console.WriteLine(m);
+            //}
+            //Console.WriteLine(moves[0].CompareTo(moves[1]));
             String move;
             //Console.WriteLine(board.ToString());
             System.Diagnostics.Stopwatch t = new System.Diagnostics.Stopwatch();
@@ -171,7 +178,7 @@ namespace ChessAI
             t.Reset();
             t.Start();
             //Console.WriteLine("SingleThreaded Move: " + move);
-            int depth = 6;
+            int depth = 4;
             int ourCurrentBranch = board.GetAllStates(color, true).Count;
             int oppCurrentBranch = board.GetAllStates(!color, false).Count;
             if (turn > 1)
