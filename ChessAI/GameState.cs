@@ -220,6 +220,9 @@ namespace ChessAI
             {
                 depth = 10;
             }
+
+            depth = 8;
+
             //if (turn > 35 && secondsLeft > 200)
             //{
             //    depth = 6;

@@ -16,6 +16,7 @@ namespace ChessAI
         private NegaMaxMasterThread master;
         private bool finished;
         private int depth;
+        private bool first;
 
         public NegaMaxThread(Board board, bool color, NegaMaxMasterThread master, int depth)
         {
@@ -26,6 +27,7 @@ namespace ChessAI
             this.depth = depth;
             alpha = Negamax.NEGA_SCORE;
             beta = -Negamax.NEGA_SCORE;
+            first = true;
         }
 
         public void Run()
@@ -41,9 +43,31 @@ namespace ChessAI
                 Negamax.pruned = 0;
                 //for (int i = 0; i < moves.Count; ++i)
                 //{
-                board.MakeMove(move);
-                int score = -Negamax.negaMax(board, depth - 1, -beta, -alpha, !color, move.destinationPiece != 0);
-                board.UndoMove();
+                int score = Negamax.NEGA_SCORE;
+                if (!first)
+                {
+                    board.MakeMove(move);
+
+                    score = Negamax.negaMax(board, depth - 1, (-alpha) - 1, -alpha, !color, move.destinationPiece != 0);
+                    if (alpha < score && score < beta)
+                    {
+                        int score2 = Negamax.negaMax(board, depth - 1, -beta, -alpha, !color, move.destinationPiece != 0);
+                        if (score2 > score)
+                        {
+                            score = score2;
+                        }
+                    }
+                    board.UndoMove();
+                }
+                else
+                {
+                    board.MakeMove(move);
+
+                    score = -Negamax.negaMax(board, depth - 1, -beta, -alpha, !color, move.destinationPiece != 0);
+                    board.UndoMove();
+                    first = false;
+                }
+
                 if (score > alpha)
                 {
                     alpha = score;

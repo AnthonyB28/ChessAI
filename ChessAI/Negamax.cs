@@ -44,13 +44,31 @@ namespace ChessAI
                 //{
                 //    //state.sortMoves(moves, color);
                 //}
+            bool first = true;
                 for (int i = 0; i < moves.Count; ++i)
                 {
+                    int score = -Negamax.NEGA_SCORE;
                     Board backUp = state.Clone();
-                    state.MakeMove(moves[i]);
-                    int score = -negaMax(state, depth - 1, -beta, -alpha, !color, (qs && moves[i].destinationPiece != 0));
-                    
-                    state.UndoMove();
+                    if (false)
+                    {
+                        state.MakeMove(moves[i]);
+                        score = -negaMax(state, depth - 1, -(alpha + 1), -alpha, !color, (qs && moves[i].destinationPiece != 0));
+                        if (alpha < score && score < beta)
+                        {
+                            int score2 = -negaMax(state, depth - 1, -beta, -alpha, !color, (qs && moves[i].destinationPiece != 0));
+                            if (score2 > score)
+                            {
+                                score = score2;
+                            }
+                        }
+                        state.UndoMove();
+                    }
+                    else
+                    {
+                        state.MakeMove(moves[i]);
+                        score = -negaMax(state, depth - 1, -beta, -alpha, !color, (qs && moves[i].destinationPiece != 0));
+                        first = false;
+                    }
                     //if (!state.Equals(backUp))
                     //{
                     //    Console.WriteLine("WARNING: UNDO FAILED ON MOVE");
