@@ -92,6 +92,7 @@ namespace ChessAI
                 return Quiesce(state, alpha, beta, color, 0);
             }
             List<Move> moves = state.GetAllStates(color, false);
+            moves.Sort();
             if (moves.Count == 0)
             {
                 return state.Evaluate(color, 0);
