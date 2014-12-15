@@ -107,7 +107,7 @@ namespace ChessAI
                     }
                     if (alpha >= beta)
                     {
-                        return alpha;
+                        return transposeEval.eval;
                     }
                 }
             }
