@@ -79,6 +79,8 @@ namespace ChessAI
 
         public static int negaMax(Board state, int depth, int alpha, int beta, bool color, bool qs, int offset)
         {
+            int alphaO = alpha;
+            int betaO = beta;
             pruned++;
             byte type = Entry.ALPHA;
             long key = state.GetKey(); // Use Zobrist.GetKey(state.board, color) instead if there appears to be issues, slower as its linear
@@ -170,8 +172,10 @@ namespace ChessAI
                     //}
                     if (score >= beta)
                     {
-                        Transposition.Insert(key, (short)depth, Entry.BETA, beta);
-                        return score;
+                        //Transposition.Insert(key, (short)depth, Entry.BETA, beta);
+                        //return score;
+                        alpha = score;
+                        break;
                     }
                     //if (score < alpha)
                     //{
@@ -179,12 +183,23 @@ namespace ChessAI
                     //}
                     if (score > alpha)
                     {
-                        type = Entry.EXACT;
+                        //type = Entry.EXACT;
                         alpha = score;
                     }
                 }
             //}
-                Transposition.Insert(key, (short)depth, type, alpha);
+                if (alpha <= alphaO)
+                {
+                    Transposition.Insert(Entry.ALPHA, (short)depth, type, alpha);
+                }
+                else if (alpha >= beta)
+                {
+                    Transposition.Insert(Entry.BETA, (short)depth, type, alpha);
+                }
+                else
+                {
+                    Transposition.Insert(Entry.EXACT, (short)depth, type, alpha);
+                }
             return alpha;
         }
     }
