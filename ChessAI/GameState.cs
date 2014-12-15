@@ -180,7 +180,7 @@ namespace ChessAI
             t.Reset();
             t.Start();
             //Console.WriteLine("SingleThreaded Move: " + move);
-            int depth = 6;
+            int depth = 5;
             int ourCurrentBranch = board.GetAllStates(color, true).Count;
             int oppCurrentBranch = board.GetAllStates(!color, false).Count;
             if (turn > 1)
