@@ -43,13 +43,13 @@ namespace ChessAI
                 //{
                 int score = Negamax.NEGA_SCORE;
                 int offset = 0;
-                if (board.LastMove().destinationPiece == 0)
-                {
-                    if (move.destinationPiece != 0 && Board.OFFSET_TABLE[move.originPiece] == Board.OFFSET_TABLE[move.destinationPiece])
-                    {
-                        offset = Board.OFFSET_TABLE[move.originPiece];
-                    }
-                }
+                //if (board.LastMove().destinationPiece == 0)
+                //{
+                //    if (move.destinationPiece != 0 && Board.OFFSET_TABLE[move.originPiece] == Board.OFFSET_TABLE[move.destinationPiece])
+                //    {
+                //        offset = Board.OFFSET_TABLE[move.originPiece];
+                //    }
+                //}
                 if (!first) 
                 {
                     board.MakeMove(move);
