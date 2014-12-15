@@ -178,7 +178,7 @@ namespace ChessAI
             t.Reset();
             t.Start();
             //Console.WriteLine("SingleThreaded Move: " + move);
-            int depth = 5;
+            int depth = 4;
             int ourCurrentBranch = board.GetAllStates(color, true).Count;
             int oppCurrentBranch = board.GetAllStates(!color, false).Count;
             if (turn > 1)
@@ -196,7 +196,7 @@ namespace ChessAI
                         currentNodes = (long)(Math.Pow(ourCurrentBranch, depth / 2.0) * Math.Pow(oppCurrentBranch, depth / 2.0));
                         estimatedTime = (currentNodes / nodesPerSecond);
                     }
-                    while (depth > 5 && estimatedTime > 20000)
+                    while (depth > 4 && estimatedTime > 20000)
                     {
                         depth--;
                         currentNodes = (long)(Math.Pow(ourCurrentBranch, depth / 2.0) * Math.Pow(oppCurrentBranch, depth / 2.0));
@@ -205,13 +205,13 @@ namespace ChessAI
                 }
                 else
                 {
-                    while (depth > 5 && estimatedTime < 10000)
+                    while (depth < 12 && estimatedTime < 10000)
                     {
                         depth++;
                         currentNodes = (long)(Math.Pow(ourCurrentBranch, depth / 2.0) * Math.Pow(oppCurrentBranch, depth / 2.0));
                         estimatedTime = (currentNodes / nodesPerSecond);
                     }
-                    while (depth > 5 && (estimatedTime > secondsLeft + 20000 || estimatedTime > 60000))
+                    while (depth > 7 && (estimatedTime > secondsLeft + 20000 || estimatedTime > 60000))
                     {
                         depth--;
                         currentNodes = (long)(Math.Pow(ourCurrentBranch, depth / 2.0) * Math.Pow(oppCurrentBranch, depth / 2.0));
@@ -219,13 +219,21 @@ namespace ChessAI
                     }
                 }
             }
-            if (depth < 5)
+            if (depth < 4)
             {
-                depth = 5;
+                depth = 4;
             }
-            if (depth > 10)
+            if (board.IsEndGame() && depth < 7)
+            {
+                depth = 7;
+            }
+            if (!board.IsEndGame() && depth > 10)
             {
                 depth = 10;
+            }
+            if (depth > 13)
+            {
+                depth = 13;
             }
             //if (turn > 35 && secondsLeft > 200)
             //{
