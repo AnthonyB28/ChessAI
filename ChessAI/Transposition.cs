@@ -15,16 +15,51 @@ namespace ChessAI
     class Transposition
     {
         public static volatile EntryW[] TABLE; // Not a real hashmap, but w/e
+        public static volatile EntryW[] TABLEQ;
         public static readonly int SIZE = 104858300;
 
         public static void InitTable()
         {
             TABLE = new EntryW[SIZE];
+            TABLEQ = new EntryW[SIZE];
             for(int i = 0; i < SIZE; i++)
             {
                 TABLE[i] = new EntryW();
+                TABLEQ[i] = new EntryW();
             }
             Console.WriteLine("create");
+        }
+
+        public static void InsertState(long key, long val)
+        {
+            long hashKey = key;
+            if (key < 0)
+            {
+                hashKey = -key;
+            }
+            int hash = (int)(hashKey % SIZE);
+            TABLE[hash].key = key ^ val;
+            TABLE[hash].data = val;
+        }
+
+        public static bool GetState(long key, out int val)
+        {
+            val = 0;
+            long hashKey = key;
+            if (key < 0)
+            {
+                hashKey = -key;
+            }
+            int hash = (int)(hashKey % SIZE);
+            long tableKey = TABLE[hash].key + 0;
+            long tableData = TABLE[hash].data + 0;
+            if ((tableKey ^ tableData) == key)
+            {
+                val = (int) tableData;
+                return true;
+            }
+
+            return false;
         }
 
         public static void Insert(long key, short depth, byte flag, int eval)
@@ -47,6 +82,26 @@ namespace ChessAI
             TABLE[hash].data = data;
         }
 
+        public static void InsertQ(long key, short depth, byte flag, int eval)
+        {
+            long hashKey = key;
+            if (key < 0)
+            {
+                hashKey = -key;
+            }
+            int hash = (int)(hashKey % SIZE);
+            Entry toSave = new Entry();
+            //toSave.key = key;
+            toSave.depth = depth;
+            toSave.flag = flag;
+            toSave.eval = eval;
+            //toSave.move = move;
+            //toSave.dirty = false;
+            long data = toSave.Serialize();
+            TABLEQ[hash].key = key ^ data;
+            TABLEQ[hash].data = data;
+        }
+
         public static Entry Probe(long key)
         {
             long hashKey = key;
@@ -56,13 +111,47 @@ namespace ChessAI
             }
             int hash = (int) (hashKey % SIZE);
             
-            long tableKey = TABLE[hash].key;
-            long tableData = TABLE[hash].data;
+            long tableKey = TABLE[hash].key + 0;
+            long tableData = TABLE[hash].data + 0;
             if ((tableKey ^ tableData) == key)
             {
                 Entry toTest = Entry.Desserialize(tableData);
                 return toTest;
             }
+            //else
+            //{
+            //    if (tableKey != 0)
+            //    {
+            //        Console.WriteLine("corrupted");
+            //    }
+            //}
+            return null;
+        }
+
+
+        public static Entry ProbeQ(long key)
+        {
+            long hashKey = key;
+            if (key < 0)
+            {
+                hashKey = -key;
+            }
+            int hash = (int)(hashKey % SIZE);
+
+            long tableKey = TABLEQ[hash].key + 0;
+            long tableData = TABLEQ[hash].data + 0;
+            if ((tableKey ^ tableData) == key)
+            {
+                Entry toTest = Entry.Desserialize(tableData);
+                return toTest;
+            }
+            //else
+            //{
+            //    if (tableKey != 0)
+            //    {
+            //        Console.WriteLine("corrupted");
+            //    }
+            //}
             return null;
         }
     }
@@ -70,8 +159,8 @@ namespace ChessAI
     class Entry
     {
         public static readonly byte EXACT = 0;
-        public static readonly byte ALPHA = 1;
-        public static readonly byte BETA = 2;
+        public static readonly byte UPPER = 1;
+        public static readonly byte LOWER = 2;
 
         //public long key;
         public int eval;
@@ -97,6 +186,7 @@ namespace ChessAI
         {
             byte[] bytes = BitConverter.GetBytes(data);
             Entry result = new Entry();
+            result.flag = -1;
             using (MemoryStream m = new MemoryStream(bytes))
             {
                 using (BinaryReader reader = new BinaryReader(m))

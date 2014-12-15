@@ -40,13 +40,47 @@ namespace ChessAI
             //}
 
             //return alpha;
+            int alphaO = alpha;
+            long key = state.GetKey();
+            Entry transposeEval = Transposition.ProbeQ(key);
+            if (transposeEval != null && transposeEval.flag != -1)
+            {
+                if (transposeEval.depth == 0)
+                {
+                    //if (transposeEval.flag == Entry.EXACT)
+                    //{
+                    //    return transposeEval.eval;
+                    //}
+                    if (transposeEval.flag == Entry.LOWER)
+                    {
+                        if (transposeEval.eval > alpha)
+                        {
+                            alpha = transposeEval.eval;
+                        }
+                    }
+                    if (transposeEval.flag == Entry.UPPER)
+                    {
+                        if (transposeEval.eval < beta)
+                        {
+                            beta = transposeEval.eval;
+                        }
+                    }
+                    if (alpha >= beta)
+                    {
+                        return transposeEval.eval;
+                    }
+                }
+            }
             if (state.isTerminal())
             {
                 return state.Evaluate(color, 0);
+                //Transposition.Insert(key, (short)0, Entry.EXACT, eval);
+                //return eval;
             }
             int stand_pat = state.Evaluate(color, 0);
             if (stand_pat >= beta)
             {
+                //Transposition.Insert(key, (short)depth, Entry.LOWER, stand_pat);
                 return beta;
             }
             if (alpha < stand_pat)
@@ -67,12 +101,25 @@ namespace ChessAI
                 state.UndoMove();
                 if (score >= beta)
                 {
-                    return beta;
+                    alpha = beta;
+                    break;
                 }
                 if (score > alpha)
                 {
                     alpha = score;
                 }
+            }
+            if (alpha <= alphaO)
+            {
+                Transposition.InsertQ(key, (short)0, Entry.UPPER, alpha);
+            }
+            else if (alpha >= beta)
+            {
+                Transposition.InsertQ(key, (short)0, Entry.LOWER, alpha);
+            }
+            else
+            {
+                //Transposition.Insert(key, (short)0, Entry.EXACT, alpha);
             }
             return alpha;
         }
@@ -82,10 +129,12 @@ namespace ChessAI
             int alphaO = alpha;
             int betaO = beta;
             pruned++;
-            byte type = Entry.ALPHA;
+            byte type = Entry.UPPER;
             long key = state.GetKey(); // Use Zobrist.GetKey(state.board, color) instead if there appears to be issues, slower as its linear
             Entry transposeEval = Transposition.Probe(key);
-            if (transposeEval != null)
+            // ALPHA = UPPERBOUND
+            // BETA = LOWERBOUND
+            if (transposeEval != null && transposeEval.flag != -1)
             {
                 if (transposeEval.depth >= depth)
                 {
@@ -93,16 +142,16 @@ namespace ChessAI
                     {
                         return transposeEval.eval;
                     }
-                    if (transposeEval.flag == Entry.ALPHA)
+                    if (transposeEval.flag == Entry.LOWER)
                     {
-                        if(transposeEval.eval > alpha)
+                        if (transposeEval.eval > alpha)
                         {
                             alpha = transposeEval.eval;
                         }
                     }
-                    if (transposeEval.flag == Entry.BETA)
+                    if (transposeEval.flag == Entry.UPPER)
                     {
-                        if(transposeEval.eval < beta)
+                        if (transposeEval.eval < beta)
                         {
                             beta = transposeEval.eval;
                         }
@@ -124,13 +173,15 @@ namespace ChessAI
             if(depth == 0 ) //TODO: Checkmate end of game test
             {
                 //
-                return Quiesce(state, alpha, beta, color, 0);
+                int val =  Quiesce(state, alpha, beta, color, 0);
+                
+                return val;
             }
             List<Move> moves = state.GetAllStates(color, false);
             if (moves.Count == 0)
             {
                 int eval = state.Evaluate(color, 0);
-                Transposition.Insert(key, (short)depth, Entry.EXACT, eval);
+                //Transposition.Insert(key, (short)depth, Entry.EXACT, eval);
                 return eval;
             }
 
@@ -190,16 +241,17 @@ namespace ChessAI
             //}
                 if (alpha <= alphaO)
                 {
-                    Transposition.Insert(Entry.ALPHA, (short)depth, type, alpha);
+                    Transposition.Insert(key, (short)depth, Entry.UPPER, alpha);
                 }
                 else if (alpha >= beta)
                 {
-                    Transposition.Insert(Entry.BETA, (short)depth, type, alpha);
+                    Transposition.Insert(key, (short)depth, Entry.LOWER, alpha);
                 }
                 else
                 {
-                    Transposition.Insert(Entry.EXACT, (short)depth, type, alpha);
+                    Transposition.Insert(key, (short)depth, Entry.EXACT, alpha);
                 }
+                
             return alpha;
         }
     }

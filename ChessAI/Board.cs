@@ -1288,6 +1288,10 @@ namespace ChessAI
         // TODO: Speed this fucker up. He's the 80%
         public int Evaluate(bool color, int offset)
         {
+            //int val;
+            //if(Transposition.GetState(GetKey(), out val)){
+            //    return val;
+            //}
             const int pawnVal = 100;
             const int knightVal = 350;
             const int bishopVal = 350;
@@ -1572,17 +1576,19 @@ namespace ChessAI
                     }
                 }
             }
-                
-            
 
+
+            int result = 0;
             if (color)
             {
-                return (whiteScore - blackScore) + offset;
+                result = (whiteScore - blackScore) + offset;
             }
             else
             {
-                return (blackScore - whiteScore) + offset;
+                result = (blackScore - whiteScore) + offset;
             }
+            //Transposition.InsertState(GetKey(), result);
+            return result;
         }
 
         public bool CheckForKingCheck(int x, int y, bool color)
