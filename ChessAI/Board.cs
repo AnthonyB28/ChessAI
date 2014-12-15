@@ -112,7 +112,10 @@ namespace ChessAI
 
     class Board
     {
-        static int ENDGAME = 14;
+        private static readonly byte ENDGAME_PIECES = 14;
+        private static readonly byte MIDGAME_PIECES = 20;
+        private static readonly byte MIDGAME = 1;
+        private static readonly byte ENDGAME = 2;
         private static readonly byte BLANK_PIECE = 0;
         private static readonly byte W_PAWN = 1;
         private static readonly byte W_ROOK = 2;
@@ -133,7 +136,7 @@ namespace ChessAI
         private byte[,] board;
         private byte[] pieceCount;
         private Stack<Move> moves;
-        private bool endGame = false;
+        private byte stateOfGame = 0;
         private bool blackKingTaken = false;
         private bool whiteKingTaken = false;
         private byte pieces = 32;
@@ -189,12 +192,12 @@ namespace ChessAI
             zobristKey = Zobrist.GetKey(board, true);
         }
 
-        public Board(byte[,] board, byte[] pieceCount, Stack<Move> moves, byte pieces, bool endGame, bool blackKingTaken, bool whiteKingTaken, long key)
+        public Board(byte[,] board, byte[] pieceCount, Stack<Move> moves, byte pieces, byte gameState, bool blackKingTaken, bool whiteKingTaken, long key)
         {
             this.board = board;
             this.pieceCount = pieceCount;
             this.moves = moves;
-            this.endGame = endGame;
+            this.stateOfGame = gameState;
             this.blackKingTaken = blackKingTaken;
             this.whiteKingTaken = whiteKingTaken;
             this.pieces = pieces;
@@ -208,7 +211,7 @@ namespace ChessAI
                 moveStack.Push(m);
             }
             return new Board((byte[,])board.Clone(), (byte[])pieceCount.Clone(), 
-                moveStack, pieces, endGame, blackKingTaken, whiteKingTaken, zobristKey);
+                moveStack, pieces, stateOfGame, blackKingTaken, whiteKingTaken, zobristKey);
         }
 
         public long GetKey()
@@ -295,9 +298,13 @@ namespace ChessAI
                     {
                         ++pieceCount[move.destinationPiece];
                     }
-                    if (pieces > ENDGAME)
+                    if (pieces > ENDGAME_PIECES)
                     {
-                        endGame = false;
+                        stateOfGame = ENDGAME;
+                    }
+                    else if(pieces > MIDGAME_PIECES)
+                    {
+                        stateOfGame = MIDGAME;
                     }
                 }
                 board[move.originX, move.originY] = move.originPiece;
@@ -328,9 +335,13 @@ namespace ChessAI
                     {
                         ++pieceCount[move.destinationPiece];
                         ++pieces;
-                        if (pieces > ENDGAME)
+                        if (pieces > ENDGAME_PIECES)
                         {
-                            endGame = false;
+                            stateOfGame = ENDGAME;
+                        }
+                        else if (pieces > MIDGAME_PIECES)
+                        {
+                            stateOfGame = MIDGAME;
                         }
                     }
                 }
@@ -384,9 +395,13 @@ namespace ChessAI
                         --pieceCount[move.destinationPiece];
                     }
                     zobristKey = Zobrist.MakeMoveKey(zobristKey, move.destX, move.destY, move.destinationPiece, !isWhitePiece);
-                    if (pieces <= ENDGAME)
+                    if (pieces <= ENDGAME_PIECES)
                     {
-                        endGame = true;
+                        stateOfGame = ENDGAME;
+                    }
+                    else if (pieces <= MIDGAME_PIECES)
+                    {
+                        stateOfGame = MIDGAME;
                     }
                 }
             }
@@ -398,9 +413,13 @@ namespace ChessAI
                 board[move.destX, move.destY] = move.originPiece;
                 board[move.originX, move.destY] = BLANK_PIECE;
                 --pieces;
-                if (pieces <= ENDGAME)
+                if (pieces <= ENDGAME_PIECES)
                 {
-                    this.endGame = true;
+                    stateOfGame = ENDGAME;
+                }
+                else if (pieces <= MIDGAME_PIECES)
+                {
+                    stateOfGame = MIDGAME;
                 }
                 zobristKey = Zobrist.MakeMoveKey(zobristKey, move.destX, move.originY, board[move.destX, move.originY], !isWhitePiece);
                 board[move.destX, move.originY] = BLANK_PIECE; // piece being removed
@@ -436,9 +455,13 @@ namespace ChessAI
                 {
                     zobristKey = Zobrist.MakeMoveKey(zobristKey, move.destX, move.destY, move.destinationPiece, !isWhitePiece);
                     --pieces;
-                    if (pieces <= ENDGAME)
+                    if (pieces <= ENDGAME_PIECES)
                     {
-                        endGame = true;
+                        stateOfGame = ENDGAME;
+                    }
+                    else if (pieces <= MIDGAME_PIECES)
+                    {
+                        stateOfGame = MIDGAME;
                     }
                     if (move.destinationPiece != W_KING && move.destinationPiece != B_KING)
                     {
@@ -973,8 +996,14 @@ namespace ChessAI
 
         public bool IsEndGame()
         {
-            return this.endGame;
+            return this.stateOfGame == ENDGAME;
         }
+
+        public bool IsMidGame()
+        {
+            return this.stateOfGame == MIDGAME;
+        }
+
         public bool isCapture()
         {
             return this.moves.Peek().destinationPiece != 0;
@@ -1341,7 +1370,7 @@ namespace ChessAI
                         else if (pieceToEval == W_KNIGHT)
                         {
                             scoreToAdd = knightVal;
-                            if (endGame)
+                            if (stateOfGame == ENDGAME)
                             {
                                 scoreToAdd -= 10;
                             }
@@ -1361,7 +1390,7 @@ namespace ChessAI
                         else if (pieceToEval == W_BISHOP)
                         {
                             scoreToAdd = bishopVal;
-                            if(endGame)
+                            if(stateOfGame == ENDGAME)
                             {
                                 scoreToAdd += 10;
                             }
@@ -1377,7 +1406,7 @@ namespace ChessAI
                         else if (pieceToEval == W_QUEEN)
                         {
                             scoreToAdd = queenVal;
-                            if (!endGame && ((j != 0 || j != 8) || i != 3) )
+                            if (stateOfGame != ENDGAME && ((j != 0 || j != 8) || i != 3) )
                             {
                                 scoreToAdd -= 10;
                             }
@@ -1454,7 +1483,7 @@ namespace ChessAI
 //                                 {
 //                                     whiteScore -= 100;
 //                                 }
-                                if (endGame)
+                                if (stateOfGame == ENDGAME)
                                 {
                                     wTableScoreToAdd = PieceTables.KingEndGame[tablePosition];
                                 }
@@ -1469,7 +1498,7 @@ namespace ChessAI
 //                                 {
 //                                     blackScore -= 100;
 //                                 }
-                                if (endGame)
+                                if (stateOfGame == ENDGAME)
                                 {
                                     bTableScoreToAdd = PieceTables.KingEndGame[tablePosition];
                                 }
@@ -1501,7 +1530,7 @@ namespace ChessAI
                 blackScore -= 500;
             }
 
-            if(endGame)
+            if (stateOfGame == ENDGAME)
             {
                 if(pieceCount[W_ROOK] >= 1)
                 {
@@ -1515,14 +1544,14 @@ namespace ChessAI
 
             if (pieceCount[W_BISHOP] >= 2)
             {
-                if (!endGame)
+                if (stateOfGame != ENDGAME)
                 {
                     whiteScore += 20;
                 }
             }
             if (pieceCount[B_BISHOP] >= 2)
             {
-                if(!endGame)
+                if (stateOfGame != ENDGAME)
                 {
                     blackScore += 20;
                 }
