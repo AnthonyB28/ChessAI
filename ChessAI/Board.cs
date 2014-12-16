@@ -371,7 +371,7 @@ namespace ChessAI
                 board[move.destX, move.originY] = BLANK_PIECE;
             }
             // make castle
-            else if(move.originPiece % 6 == 0 && move.destX - move.originX == 2)
+            else if(move.originPiece % 6 == 0 && (move.destX - move.originX == 2 || move.originX - move.destX == 2 ))
             {
                 board[move.originX, move.originY] = BLANK_PIECE;
                 board[move.destX, move.destY] = move.originPiece;
@@ -1838,11 +1838,11 @@ namespace ChessAI
             {
                 if (y + 1 < 8)
                 {
-                    if (color && board[x + 1, y + 1] == B_PAWN)
-                    {
-                        return true;
-                    }
-                    else if (!color && board[x + 1, y + 1] == W_PAWN)
+                    //if (color && board[x + 1, y + 1] == B_PAWN)
+                    //{
+                    //    return true;
+                    //}
+                    if (!color && board[x + 1, y + 1] == W_PAWN)
                     {
                         return true;
                     }
@@ -1853,21 +1853,21 @@ namespace ChessAI
                     {
                         return true;
                     }
-                    else if (!color && board[x + 1, y - 1] == W_PAWN)
-                    {
-                        return true;
-                    }
+                    //else if (!color && board[x + 1, y - 1] == W_PAWN)
+                    //{
+                    //    return true;
+                    //}
                 }
             }
             if (x - 1 >= 0)
             {
                 if (y + 1 < 8)
                 {
-                    if (color && board[x - 1, y + 1] == B_PAWN)
-                    {
-                        return true;
-                    }
-                    else if (!color && board[x - 1, y + 1] == W_PAWN)
+                    //if (color && board[x - 1, y + 1] == B_PAWN)
+                    //{
+                    //    return true;
+                    //}
+                    if (!color && board[x - 1, y + 1] == W_PAWN)
                     {
                         return true;
                     }
@@ -1878,10 +1878,10 @@ namespace ChessAI
                     {
                         return true;
                     }
-                    else if (!color && board[x - 1, y - 1] == W_PAWN)
-                    {
-                        return true;
-                    }
+                    //else if (!color && board[x - 1, y - 1] == W_PAWN)
+                    //{
+                    //    return true;
+                    //}
                 }
             }
 
