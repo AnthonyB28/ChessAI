@@ -1561,14 +1561,14 @@ namespace ChessAI
 
         public bool CheckForKingCheck(int x, int y, bool color)
         {
-            int i = x;
+            int i = x+1;
             for (; i < 8; ++i) // CHECKING VERTICLE
             {
                 if (board[i, y] != BLANK_PIECE)
                 {
                     if (color)
                     {
-                        if (board[i, y] == B_KING || board[i, y] == B_ROOK || board[i, y] == B_QUEEN)
+                        if (board[i, y] == B_ROOK || board[i, y] == B_QUEEN)
                         {
                             return true;
                         }
@@ -1576,7 +1576,7 @@ namespace ChessAI
                     }
                     else
                     {
-                        if (board[i, y] == W_KING || board[i, y] == W_ROOK || board[i, y] == W_QUEEN)
+                        if (board[i, y] == W_ROOK || board[i, y] == W_QUEEN)
                         {
                             return true;
                         }
@@ -1584,22 +1584,22 @@ namespace ChessAI
                     }
                 }
             }
-            i = x;
+            i = x-1;
             for (; i >= 0; --i)
             {
                 if (board[i, y] != BLANK_PIECE)
                 {
                     if (color)
                     {
-                        if (board[i, y] == B_KING || board[i, y] == B_ROOK || board[i, y] == B_QUEEN)
+                        if (board[i, y] == B_ROOK || board[i, y] == B_QUEEN)
                         {
                             return true;
-                        }
+                        } 
                         break;
                     }
                     else
                     {
-                        if (board[i, y] == W_KING || board[i, y] == W_ROOK || board[i, y] == W_QUEEN)
+                        if (board[i, y] == W_ROOK || board[i, y] == W_QUEEN)
                         {
                             return true;
                         }
@@ -1607,14 +1607,14 @@ namespace ChessAI
                     }
                 }
             }
-            int j = y;
+            int j = y+1;
             for (; j < 8; ++j)
             {
                 if (board[x, j] != BLANK_PIECE)
                 {
                     if (color)
                     {
-                        if (board[x, j] == B_KING || board[x, y] == B_ROOK || board[x, y] == B_QUEEN)
+                        if (board[x, y] == B_ROOK || board[x, y] == B_QUEEN)
                         {
                             return true;
                         }
@@ -1622,7 +1622,7 @@ namespace ChessAI
                     }
                     else
                     {
-                        if (board[x, j] == W_KING || board[x, y] == W_ROOK || board[x, y] == W_QUEEN)
+                        if (board[x, y] == W_ROOK || board[x, y] == W_QUEEN)
                         {
                             return true;
                         }
@@ -1630,14 +1630,14 @@ namespace ChessAI
                     }
                 }
             }
-            j = y;
+            j = y-1;
             for (; j >= 0; --j)
             {
                 if (board[x, j] != BLANK_PIECE)
                 {
                     if (color)
                     {
-                        if (board[x, j] == B_KING || board[x, y] == B_ROOK || board[x, y] == B_QUEEN)
+                        if (board[x, y] == B_ROOK || board[x, y] == B_QUEEN)
                         {
                             return true;
                         }
@@ -1645,7 +1645,7 @@ namespace ChessAI
                     }
                     else
                     {
-                        if (board[x, j] == W_KING || board[x, y] == W_ROOK || board[x, y] == W_QUEEN)
+                        if (board[x, y] == W_ROOK || board[x, y] == W_QUEEN)
                         {
                             return true;
                         }
@@ -1655,15 +1655,15 @@ namespace ChessAI
             }
 
             // CHECKING DIAGONAL
-            i = x;
-            j = y;
+            i = x+1;
+            j = y+1;
             for (; j < 8 && i < 8; ++j, ++i)
             {
                 if (board[i, j] != BLANK_PIECE)
                 {
                     if (color)
                     {
-                        if (board[i, j] == B_KING || board[i, y] == B_BISHOP || board[i, y] == B_QUEEN)
+                        if (board[i, y] == B_BISHOP || board[i, y] == B_QUEEN)
                         {
                             return true;
                         }
@@ -1671,7 +1671,7 @@ namespace ChessAI
                     }
                     else
                     {
-                        if (board[i, j] == W_KING || board[i, y] == W_BISHOP || board[i, y] == W_QUEEN)
+                        if (board[i, y] == W_BISHOP || board[i, y] == W_QUEEN)
                         {
                             return true;
                         }
@@ -1679,15 +1679,15 @@ namespace ChessAI
                     }
                 }
             }
-            i = x;
-            j = y;
+            i = x-1;
+            j = y+1;
             for (; j < 8 && i >= 0; ++j, --i)
             {
                 if (board[i, j] != BLANK_PIECE)
                 {
                     if (color)
                     {
-                        if (board[i, j] == B_KING || board[i, y] == B_BISHOP || board[i, y] == B_QUEEN)
+                        if (board[i, y] == B_BISHOP || board[i, y] == B_QUEEN)
                         {
                             return true;
                         }
@@ -1695,7 +1695,7 @@ namespace ChessAI
                     }
                     else
                     {
-                        if (board[i, j] == W_KING || board[i, y] == W_BISHOP || board[i, y] == W_QUEEN)
+                        if (board[i, y] == W_BISHOP || board[i, y] == W_QUEEN)
                         {
                             return true;
                         }
@@ -1703,15 +1703,15 @@ namespace ChessAI
                     }
                 }
             }
-            i = x;
-            j = y;
+            i = x+1;
+            j = y-1;
             for (; j >= 0 && i < 8; --j, ++i)
             {
                 if (board[i, j] != BLANK_PIECE)
                 {
                     if (color)
                     {
-                        if (board[i, j] == B_KING || board[i, y] == B_BISHOP || board[i, y] == B_QUEEN)
+                        if (board[i, y] == B_BISHOP || board[i, y] == B_QUEEN)
                         {
                             return true;
                         }
@@ -1719,7 +1719,7 @@ namespace ChessAI
                     }
                     else
                     {
-                        if (board[i, j] == W_KING || board[i, y] == W_BISHOP || board[i, y] == W_QUEEN)
+                        if (board[i, y] == W_BISHOP || board[i, y] == W_QUEEN)
                         {
                             return true;
                         }
@@ -1727,15 +1727,15 @@ namespace ChessAI
                     }
                 }
             }
-            i = x;
-            j = y;
+            i = x-1;
+            j = y-1;
             for (; j >= 0 && i >= 0; --j, --i)
             {
                 if (board[i, j] != BLANK_PIECE)
                 {
                     if (color)
                     {
-                        if (board[i, j] == B_KING || board[i, y] == B_BISHOP || board[i, y] == B_QUEEN)
+                        if (board[i, y] == B_BISHOP || board[i, y] == B_QUEEN)
                         {
                             return true;
                         }
@@ -1743,12 +1743,108 @@ namespace ChessAI
                     }
                     else
                     {
-                        if (board[i, j] == W_KING || board[i, y] == W_BISHOP || board[i, y] == W_QUEEN)
+                        if (board[i, y] == W_BISHOP || board[i, y] == W_QUEEN)
                         {
                             return true;
                         }
                         break;
                     }
+                }
+            }
+
+            // Check for Kings
+            if(y + 1 < 8)
+            {
+                // UP KING
+                if(color && board[x,y+1] == B_KING)
+                {
+                    return true;
+                }
+                else if(!color && board[x,y+1] == W_KING)
+                {
+                    return true;
+                }
+
+                // DIAG
+                if(x + 1 < 8)
+                {
+                    if (color && board[x+1, y + 1] == B_KING)
+                    {
+                        return true;
+                    }
+                    else if (!color && board[x+1, y + 1] == W_KING)
+                    {
+                        return true;
+                    }
+                }
+                if (x - 1 >= 0)
+                {
+                    if (color && board[x - 1, y + 1] == B_KING)
+                    {
+                        return true;
+                    }
+                    else if (!color && board[x - 1, y + 1] == W_KING)
+                    {
+                        return true;
+                    }
+                }
+            }
+            if(y - 1 >= 0)
+            {
+                // DOWN KING
+                if (color && board[x, y - 1] == B_KING)
+                {
+                    return true;
+                }
+                else if (!color && board[x, y - 1] == W_KING)
+                {
+                    return true;
+                }
+                // DIAG KING
+                if (x + 1 < 8)
+                {
+                    if (color && board[x + 1, y - 1] == B_KING)
+                    {
+                        return true;
+                    }
+                    else if (!color && board[x + 1, y - 1] == W_KING)
+                    {
+                        return true;
+                    }
+                }
+                if (x - 1 >= 0)
+                {
+                    if (color && board[x - 1, y - 1] == B_KING)
+                    {
+                        return true;
+                    }
+                    else if (!color && board[x - 1, y - 1] == W_KING)
+                    {
+                        return true;
+                    }
+                }
+            }
+            // LEFT/RIGHT KING
+            if(x + 1 < 8)
+            {
+                if (color && board[x+1, y] == B_KING)
+                {
+                    return true;
+                }
+                else if (!color && board[x+1, y] == W_KING)
+                {
+                    return true;
+                }
+            }
+            if (x - 1 >= 0)
+            {
+                if (color && board[x-1, y] == B_KING)
+                {
+                    return true;
+                }
+                else if (!color && board[x-1, y] == W_KING)
+                {
+                    return true;
                 }
             }
             
