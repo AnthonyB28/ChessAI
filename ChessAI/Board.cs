@@ -235,11 +235,11 @@ namespace ChessAI
         {
             List<Move> allMoves = this.GetAllStates(color, false);
             List<Move> capMoves = new List<Move>();
-            foreach (Move move in allMoves)
+            for(int i = 0; i < allMoves.Count; ++i)
             {
-                if (move.destinationPiece != 0)
+                if (allMoves[i].destinationPiece != 0)
                 {
-                    capMoves.Add(move);
+                    capMoves.Add(allMoves[i]);
                 }
             }
             return capMoves;
