@@ -112,7 +112,14 @@ namespace ChessAI
 
     class Board
     {
-        static int ENDGAME = 14;
+        private static readonly byte MIDGAMEPIECES = 19;
+        private static readonly byte ENDGAMEPIECES = 14;
+        private static readonly byte LATEENDGAMEPIECES = 9;
+        private static readonly byte BEG_GAME = 0;
+        private static readonly byte MID_GAME = 1;
+        private static readonly byte END_GAME = 2;
+        private static readonly byte LATE_END_GAME = 3;
+
         private static readonly byte BLANK_PIECE = 0;
         private static readonly byte W_PAWN = 1;
         private static readonly byte W_ROOK = 2;
@@ -133,7 +140,7 @@ namespace ChessAI
         private byte[,] board;
         private byte[] pieceCount;
         private Stack<Move> moves;
-        private bool endGame = false;
+        private byte gameState = BEG_GAME;
         private bool blackKingTaken = false;
         private bool whiteKingTaken = false;
         private byte pieces = 32;
@@ -187,12 +194,12 @@ namespace ChessAI
             board[7, 7] = B_ROOK;
         }
 
-        public Board(byte[,] board, byte[] pieceCount, Stack<Move> moves, byte pieces, bool endGame, bool blackKingTaken, bool whiteKingTaken)
+        public Board(byte[,] board, byte[] pieceCount, Stack<Move> moves, byte pieces, byte gameState, bool blackKingTaken, bool whiteKingTaken)
         {
             this.board = board;
             this.pieceCount = pieceCount;
             this.moves = moves;
-            this.endGame = endGame;
+            this.gameState = gameState;
             this.blackKingTaken = blackKingTaken;
             this.whiteKingTaken = whiteKingTaken;
             this.pieces = pieces;
@@ -205,7 +212,7 @@ namespace ChessAI
                 moveStack.Push(m);
             }
             return new Board((byte[,])board.Clone(), (byte[])pieceCount.Clone(), 
-                moveStack, pieces, endGame, blackKingTaken, whiteKingTaken);
+                moveStack, pieces, gameState, blackKingTaken, whiteKingTaken);
         }
 
         public List<Move> GetAllCaptureStates(bool color)
@@ -283,10 +290,7 @@ namespace ChessAI
                     {
                         ++pieceCount[move.destinationPiece];
                     }
-                    if (pieces > ENDGAME)
-                    {
-                        endGame = false;
-                    }
+                    CheckGameState(false);
                 }
                 board[move.originX, move.originY] = move.originPiece;
                 board[move.destX, move.destY] = move.destinationPiece;
@@ -309,11 +313,8 @@ namespace ChessAI
                 {
                     ++pieceCount[move.destinationPiece];
                     ++pieces;
-                    if(pieces > ENDGAME)
-                    {
-                        endGame = false;
-                    }
                 }
+                CheckGameState(false);
                 board[move.destX, move.destY] = move.destinationPiece;
             }
         }
@@ -352,11 +353,8 @@ namespace ChessAI
                     {
                         --pieceCount[move.destinationPiece];
                     }
-                    if (pieces <= ENDGAME)
-                    {
-                        endGame = true;
-                    }
                 }
+                CheckGameState(true);
             }
             // make enpassent
             else if (move.originPiece % 6 == W_PAWN && move.originX != move.destX && move.destinationPiece == 0)
@@ -364,10 +362,7 @@ namespace ChessAI
                 board[move.destX, move.destY] = move.originPiece;
                 board[move.originX, move.destY] = BLANK_PIECE;
                 --pieces;
-                if (pieces <= ENDGAME)
-                {
-                    this.endGame = true;
-                }
+                CheckGameState(true);
                 board[move.destX, move.originY] = BLANK_PIECE;
             }
             // make castle
@@ -395,14 +390,45 @@ namespace ChessAI
                 if(move.destinationPiece != BLANK_PIECE) //decrement pieces count if capture
                 {
                     --pieces;
-                    if(pieces <= ENDGAME)
-                    {
-                        endGame = true;
-                    }
+                    CheckGameState(true);
                     if(move.destinationPiece != W_KING && move.destinationPiece != B_KING)
                     {
                         --pieceCount[move.destinationPiece];
                     }
+                }
+            }
+        }
+
+        private void CheckGameState(bool makeMove)
+        {
+            if(makeMove)
+            {
+                if (pieces <= LATEENDGAMEPIECES)
+                {
+                    gameState = LATE_END_GAME;
+                }
+                else if (pieces <= ENDGAMEPIECES)
+                {
+                    gameState = END_GAME;
+                }
+                else if (pieces <= MIDGAMEPIECES)
+                {
+                    gameState = MID_GAME;
+                }
+            }
+            else
+            {
+                if (pieces > MIDGAMEPIECES)
+                {
+                    gameState = BEG_GAME;
+                }
+                else if (pieces > ENDGAMEPIECES)
+                {
+                    gameState = MID_GAME;
+                }
+                else if (pieces > LATEENDGAMEPIECES)
+                {
+                    gameState = END_GAME;
                 }
             }
         }
@@ -925,11 +951,22 @@ namespace ChessAI
             return moves;
         }
 
+        public bool IsMidGame()
+        {
+            return gameState == MID_GAME;
+        }
+
         public bool IsEndGame()
         {
-            return this.endGame;
+            return gameState == END_GAME;
         }
-        public bool isCapture()
+
+        public bool IsLateEndGame()
+        {
+            return gameState == LATE_END_GAME;
+        }
+
+        public bool IsCapture()
         {
             return this.moves.Peek().destinationPiece != 0;
         }
@@ -1291,7 +1328,7 @@ namespace ChessAI
                         else if (pieceToEval == W_KNIGHT)
                         {
                             scoreToAdd = knightVal;
-                            if (endGame)
+                            if (IsEndGame())
                             {
                                 scoreToAdd -= 10;
                             }
@@ -1311,7 +1348,7 @@ namespace ChessAI
                         else if (pieceToEval == W_BISHOP)
                         {
                             scoreToAdd = bishopVal;
-                            if(endGame)
+                            if(IsEndGame())
                             {
                                 scoreToAdd += 10;
                             }
@@ -1327,7 +1364,7 @@ namespace ChessAI
                         else if (pieceToEval == W_QUEEN)
                         {
                             scoreToAdd = queenVal;
-                            if (!endGame && ((j != 0 || j != 8) || i != 3) )
+                            if (!IsEndGame() && ((j != 0 || j != 8) || i != 3) )
                             {
                                 scoreToAdd -= 10;
                             }
@@ -1404,7 +1441,7 @@ namespace ChessAI
 //                                 {
 //                                     whiteScore -= 100;
 //                                 }
-                                if (endGame)
+                                if (IsEndGame())
                                 {
                                     wTableScoreToAdd = PieceTables.KingEndGame[tablePosition];
                                 }
@@ -1419,7 +1456,7 @@ namespace ChessAI
 //                                 {
 //                                     blackScore -= 100;
 //                                 }
-                                if (endGame)
+                                if (IsEndGame())
                                 {
                                     bTableScoreToAdd = PieceTables.KingEndGame[tablePosition];
                                 }
@@ -1451,7 +1488,7 @@ namespace ChessAI
                 blackScore -= 500;
             }
 
-            if(endGame)
+            if(IsEndGame())
             {
                 if(pieceCount[W_ROOK] >= 1)
                 {
@@ -1465,14 +1502,14 @@ namespace ChessAI
 
             if (pieceCount[W_BISHOP] >= 2)
             {
-                if (!endGame)
+                if (!IsEndGame())
                 {
                     whiteScore += 20;
                 }
             }
             if (pieceCount[B_BISHOP] >= 2)
             {
-                if(!endGame)
+                if(!IsEndGame())
                 {
                     blackScore += 20;
                 }
