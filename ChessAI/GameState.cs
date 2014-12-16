@@ -178,7 +178,7 @@ namespace ChessAI
             t.Reset();
             t.Start();
             //Console.WriteLine("SingleThreaded Move: " + move);
-            int depth = 4;
+            int depth = 5;
             int ourCurrentBranch = board.GetAllStates(color, true).Count;
             int oppCurrentBranch = board.GetAllStates(!color, false).Count;
             if (turn > 1)
@@ -196,7 +196,7 @@ namespace ChessAI
                         currentNodes = (long)(Math.Pow(ourCurrentBranch, depth / 2.0) * Math.Pow(oppCurrentBranch, depth / 2.0));
                         estimatedTime = (currentNodes / nodesPerSecond);
                     }
-                    while (depth > 4 && estimatedTime > 20000)
+                    while (depth > 5 && estimatedTime > 20000)
                     {
                         depth--;
                         currentNodes = (long)(Math.Pow(ourCurrentBranch, depth / 2.0) * Math.Pow(oppCurrentBranch, depth / 2.0));
@@ -219,9 +219,9 @@ namespace ChessAI
                     }
                 }
             }
-            if (depth < 4)
+            if (depth < 5)
             {
-                depth = 4;
+                depth = 5;
             }
             if (board.IsEndGame() && depth < 7)
             {
