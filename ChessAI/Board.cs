@@ -119,13 +119,13 @@ namespace ChessAI
         private static readonly byte W_KNIGHT = 3;
         private static readonly byte W_BISHOP = 4;
         private static readonly byte W_QUEEN = 5;
-        private static readonly byte W_KING = 6;
+        public static readonly byte W_KING = 6;
         private static readonly byte B_PAWN = 7;
         private static readonly byte B_ROOK = 8;
         private static readonly byte B_KNIGHT = 9;
         private static readonly byte B_BISHOP = 10;
         private static readonly byte B_QUEEN = 11;
-        private static readonly byte B_KING = 12;
+        public static readonly byte B_KING = 12;
 
         private static readonly bool WHITE = true;
         private static readonly bool BLACK = false;
@@ -895,34 +895,12 @@ namespace ChessAI
                     }
                 }
             }
-            if (first && this.moves.Count >= 6)
-            {
-                Stack<Move> tempStack = new Stack<Move>();
-                foreach (Move m in this.moves.Reverse())
-                {
-                    tempStack.Push(m);
-                }
-                tempStack.Pop();
-                Move m1 = tempStack.Pop();
-                tempStack.Pop();
-                Move m2 = tempStack.Pop();
-                tempStack.Pop();
-                if (m1.Equals(tempStack.Pop()))
-                {
-                    for (int i = 0; i < moves.Count; )
-                    {
-                        if (m2.Equals(moves[i]))
-                        {
-                            moves.RemoveAt(i);
-                        }
-                        else
-                        {
-                            i++;
-                        }
-                    }
-                }
-            }
             return moves;
+        }
+
+        public Stack<Move> GetAllMoves()
+        {
+            return this.moves;
         }
 
         public bool IsEndGame()
