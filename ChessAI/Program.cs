@@ -10,6 +10,24 @@ namespace ChessAI
     {
         static void Main(string[] args)
         {
+            //Board board = new Board();
+            //Move m = board.CreateMove(3, 1, 3, 3);
+            //board.MakeMove(m);
+            //m = board.CreateMove(3, 6, 3, 5);
+            //board.MakeMove(m);
+            //m = board.CreateMove(3, 3, 3, 4);
+            //board.MakeMove(m);
+            //m = board.CreateMove(5, 6, 5, 4);
+            //board.MakeMove(m);
+            //m = board.CreateMove(4, 6, 4, 4);
+            //board.MakeMove(m);
+            //m = board.CreateMove(3, 4, 4, 5);
+            //board.MakeMove(m);
+            //Console.WriteLine(board);
+            //String move;
+            //Board b = board.PlayNegaMaxMoveMultiThreaded(out move, true, 1);
+            //Console.WriteLine(move);
+            //Console.WriteLine(b);
             //List<Move> moves = new List<Move>();
             //Board board = new Board();
             //moves = board.GetAllStates(true, false);

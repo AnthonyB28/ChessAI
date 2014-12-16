@@ -326,6 +326,7 @@ namespace ChessAI
                 board[move.originX, move.originY] = move.originPiece;
                 board[move.destX, move.destY] = BLANK_PIECE;
                 board[move.destX, move.originY] = move.destinationPiece;
+                //Console.WriteLine("En Passent");
             }
             else
             {
@@ -397,7 +398,7 @@ namespace ChessAI
                 {
                     this.endGame = true;
                 }
-                board[move.destX, move.originY] = BLANK_PIECE;
+                board[move.originX, move.originY] = BLANK_PIECE;
             }
             // make castle
             else if(move.originPiece % 6 == 0 && (move.destX - move.originX == 2 || move.originX - move.destX == 2 ))
