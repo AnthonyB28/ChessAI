@@ -150,6 +150,32 @@ namespace ChessAI
             //{
             //    moveToMake = checkMateMove;
             //}
+            if (this.alpha < -8000)
+            {
+                Board b = this.board.Clone();
+                b.MakeMove(moveToMake);
+                if (b.CheckForKingCheck(0, 0, color)) // TODO fix
+                {
+                    b.UndoMove();
+                    List<Move> nonCheckMoves = new List<Move>();
+                    foreach(Move m in this.moves)
+                    {
+                        b.MakeMove(m);
+                        if (!b.CheckForKingCheck(0, 0, color))
+                        {
+                            nonCheckMoves.Add(m);
+                        }
+                        b.UndoMove();
+                    }
+                    if (nonCheckMoves.Count > 0)
+                    {
+                        Console.WriteLine("Researching....");
+                        depth = 5;
+                        this.moves = nonCheckMoves;
+                        return this.Run();
+                    }
+                }
+            }
             return moveToMake;
         }
 
