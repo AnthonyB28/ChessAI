@@ -18,6 +18,9 @@ namespace ChessAI
         public bool promotion;
         public bool enpassent;
 
+        public static readonly string[] FILE_TABLE = new string[8]{"a", "b", "c", "d", "e", "f", "g", "h"};
+        public static readonly string[] PIECE_TABLE = new string[13] { "P", "P", "R", "N", "B", "Q", "K", "P", "R", "N", "B", "Q", "K" };
+
         public static readonly int[] MATERIAL_TABLE = new int[13] { 0, 100, 525, 350, 350, 1000, 10000, 100, 525, 350, 350, 1000, 10000 };
 
         // Regular move
@@ -78,16 +81,33 @@ namespace ChessAI
             //sb.Append("orig " + originPiece);
             //sb.AppendLine();
             //sb.Append("promote " + promotion);
-            sb.Append(originPiece + " ");
-            sb.Append(originX);
-            sb.Append(originY);
-            sb.Append(destX);
-            sb.Append(destY);
-            sb.Append(" " + destinationPiece);
+            //sb.Append(originPiece + " ");
+            //sb.Append(originX);
+            //sb.Append(originY);
+            //sb.Append(destX);
+            //sb.Append(destY);
+            //sb.Append(" " + destinationPiece);
+            //if (promotion)
+            //{
+            //    sb.Append("Q");
+            //}
+            if (!promotion)
+            {
+                sb.Append(PIECE_TABLE[originPiece]);
+            }
+            else
+            {
+                sb.Append("P");
+            }
+            sb.Append(FILE_TABLE[originX]);
+            sb.Append((originY + 1));
+            sb.Append(FILE_TABLE[destX]);
+            sb.Append((destY + 1));
             if (promotion)
             {
-                sb.Append("Q");
+                sb.Append(PIECE_TABLE[destinationPiece]);
             }
+
             return sb.ToString();
 
         }
@@ -160,6 +180,12 @@ namespace ChessAI
         private bool blackKingTaken = false;
         private bool whiteKingTaken = false;
         private byte pieces = 32;
+        private int whiteKing;
+        private int blackKing;
+        private int rightWhiteRook;
+        private int leftWhiteRook;
+        private int rightBlackRook;
+        private int leftBlackRook;
         /**
          * Material Values
          * Pawn -  100
@@ -208,9 +234,17 @@ namespace ChessAI
             board[5, 7] = B_BISHOP;
             board[6, 7] = B_KNIGHT;
             board[7, 7] = B_ROOK;
+
+            whiteKing = 0;
+            blackKing = 0;
+            rightWhiteRook = 0;
+            rightBlackRook = 0;
+            leftBlackRook = 0;
+            rightWhiteRook = 0;
         }
 
-        public Board(byte[,] board, byte[] pieceCount, Stack<Move> moves, byte pieces, byte gameState, bool blackKingTaken, bool whiteKingTaken)
+        public Board(byte[,] board, byte[] pieceCount, Stack<Move> moves, byte pieces, byte gameState, bool blackKingTaken, bool whiteKingTaken, int whiteKing,
+                    int blackKing, int rightWhiteRook, int rightBlackRook, int leftWhiteRook, int leftBlackRook)
         {
             this.board = board;
             this.pieceCount = pieceCount;
@@ -219,6 +253,12 @@ namespace ChessAI
             this.blackKingTaken = blackKingTaken;
             this.whiteKingTaken = whiteKingTaken;
             this.pieces = pieces;
+            this.whiteKing = whiteKing;
+            this.blackKing = blackKing;
+            this.rightWhiteRook = rightWhiteRook;
+            this.leftWhiteRook = leftWhiteRook;
+            this.rightBlackRook = rightBlackRook;
+            this.leftBlackRook = leftBlackRook;
         }
 
         public Board Clone()
@@ -228,7 +268,7 @@ namespace ChessAI
                 moveStack.Push(m);
             }
             return new Board((byte[,])board.Clone(), (byte[])pieceCount.Clone(), 
-                moveStack, pieces, gameState, blackKingTaken, whiteKingTaken);
+                moveStack, pieces, gameState, blackKingTaken, whiteKingTaken, whiteKing, blackKing, rightWhiteRook, rightBlackRook, leftWhiteRook, leftBlackRook);
         }
 
         public List<Move> GetAllCaptureStates(bool color)
@@ -336,6 +376,47 @@ namespace ChessAI
                 CheckGameState(false);
                 board[move.destX, move.destY] = move.destinationPiece;
             }
+            else if(move.originPiece % 6 == 0 && (move.destX - move.originX == 2 || move.originX - move.destX == 2))
+            {
+                int y = move.originY;
+                int x = move.destX + 1;
+                int x2 = 0;
+                bool colorPiece = move.originPiece == W_KING;
+                if (move.destX > move.originX)
+                {
+                    x = move.destX - 1;
+                    x2 = 7;
+                    if (colorPiece)
+                    {
+                        whiteKing = 0;
+                        rightWhiteRook = 0;
+                    }
+                    else
+                    {
+                        blackKing = 0;
+                        rightBlackRook = 0;
+                    }
+                }
+                else 
+                {
+                    if (colorPiece)
+                    {
+                        whiteKing = 0;
+                        leftWhiteRook = 0;
+                    }
+                    else
+                    {
+                        blackKing = 0;
+                        leftBlackRook = 0;
+                    }
+                    //x2 
+                }
+
+                board[move.originX, move.originY] = move.originPiece;
+                board[move.destX, move.destY] = BLANK_PIECE;
+                board[x2, y] = board[x, y];
+                board[x, y] = BLANK_PIECE;
+            }
             else if(move.enpassent)
             {
                 ++pieces;
@@ -414,6 +495,15 @@ namespace ChessAI
             {
                 board[move.originX, move.originY] = BLANK_PIECE;
                 board[move.destX, move.destY] = move.originPiece;
+                bool colorPiece = (move.originPiece - 1) / 6 == 0;
+                if (colorPiece)
+                {
+                    whiteKing = this.moves.Count;
+                }
+                else
+                {
+                    blackKing = this.moves.Count;
+                }
                 int y = move.originY;
                 int x = 0;
                 int x2 = move.destX + 1;
@@ -421,6 +511,25 @@ namespace ChessAI
                 {
                     x = 7;
                     x2 = move.destX - 1;
+                    if (colorPiece)
+                    {
+                        rightWhiteRook = this.moves.Count;
+                    }
+                    else
+                    {
+                        rightBlackRook = this.moves.Count;
+                    }
+                }
+                else
+                {
+                    if (colorPiece)
+                    {
+                        leftWhiteRook = this.moves.Count;
+                    }
+                    else
+                    {
+                        leftBlackRook = this.moves.Count;
+                    }
                 }
                 board[x2, y] = board[x, y];
                 board[x, y] = BLANK_PIECE;
@@ -438,6 +547,42 @@ namespace ChessAI
                     if(move.destinationPiece != W_KING && move.destinationPiece != B_KING)
                     {
                         --pieceCount[move.destinationPiece];
+                    }
+                }
+                if (whiteKing == 0 && move.originPiece % 6 == 0 && move.originX == 4)
+                {
+                    if (move.originPiece == W_KING && move.originY == 0)
+                    {
+                        whiteKing = this.moves.Count;
+                    }
+                    else if (move.originPiece == B_KING && move.originY == 7)
+                    {
+                        blackKing = this.moves.Count;
+                    }
+                }
+                else if (move.originPiece % 6 == W_ROOK)
+                {
+                    if (move.originX == 0)
+                    {
+                        if (leftWhiteRook == 0 && move.originPiece == W_ROOK && move.originY == 0)
+                        {
+                            leftWhiteRook = this.moves.Count;
+                        }
+                        else if (leftBlackRook == 0 && move.originPiece == B_ROOK && move.originY == 7)
+                        {
+                            leftBlackRook = this.moves.Count;
+                        }
+                    }
+                    else if (move.originX == 7)
+                    {
+                        if (rightWhiteRook == 0 && move.originPiece == W_ROOK && move.originY == 0)
+                        {
+                            rightWhiteRook = this.moves.Count;
+                        }
+                        else if (rightBlackRook == 0 && move.originPiece == B_ROOK && move.originY == 7)
+                        {
+                            rightBlackRook = this.moves.Count;
+                        }
                     }
                 }
             }
@@ -975,6 +1120,101 @@ namespace ChessAI
                                 
                                 moves.Add(CreateMove(i, j, i - 1, j - 1));
                             }
+                            if (board[i, j] == W_KING && whiteKing == 0)
+                            {
+                                if (rightWhiteRook == 0)
+                                {
+                                    // kingside white castle
+                                    if (board[5, 0] == 0 && board[6, 0] == 0)
+                                    {
+                                        Board b = this.Clone();
+                                        if (!b.CheckForKingCheck(true))
+                                        {
+                                            b.MakeMove(b.CreateMove(4, 0, 5, 0));
+                                            if (!b.CheckForKingCheck(true))
+                                            {
+                                                //b.UndoMove();
+                                                b.MakeMove(b.CreateMove(5, 0, 6, 0));
+                                                if (!b.CheckForKingCheck(true))
+                                                {
+                                                    moves.Add(CreateMove(4, 0, 6, 0));
+                                                }
+                                                b.UndoMove();
+                                            }
+                                            b.UndoMove();
+                                        }
+                                    }
+                                }
+                                if (leftWhiteRook == 0)
+                                {
+                                    if (board[3, 0] == 0 && board[2, 0] == 0 && board[1, 0] == 0)
+                                    {
+                                        Board b = this.Clone();
+                                        if (!b.CheckForKingCheck(true))
+                                        {
+                                            b.MakeMove(b.CreateMove(4, 0, 3, 0));
+                                            if (!b.CheckForKingCheck(true))
+                                            {
+                                                //b.UndoMove();
+                                                b.MakeMove(b.CreateMove(3, 0, 2, 0));
+                                                if (!b.CheckForKingCheck(true))
+                                                {
+                                                    moves.Add(CreateMove(4, 0, 2, 0));
+                                                }
+                                                b.UndoMove();
+                                            }
+                                            b.UndoMove();
+                                        }
+                                    }
+                                }
+                            }
+                            else if (board[i, j] == B_KING && blackKing == 0)
+                            {
+                                if (rightBlackRook == 0)
+                                {
+                                    if (board[5, 7] == 0 && board[6, 7] == 0)
+                                    {
+                                        Board b = this.Clone();
+                                        if (!b.CheckForKingCheck(false))
+                                        {
+                                            b.MakeMove(b.CreateMove(4, 7, 5, 7));
+                                            if (!b.CheckForKingCheck(false))
+                                            {
+                                                //b.UndoMove();
+                                                b.MakeMove(b.CreateMove(5, 7, 6, 7));
+                                                if (!b.CheckForKingCheck(false))
+                                                {
+                                                    moves.Add(CreateMove(4, 7, 6, 7));
+                                                }
+                                                b.UndoMove();
+                                            }
+                                            b.UndoMove();
+                                        }
+                                    }
+                                }
+                                if (leftBlackRook == 0)
+                                {
+                                    if (board[2, 7] == 0 && board[3, 7] == 0 && board[1,7] == 0)
+                                    {
+                                        Board b = this.Clone();
+                                        if (!b.CheckForKingCheck(false))
+                                        {
+                                            b.MakeMove(b.CreateMove(4, 7, 3, 7));
+                                            if (!b.CheckForKingCheck(false))
+                                            {
+                                                //b.UndoMove();
+                                                b.MakeMove(b.CreateMove(3, 7, 2, 7));
+                                                if (!b.CheckForKingCheck(false))
+                                                {
+                                                    moves.Add(CreateMove(4, 7, 2, 7));
+                                                }
+                                                b.UndoMove();
+                                            }
+                                            b.UndoMove();
+                                        }
+                                    }
+                                }
+                            }
                         }
                         else if (board[i, j] % 6 == W_KNIGHT)
                         {
@@ -1244,7 +1484,7 @@ namespace ChessAI
             b.MakeMove(moveToMake);
             //Console.WriteLine(moveToMake.ToString());
             //Console.WriteLine(b.ToString());
-            move = detectMove(b);
+            move = moveToMake.ToString();
             return b;
         }
 
