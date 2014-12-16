@@ -17,7 +17,14 @@ namespace ChessAI
         private List<NegaMaxThread> threads;
         private Move moveToMake;
         private int depth;
+        private bool loopState;
+        private Move loopMove;
+        private int loopAlpha;
+        //private List<Move> checkMateMoves;
+        //private bool checkMate;
+        //private Move checkMateMove;
 
+        //private object _lockerCheckMate = new object();
         private object _lockerGet = new object();
         private object _lockerStore = new object();
 
@@ -26,6 +33,12 @@ namespace ChessAI
             this.board = board;
             this.color = color;
             this.moves = this.board.GetAllStates(this.color, true);
+            loopState = false;
+            loopMove = null;
+            loopAlpha = Negamax.NEGA_SCORE;
+            //checkMateMoves = new List<Move>();
+            //checkMate = false;
+            //checkMateMove = null;
             
             Console.WriteLine("Moves available: " + this.moves.Count);
             this.moves.Sort();
@@ -45,6 +58,52 @@ namespace ChessAI
         public Move Run()
         {
             int cpus = Environment.ProcessorCount;
+            // Search all moves for a king capture and just take the first one possible, avoids a high depth search in end game
+            // that can run out the clock, score is pointless in comparison to a win
+            // also avoids letting our king be in check and constantly looping, however it may not be possible due to that a captured king
+            // is considered a terminal node in search, and our awesome eval function
+            foreach (Move m in moves)
+            {
+                if (color)
+                {
+                    if (m.destinationPiece == Board.B_KING)
+                    {
+                        return m;
+                    }
+                }
+                else
+                {
+                    if (m.destinationPiece == Board.W_KING)
+                    {
+                        return m;
+                    }
+                }
+            }
+            // find a loop move and save it, so when it's score comes back we compare it to a secondary choice
+            // secondary choice is picked if it is within a close margin, this avoids escaping a loop and losing 
+            // a big piece
+            // consideration, if loop increase depth to try to escape, would be nice to have some kind of var to see how many times
+            // we have been looping and continously increase the depth here, perhaps 1 depth every 3 loops
+            // if no loop found we reset the counter to 0, this is not multithreaded code, so it should work
+            Board bClone = this.board.Clone();
+            if (bClone.GetAllMoves().Count >= 6)
+            {
+                Stack<Move> tempStack = new Stack<Move>();
+                foreach (Move m in bClone.GetAllMoves().Reverse())
+                {
+                    tempStack.Push(m);
+                }
+                tempStack.Pop();
+                Move m1 = tempStack.Pop();
+                tempStack.Pop();
+                Move m2 = tempStack.Pop();
+                tempStack.Pop();
+                if (m1.Equals(tempStack.Pop()))
+                {
+                    loopMove = m2;
+                    loopState = true;
+                }
+            }
             //Console.WriteLine("CPUS: " + cpus);
             // Create threads and fire off
             for (int i = 0; i < cpus; i++)
@@ -53,6 +112,7 @@ namespace ChessAI
                 new Thread(thread.Run).Start();
                 this.threads.Add(thread);
             }
+            //if(board.)
             int x = 0;
             while (threads.Count != 0)
             {
@@ -75,6 +135,47 @@ namespace ChessAI
                 
             }
             //do return magic
+            if (loopState)
+            {
+                if (this.alpha < (loopAlpha - 100))
+                {
+                    moveToMake = loopMove;
+                }
+                else
+                {
+                    Console.WriteLine("Avoiding loop move... WARNING!!!");
+                }
+            }
+            //if (checkMate)
+            //{
+            //    moveToMake = checkMateMove;
+            //}
+            if (this.alpha < -8000)
+            {
+                Board b = this.board.Clone();
+                b.MakeMove(moveToMake);
+                if (b.CheckForKingCheck(color)) // TODO fix
+                {
+                    b.UndoMove();
+                    List<Move> nonCheckMoves = new List<Move>();
+                    foreach(Move m in this.moves)
+                    {
+                        b.MakeMove(m);
+                        if (!b.CheckForKingCheck(color))
+                        {
+                            nonCheckMoves.Add(m);
+                        }
+                        b.UndoMove();
+                    }
+                    if (nonCheckMoves.Count > 0)
+                    {
+                        Console.WriteLine("Researching....");
+                        depth = 5;
+                        this.moves = nonCheckMoves;
+                        return this.Run();
+                    }
+                }
+            }
             return moveToMake;
         }
 
@@ -102,23 +203,37 @@ namespace ChessAI
         {
             //Console.WriteLine(alpha);
             //Console.WriteLine("telling");
-            //if (alpha > this.alpha)
-            //{
+            bool message = false;
+            bool loop = false;
+            if (alpha >= this.alpha)
+            {
                 lock (_lockerStore)
                 {
                     if (alpha > this.alpha)
                     {
-                        moveToMake = move;
-                        this.alpha = alpha;
-                        Console.WriteLine("New move:" + alpha + " @depth:" + depth);
+                        if (loopState && move.Equals(loopMove))
+                        {
+                            loopAlpha = alpha;
+                            loop = true;
+                        }
+                        else
+                        {
+                            moveToMake = move;
+                            this.alpha = alpha;
+                            message = true;// so this IO bound probably fucking murders contention we should consider moving this outside the lock
+                        }
                     }
                     else if (alpha == this.alpha)
                     {
-                        if (move.CompareTo(moveToMake) < 0)
+                        if (!loopState || !move.Equals(loopMove))
                         {
-                            Console.WriteLine(move);
-                            Console.WriteLine(moveToMake);
-                            moveToMake = move;
+                            if (move.CompareTo(moveToMake) < 0)
+                            {
+                                //Console.WriteLine(move);
+                                //Console.WriteLine(moveToMake);
+                                moveToMake = move;
+                                message = true;
+                            }
                         }
                     }
                     //if (alpha < this.alpha)
@@ -129,7 +244,46 @@ namespace ChessAI
                     //    }
                     //}
                 }
+            }
+            //if (alpha > 8000)
+            //{
+            //    if (color)
+            //    {
+            //        if (move.destinationPiece == Board.B_KING)
+            //        {
+            //            if (!checkMate)
+            //            {
+            //                lock (_lockerCheckMate)
+            //                {
+            //                    checkMateMove = move;
+            //                    checkMate = true;
+            //                }
+            //            }
+            //        }
+            //    }
+            //    else
+            //    {
+            //        if (move.destinationPiece == Board.W_KING)
+            //        {
+            //            if (!checkMate)
+            //            {
+            //                lock (_lockerCheckMate)
+            //                {
+            //                    checkMateMove = move;
+            //                    checkMate = true;
+            //                }
+            //            }
+            //        }
+            //    }
             //}
+            if (message)
+            {
+                Console.WriteLine("New move:" + alpha + " @depth:" + depth);
+            }
+            if (loop)
+            {
+                Console.WriteLine("loop move:" + alpha + " @depth:" + depth);
+            }
         }
 
         public int getCurrentAlpha()

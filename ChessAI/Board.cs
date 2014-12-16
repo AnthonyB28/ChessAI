@@ -16,6 +16,7 @@ namespace ChessAI
         public byte destinationPiece;
         public byte originPiece;
         public bool promotion;
+        public bool enpassent;
 
         public static readonly int[] MATERIAL_TABLE = new int[13] { 0, 100, 525, 350, 350, 1000, 10000, 100, 525, 350, 350, 1000, 10000 };
 
@@ -30,6 +31,7 @@ namespace ChessAI
             originPiece = board[x1, y1];
             destinationPiece = board[x2, y2];
             promotion = false;
+            enpassent = false;
         }
         
         // Promotion
@@ -43,6 +45,20 @@ namespace ChessAI
             originPiece = promote;
             destinationPiece = board[x2,y2];
             promotion = true;
+            enpassent = false;
+        }
+
+        //Enpassent
+        public Move(int x1, int y1, int x2, int y2, byte[,] board, bool passent)
+        {
+            originX = x1;
+            originY = y1;
+            destX = x2;
+            destY = y2;
+            originPiece = board[x1, y1];
+            destinationPiece = board[x2, y1];
+            enpassent = true;
+
         }
 
         public override string ToString()
@@ -126,13 +142,13 @@ namespace ChessAI
         private static readonly byte W_KNIGHT = 3;
         private static readonly byte W_BISHOP = 4;
         private static readonly byte W_QUEEN = 5;
-        private static readonly byte W_KING = 6;
+        public static readonly byte W_KING = 6;
         private static readonly byte B_PAWN = 7;
         private static readonly byte B_ROOK = 8;
         private static readonly byte B_KNIGHT = 9;
         private static readonly byte B_BISHOP = 10;
         private static readonly byte B_QUEEN = 11;
-        private static readonly byte B_KING = 12;
+        public static readonly byte B_KING = 12;
 
         private static readonly bool WHITE = true;
         private static readonly bool BLACK = false;
@@ -281,21 +297,24 @@ namespace ChessAI
                 this.blackKingTaken = false;
             }
 
-            if(!move.promotion)
-            {
-                if (move.destinationPiece != BLANK_PIECE)
-                {
-                    ++pieces;
-                    if (move.destinationPiece != B_KING && move.destinationPiece != W_KING)
-                    {
-                        ++pieceCount[move.destinationPiece];
-                    }
-                    CheckGameState(false);
-                }
-                board[move.originX, move.originY] = move.originPiece;
-                board[move.destX, move.destY] = move.destinationPiece;
-            }
-            else
+//<<<<<<< HEAD
+//            if(!move.promotion)
+//            {
+//                if (move.destinationPiece != BLANK_PIECE)
+//                {
+//                    ++pieces;
+//                    if (move.destinationPiece != B_KING && move.destinationPiece != W_KING)
+//                    {
+//                        ++pieceCount[move.destinationPiece];
+//                    }
+//                    CheckGameState(false);
+//                }
+//                board[move.originX, move.originY] = move.originPiece;
+//                board[move.destX, move.destY] = move.destinationPiece;
+//            }
+//            else
+//=======
+            if(move.promotion)
             {
                 if ((move.originPiece - 1) / 6 == 0)
                 {
@@ -317,6 +336,31 @@ namespace ChessAI
                 CheckGameState(false);
                 board[move.destX, move.destY] = move.destinationPiece;
             }
+            else if(move.enpassent)
+            {
+                ++pieces;
+                ++pieceCount[move.destinationPiece];
+                CheckGameState(false);
+                board[move.originX, move.originY] = move.originPiece;
+                board[move.destX, move.destY] = BLANK_PIECE;
+                board[move.destX, move.originY] = move.destinationPiece;
+                //Console.WriteLine("En Passent");
+            }
+            else
+            {
+                if (move.destinationPiece != BLANK_PIECE)
+                {
+                    ++pieces;
+                    if (move.destinationPiece != B_KING && move.destinationPiece != W_KING)
+                    {
+                        ++pieceCount[move.destinationPiece];
+                    }
+                    CheckGameState(false);
+                }
+                board[move.originX, move.originY] = move.originPiece;
+                board[move.destX, move.destY] = move.destinationPiece;
+            }
+            
         }
 
         public void MakeMove(Move move)
@@ -360,13 +404,13 @@ namespace ChessAI
             else if (move.originPiece % 6 == W_PAWN && move.originX != move.destX && move.destinationPiece == 0)
             {
                 board[move.destX, move.destY] = move.originPiece;
-                board[move.originX, move.destY] = BLANK_PIECE;
+                board[move.destX, move.originY] = BLANK_PIECE;
                 --pieces;
                 CheckGameState(true);
-                board[move.destX, move.originY] = BLANK_PIECE;
+                board[move.originX, move.originY] = BLANK_PIECE;
             }
             // make castle
-            else if(move.originPiece % 6 == 0 && move.destX - move.originX == 2)
+            else if(move.originPiece % 6 == 0 && (move.destX - move.originX == 2 || move.originX - move.destX == 2 ))
             {
                 board[move.originX, move.originY] = BLANK_PIECE;
                 board[move.destX, move.destY] = move.originPiece;
@@ -450,6 +494,7 @@ namespace ChessAI
                                     if (j == 6) 
                                     {
                                         moves.Add(CreateMove(i, j, i, j + 1, W_QUEEN));
+                                        moves.Add(CreateMove(i, j, i, j + 1, W_KNIGHT));
                                     }
                                     else
                                     {
@@ -467,6 +512,7 @@ namespace ChessAI
                                     if (j == 6)
                                     {
                                         moves.Add(CreateMove(i, j, i + 1, j + 1, W_QUEEN));
+                                        moves.Add(CreateMove(i, j, i, j + 1, W_KNIGHT));
                                     }
                                     else
                                     {
@@ -479,10 +525,36 @@ namespace ChessAI
                                     if (j == 6)
                                     {
                                         moves.Add(CreateMove(i, j, i - 1, j + 1, W_QUEEN));
+                                        moves.Add(CreateMove(i, j, i, j + 1, W_KNIGHT));
                                     }
                                     else
                                     {
                                         moves.Add(CreateMove(i, j, i - 1, j + 1));
+                                    }
+                                }
+                                // en passent
+                                if(j == 4){
+                                    if (i > 0 && board[i - 1, j] == B_PAWN)
+                                    {
+                                        if (this.moves.Count > 0)
+                                        {
+                                            Move m = this.moves.Peek();
+                                            if (m.originPiece == B_PAWN && m.originX == (i - 1) && m.originY == 6 && m.destX == (i - 1) && m.destY == 4)
+                                            {
+                                                moves.Add(new Move(i, j, i -1, j+1, this.board, true));
+                                            }
+                                        }
+                                    }
+                                    if (i < 7 && board[i + 1, j] == B_PAWN)
+                                    {
+                                        if (this.moves.Count > 0)
+                                        {
+                                            Move m = this.moves.Peek();
+                                            if (m.originPiece == B_PAWN && m.originX == (i + 1) && m.originY == 6 && m.destX == (i + 1) && m.destY == 4)
+                                            {
+                                                moves.Add(new Move(i, j, i + 1, j + 1, this.board, true));
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -494,6 +566,7 @@ namespace ChessAI
                                     if (j == 1)
                                     {
                                         moves.Add(CreateMove(i, j, i, j - 1, B_QUEEN));
+                                        moves.Add(CreateMove(i, j, i, j + 1, B_KNIGHT));
                                     }
                                     else
                                     {
@@ -511,6 +584,7 @@ namespace ChessAI
                                     if (j == 1)
                                     {
                                         moves.Add(CreateMove(i, j, i + 1, j - 1, B_QUEEN));
+                                        moves.Add(CreateMove(i, j, i, j + 1, B_KNIGHT));
                                     }
                                     else
                                     {
@@ -523,12 +597,39 @@ namespace ChessAI
                                     if (j == 1)
                                     {
                                         moves.Add(CreateMove(i, j, i - 1, j - 1, B_QUEEN));
+                                        moves.Add(CreateMove(i, j, i, j + 1, B_KNIGHT));
                                     }
                                     else
                                     {
                                         moves.Add(CreateMove(i, j, i - 1, j - 1));
                                     }
 
+                                }
+                                // en passent
+                                if (j == 3)
+                                {
+                                    if (i > 0 && board[i - 1, j] == W_PAWN)
+                                    {
+                                        if (this.moves.Count > 0)
+                                        {
+                                            Move m = this.moves.Peek();
+                                            if (m.originPiece == W_PAWN && m.originX == (i - 1) && m.originY == 1 && m.destX == (i - 1) && m.destY == j)
+                                            {
+                                                moves.Add(new Move(i, j, i - 1, j - 1, this.board, true));
+                                            }
+                                        }
+                                    }
+                                    if (i < 7 && board[i + 1, j] == W_PAWN)
+                                    {
+                                        if (this.moves.Count > 0)
+                                        {
+                                            Move m = this.moves.Peek();
+                                            if (m.originPiece == W_PAWN && m.originX == (i + 1) && m.originY == 1 && m.destX == (i + 1) && m.destY == j)
+                                            {
+                                                moves.Add(new Move(i, j, i + 1, j - 1, this.board, true));
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -921,39 +1022,17 @@ namespace ChessAI
                     }
                 }
             }
-            if (first && this.moves.Count >= 6)
-            {
-                Stack<Move> tempStack = new Stack<Move>();
-                foreach (Move m in this.moves.Reverse())
-                {
-                    tempStack.Push(m);
-                }
-                tempStack.Pop();
-                Move m1 = tempStack.Pop();
-                tempStack.Pop();
-                Move m2 = tempStack.Pop();
-                tempStack.Pop();
-                if (m1.Equals(tempStack.Pop()))
-                {
-                    for (int i = 0; i < moves.Count; )
-                    {
-                        if (m2.Equals(moves[i]))
-                        {
-                            moves.RemoveAt(i);
-                        }
-                        else
-                        {
-                            i++;
-                        }
-                    }
-                }
-            }
             return moves;
         }
 
         public bool IsMidGame()
         {
             return gameState == MID_GAME;
+        }
+
+        public Stack<Move> GetAllMoves()
+        {
+            return this.moves;
         }
 
         public bool IsEndGame()
@@ -1993,11 +2072,11 @@ namespace ChessAI
             {
                 if (y + 1 < 8)
                 {
-                    if (color && board[x + 1, y + 1] == B_PAWN)
-                    {
-                        return true;
-                    }
-                    else if (!color && board[x + 1, y + 1] == W_PAWN)
+                    //if (color && board[x + 1, y + 1] == B_PAWN)
+                    //{
+                    //    return true;
+                    //}
+                    if (!color && board[x + 1, y + 1] == W_PAWN)
                     {
                         return true;
                     }
@@ -2008,21 +2087,21 @@ namespace ChessAI
                     {
                         return true;
                     }
-                    else if (!color && board[x + 1, y - 1] == W_PAWN)
-                    {
-                        return true;
-                    }
+                    //else if (!color && board[x + 1, y - 1] == W_PAWN)
+                    //{
+                    //    return true;
+                    //}
                 }
             }
             if (x - 1 >= 0)
             {
                 if (y + 1 < 8)
                 {
-                    if (color && board[x - 1, y + 1] == B_PAWN)
-                    {
-                        return true;
-                    }
-                    else if (!color && board[x - 1, y + 1] == W_PAWN)
+                    //if (color && board[x - 1, y + 1] == B_PAWN)
+                    //{
+                    //    return true;
+                    //}
+                    if (!color && board[x - 1, y + 1] == W_PAWN)
                     {
                         return true;
                     }
@@ -2033,10 +2112,10 @@ namespace ChessAI
                     {
                         return true;
                     }
-                    else if (!color && board[x - 1, y - 1] == W_PAWN)
-                    {
-                        return true;
-                    }
+                    //else if (!color && board[x - 1, y - 1] == W_PAWN)
+                    //{
+                    //    return true;
+                    //}
                 }
             }
 
