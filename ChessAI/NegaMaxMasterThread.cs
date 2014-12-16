@@ -154,14 +154,14 @@ namespace ChessAI
             {
                 Board b = this.board.Clone();
                 b.MakeMove(moveToMake);
-                if (b.CheckForKingCheck(0, 0, color)) // TODO fix
+                if (b.CheckForKingCheck(color)) // TODO fix
                 {
                     b.UndoMove();
                     List<Move> nonCheckMoves = new List<Move>();
                     foreach(Move m in this.moves)
                     {
                         b.MakeMove(m);
-                        if (!b.CheckForKingCheck(0, 0, color))
+                        if (!b.CheckForKingCheck(color))
                         {
                             nonCheckMoves.Add(m);
                         }
