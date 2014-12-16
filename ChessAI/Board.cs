@@ -1539,6 +1539,26 @@ namespace ChessAI
             }
         }
 
+        public bool CheckForKingCheck(bool color)
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    if(board[i,j] == W_KING && color)
+                    {
+                        return CheckForKingCheck(i, j, color);
+                    }
+                    else if(board[i,j] == B_KING && !color)
+                    {
+                        return CheckForKingCheck(i, j, color);
+                    }
+                }
+            }
+
+            return false;
+        }
+
         public bool CheckForKingCheck(int x, int y, bool color)
         {
             int i = x;
