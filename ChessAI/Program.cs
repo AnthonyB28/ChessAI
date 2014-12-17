@@ -8,12 +8,14 @@ namespace ChessAI
         static void Main(string[] args)
         {
             //byte[,] state = new byte[8, 8];
-            //state[0, 7] = 8;
-            //state[7, 7] = 8;
-            //state[0, 6] = 7;
-            //state[3, 0] = 2;
-            //state[4, 6] = 7;
-            //state[7, 6] = 7;
+            //state[0, 6] = 5;
+            //state[4, 5] = 5;
+            //state[6, 2] = 1;
+            //state[5, 1] = 1;
+            //state[6,4] = 12;
+            //state[6, 0] = 6;
+            //state[1, 4] = 7;
+            //state[0, 1] = 7;
             //state[2, 5] = 7;
             //state[4, 5] = 12;
             //state[4, 2] = 1;
@@ -36,6 +38,9 @@ namespace ChessAI
             //moves.Push(new Move)
             //Board board = new Board(state, new byte[12], moves, 6, 2, false, false, 1, 1, 1, 1, 1, 1);
             //Console.WriteLine(board);
+            //String moveS;
+            //Move move = board.PlayNegaMaxMoveMultiThreaded(out moveS, false, 8);
+            //Console.WriteLine(moveS);
             //List<Move> moves = board.GetAllStates(false, false);
             //foreach (Move m in moves)
             //{

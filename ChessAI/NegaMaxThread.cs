@@ -12,6 +12,13 @@ namespace ChessAI
         private bool finished;
         private int depth;
 
+        /// <summary>
+        /// Creates a negamax thread
+        /// </summary>
+        /// <param name="board">Clone of the board to search on</param>
+        /// <param name="color">Team side to search for</param>
+        /// <param name="master">Reference to master thread to communicate</param>
+        /// <param name="depth">Depth to search to</param>
         public NegaMaxThread(Board board, bool color, NegaMaxMasterThread master, int depth)
         {
             this.board = board;
@@ -23,6 +30,9 @@ namespace ChessAI
             beta = -Negamax.NEGA_SCORE;
         }
 
+        /// <summary>
+        /// Runs the search thread
+        /// </summary>
         public void Run()
         {
             bool first = true;
@@ -75,6 +85,10 @@ namespace ChessAI
             finished = true;
         }
 
+        /// <summary>
+        /// Let's the master thread know if it's finished
+        /// </summary>
+        /// <returns>true if finished, false otherwise</returns>
         public bool isFinished()
         {
             return this.finished;
