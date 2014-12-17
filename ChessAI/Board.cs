@@ -153,6 +153,11 @@ namespace ChessAI
             return gameState == LATE_END_GAME;
         }
 
+        public bool IsStartGame()
+        {
+            return ( whiteKing == 0 && (leftWhiteRook == 0 || rightWhiteRook == 0)) && (blackKing == 0 && (leftBlackRook == 0 || rightBlackRook == 0));
+        }
+
         /// <summary>
         /// Returns if last move applied was a capture
         /// </summary>
@@ -393,13 +398,13 @@ namespace ChessAI
                         --pieceCount[move.destinationPiece];
                     }
                 }
-                if (whiteKing == 0 && move.originPiece % 6 == 0 && move.originX == 4)
+                if (move.originPiece % 6 == 0 && move.originX == 4)
                 {
-                    if (move.originPiece == W_KING && move.originY == 0)
+                    if (whiteKing == 0 && move.originPiece == W_KING && move.originY == 0)
                     {
                         whiteKing = this.moves.Count;
                     }
-                    else if (move.originPiece == B_KING && move.originY == 7)
+                    else if (blackKing == 0 && move.originPiece == B_KING && move.originY == 7)
                     {
                         blackKing = this.moves.Count;
                     }
@@ -533,6 +538,42 @@ namespace ChessAI
                 }
                 board[move.originX, move.originY] = move.originPiece;
                 board[move.destX, move.destY] = move.destinationPiece;
+                if (move.originPiece % 6 == 0 && move.destX == 4)
+                {
+                    if (move.originPiece == W_KING && move.destY == 0 && this.moves.Count < whiteKing)
+                    {
+                        whiteKing = 0;
+                    }
+                    else if (move.originPiece == B_KING && move.destY == 7 && this.moves.Count < blackKing)
+                    {
+                        blackKing = 0;
+                    }
+                }
+                else if (move.originPiece % 6 == W_ROOK)
+                {
+                    if (move.originPiece == W_ROOK)
+                    {
+                        if (move.destX == 0 && move.destY == 0 && this.moves.Count < leftWhiteRook)
+                        {
+                            leftWhiteRook = 0;
+                        }
+                        else if (move.destX == 7 && move.destY == 0 && this.moves.Count < rightWhiteRook)
+                        {
+                            rightWhiteRook = 0;
+                        }
+                    }
+                    else if (move.originPiece == B_ROOK)
+                    {
+                        if (move.destX == 0 && move.destY == 7 && this.moves.Count < leftBlackRook)
+                        {
+                            leftBlackRook = 0;
+                        }
+                        else if (move.destX == 7 && move.destY == 7 && this.moves.Count < rightBlackRook)
+                        {
+                            rightBlackRook = 0;
+                        }
+                    }
+                }
             }
             
         }
@@ -1248,7 +1289,7 @@ namespace ChessAI
                                     if (j == 1)
                                     {
                                         moves.Add(CreateMove(i, j, i, j - 1, B_QUEEN));
-                                        moves.Add(CreateMove(i, j, i, j + 1, B_KNIGHT));
+                                        moves.Add(CreateMove(i, j, i, j - 1, B_KNIGHT));
                                     }
                                     else
                                     {
@@ -1266,7 +1307,7 @@ namespace ChessAI
                                     if (j == 1)
                                     {
                                         moves.Add(CreateMove(i, j, i + 1, j - 1, B_QUEEN));
-                                        moves.Add(CreateMove(i, j, i + 1, j + 1, B_KNIGHT));
+                                        moves.Add(CreateMove(i, j, i + 1, j - 1, B_KNIGHT));
                                     }
                                     else
                                     {
@@ -1279,7 +1320,7 @@ namespace ChessAI
                                     if (j == 1)
                                     {
                                         moves.Add(CreateMove(i, j, i - 1, j - 1, B_QUEEN));
-                                        moves.Add(CreateMove(i, j, i - 1, j + 1, B_KNIGHT));
+                                        moves.Add(CreateMove(i, j, i - 1, j - 1, B_KNIGHT));
                                     }
                                     else
                                     {
@@ -1656,7 +1697,7 @@ namespace ChessAI
 
                                 moves.Add(CreateMove(i, j, i - 1, j - 1));
                             }
-                            if (board[i, j] == W_KING && whiteKing == 0)
+                            if (i == 4 && j == 0 && board[i, j] == W_KING && whiteKing == 0)
                             {
                                 if (rightWhiteRook == 0)
                                 {
@@ -1704,7 +1745,7 @@ namespace ChessAI
                                     }
                                 }
                             }
-                            else if (board[i, j] == B_KING && blackKing == 0)
+                            else if (j == 7 && i == 4 && board[i, j] == B_KING && blackKing == 0)
                             {
                                 if (rightBlackRook == 0)
                                 {

@@ -55,6 +55,11 @@ namespace ChessAI
         public Move Run()
         {
             int cpus = Environment.ProcessorCount;
+            int sleepTime = 400;
+            if (depth < 6)
+            {
+                sleepTime = 150;
+            }
             // Search all moves for a king capture and just take the first one possible, avoids a high depth search in end game
             // that can run out the clock, score is pointless in comparison to a win
             // also avoids letting our king be in check and constantly looping, however it may not be possible due to that a captured king
@@ -126,7 +131,7 @@ namespace ChessAI
                 if (x >= threads.Count)
                 {
                     x = 0;
-                    Thread.Sleep(500);
+                    Thread.Sleep(sleepTime);
                     //Console.WriteLine("moves waiting: " + moves.Count);
                 }
                 

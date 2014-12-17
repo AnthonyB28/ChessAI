@@ -194,10 +194,44 @@ namespace ChessAI
             //{
             //    Diagnostics.singleTime += t.ElapsedMilliseconds;
             //}
+            bool startGame = board.IsStartGame();
+            bool midGame = false;
+            bool endGame = false;
+            bool lateEndGame = false;
+            int maxTime = 20000;
+            if (!startGame)
+            {
+                midGame = board.IsMidGame();
+                endGame = board.IsEndGame();
+                lateEndGame = board.IsLateEndGame();
+            }
+            else
+            {
+                maxTime = 8000;
+            }
+
+            int minDepth = 4;
+            int maxDepth = 8;
+            if (midGame)
+            {
+                minDepth = 5;
+                maxDepth = 10;
+                
+            }
+            else if (endGame)
+            {
+                minDepth = 6;
+                maxDepth = 12;
+            }
+            else if (lateEndGame)
+            {
+                minDepth = 7;
+                maxDepth = 12;
+            }
             t.Reset();
             t.Start();
             //Console.WriteLine("SingleThreaded Move: " + move);
-            int depth = 4;
+            int depth = minDepth;
             int ourCurrentBranch = board.GetAllStates(isWhite, true).Count;
             int oppCurrentBranch = board.GetAllStates(!isWhite, false).Count;
             if (turn > 1)
@@ -206,16 +240,16 @@ namespace ChessAI
                 long currentNodes = (long)(Math.Pow(ourCurrentBranch, depth / 2.0) * Math.Pow(oppCurrentBranch, depth / 2.0));
                 double nodesPerSecond = nodes / lastMoveTime;
                 double estimatedTime = (currentNodes / nodesPerSecond);
-                Console.WriteLine("Estimated Time: " + estimatedTime);
-                if (!board.IsEndGame())
+                
+                if (!lateEndGame)
                 {
-                    while (depth < 10 && estimatedTime < 1500)
+                    while (depth < maxDepth && estimatedTime < 2500)
                     {
                         depth++;
                         currentNodes = (long)(Math.Pow(ourCurrentBranch, depth / 2.0) * Math.Pow(oppCurrentBranch, depth / 2.0));
                         estimatedTime = (currentNodes / nodesPerSecond);
                     }
-                    while (depth > 4 && estimatedTime > 20000)
+                    while (depth > minDepth && estimatedTime > maxTime)
                     {
                         depth--;
                         currentNodes = (long)(Math.Pow(ourCurrentBranch, depth / 2.0) * Math.Pow(oppCurrentBranch, depth / 2.0));
@@ -224,35 +258,47 @@ namespace ChessAI
                 }
                 else
                 {
-                    while (depth < 12 && estimatedTime < 10000)
+                    if (secondsLeft > 500)
                     {
-                        depth++;
-                        currentNodes = (long)(Math.Pow(ourCurrentBranch, depth / 2.0) * Math.Pow(oppCurrentBranch, depth / 2.0));
-                        estimatedTime = (currentNodes / nodesPerSecond);
+                        while (depth < maxDepth && estimatedTime < 30000)
+                        {
+                            depth++;
+                            currentNodes = (long)(Math.Pow(ourCurrentBranch, depth / 2.0) * Math.Pow(oppCurrentBranch, depth / 2.0));
+                            estimatedTime = (currentNodes / nodesPerSecond);
+                        }
+                        while (depth > minDepth && (estimatedTime > 85000))
+                        {
+                            depth--;
+                            currentNodes = (long)(Math.Pow(ourCurrentBranch, depth / 2.0) * Math.Pow(oppCurrentBranch, depth / 2.0));
+                            estimatedTime = (currentNodes / nodesPerSecond);
+                        }
                     }
-                    while (depth > 7 && (estimatedTime > secondsLeft + 20000 || estimatedTime > 60000))
+                    else
                     {
-                        depth--;
-                        currentNodes = (long)(Math.Pow(ourCurrentBranch, depth / 2.0) * Math.Pow(oppCurrentBranch, depth / 2.0));
-                        estimatedTime = (currentNodes / nodesPerSecond);
+                        while (depth < maxDepth && estimatedTime < 10000)
+                        {
+                            depth++;
+                            currentNodes = (long)(Math.Pow(ourCurrentBranch, depth / 2.0) * Math.Pow(oppCurrentBranch, depth / 2.0));
+                            estimatedTime = (currentNodes / nodesPerSecond);
+                        }
+                        while (depth > minDepth && (estimatedTime > 30000))
+                        {
+                            depth--;
+                            currentNodes = (long)(Math.Pow(ourCurrentBranch, depth / 2.0) * Math.Pow(oppCurrentBranch, depth / 2.0));
+                            estimatedTime = (currentNodes / nodesPerSecond);
+                        }
                     }
                 }
+                Console.WriteLine("Estimated Time: " + estimatedTime);
             }
-            if (depth < 4)
+            
+            if (depth < minDepth)
             {
-                depth = 4;
+                depth = minDepth;
             }
-            if (board.IsEndGame() && depth < 7)
+            if (depth > maxDepth)
             {
-                depth = 7;
-            }
-            if (!board.IsEndGame() && depth > 10)
-            {
-                depth = 10;
-            }
-            if (depth > 13)
-            {
-                depth = 13;
+                depth = maxDepth;
             }
             //if (turn > 35 && secondsLeft > 200)
             //{
