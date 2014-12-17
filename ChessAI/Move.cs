@@ -101,7 +101,7 @@ namespace ChessAI
             sb.Append((destY + 1));
             if (promotion)
             {
-                sb.Append(PIECE_TABLE[destinationPiece]);
+                sb.Append(PIECE_TABLE[originPiece]);
             }
 
             return sb.ToString();
