@@ -194,6 +194,7 @@ namespace ChessAI
             //{
             //    Diagnostics.singleTime += t.ElapsedMilliseconds;
             //}
+            Board b = board.Clone();
             bool startGame = board.IsStartGame();
             bool midGame = false;
             bool endGame = false;
@@ -226,7 +227,7 @@ namespace ChessAI
             else if (lateEndGame)
             {
                 minDepth = 7;
-                maxDepth = 12;
+                maxDepth = 13;
             }
             t.Reset();
             t.Start();
@@ -299,12 +300,19 @@ namespace ChessAI
             if (depth > maxDepth)
             {
                 depth = maxDepth;
+                
+            }
+            if (secondsLeft < 475 && depth > 12)
+            {
+                depth = 12;
             }
             //if (turn > 35 && secondsLeft > 200)
             //{
             //    depth = 6;
             //}//else if(secondsLeft > 100 && )
-            board = board.PlayNegaMaxMoveMultiThreaded(out move, isWhite, depth);
+            Move m = board.PlayNegaMaxMoveMultiThreaded(out move, isWhite, depth);
+            b.MakeMove(m);
+            board = b;
             t.Stop();
             lastOurMoveCount = ourCurrentBranch;
             lastOpponentMoveCount = oppCurrentBranch;

@@ -783,7 +783,7 @@ namespace ChessAI
         /// <param name="color"> color to move</param>
         /// <param name="depth"></param>
         /// <returns></returns>
-        public Board PlayNegaMaxMoveMultiThreaded(out string move, bool color, int depth)
+        public Move PlayNegaMaxMoveMultiThreaded(out string move, bool color, int depth)
         {
             //List<Move> moves = GetAllStates(color);
             //Console.WriteLine("Moves Available: " + moves.Count);
@@ -795,20 +795,20 @@ namespace ChessAI
             t.Stop();
             Console.WriteLine("MultiThread Time: " + t.ElapsedMilliseconds);
             //Diagnostics.multiTime += t.ElapsedMilliseconds;
-            Board b = this.Clone();
+            //Board b = this.Clone();
 
             if (moveToMake == null)
             {
                 Console.WriteLine("No move to make");
                 move = "";
-                return b;
+                return null;
             }
             //Console.WriteLine(b.ToString());
-            b.MakeMove(moveToMake);
+            //b.MakeMove(moveToMake);
             //Console.WriteLine(moveToMake.ToString());
             //Console.WriteLine(b.ToString());
             move = moveToMake.ToString();
-            return b;
+            return moveToMake;
         }
 
         /// <summary>
