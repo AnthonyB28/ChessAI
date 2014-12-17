@@ -227,7 +227,7 @@ namespace ChessAI
             else if (lateEndGame)
             {
                 minDepth = 7;
-                maxDepth = 13;
+                maxDepth = 12;
             }
             t.Reset();
             t.Start();
@@ -301,10 +301,6 @@ namespace ChessAI
             {
                 depth = maxDepth;
                 
-            }
-            if (secondsLeft < 475 && depth > 12)
-            {
-                depth = 12;
             }
             //if (turn > 35 && secondsLeft > 200)
             //{
