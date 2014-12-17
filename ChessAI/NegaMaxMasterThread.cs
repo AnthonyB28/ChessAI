@@ -25,6 +25,12 @@ namespace ChessAI
         //private Move checkMateMove;
         //private object _lockerCheckMate = new object();
 
+        /// <summary>
+        /// Creates the master thread negamax object
+        /// </summary>
+        /// <param name="board">Board to search</param>
+        /// <param name="color">Team side</param>
+        /// <param name="depth">Depth to search to, might be changed in research conditions</param>
         public NegaMaxMasterThread(Board board, bool color, int depth)
         {
             this.board = board;
@@ -52,6 +58,10 @@ namespace ChessAI
             }
         }
 
+        /// <summary>
+        /// Runs a full multithreaded NegaScout thread
+        /// </summary>
+        /// <returns>The move played</returns>
         public Move Run()
         {
             int cpus = Environment.ProcessorCount;
@@ -160,7 +170,7 @@ namespace ChessAI
                 {
                     b.UndoMove();
                     List<Move> nonCheckMoves = new List<Move>();
-                    foreach(Move m in this.board.GetAllStates(color, true))
+                    foreach(Move m in this.board.GetAllStates(color, false))
                     {
                         b.MakeMove(m);
                         if (!b.CheckForKingCheck(color))
@@ -182,6 +192,11 @@ namespace ChessAI
             return moveToMake;
         }
 
+        /// <summary>
+        /// Tells a thread if there are any moves left and gives it the next move if so
+        /// </summary>
+        /// <param name="move">Move for the thread to search</param>
+        /// <returns>true if there are moves left, otherwise false</returns>
         public bool HasMoves(out Move move)
         {
             // double checked locking if there are moves available, if we see none, obviously we don't need to lock
@@ -202,6 +217,12 @@ namespace ChessAI
             return false;
         }
 
+        /// <summary>
+        /// Tell the master thread the move and it's alpha score
+        /// Store the move if its alpha score is better than the last stored one
+        /// </summary>
+        /// <param name="move">The move that finished searching</param>
+        /// <param name="alpha">The move's alpha score</param>
         public void TellMove(Move move, int alpha)
         {
             //Console.WriteLine(alpha);
@@ -289,6 +310,10 @@ namespace ChessAI
             }
         }
 
+        /// <summary>
+        /// Gets the current alpha score for pruning
+        /// </summary>
+        /// <returns>current alpha score</returns>
         public int GetAlpha()
         {
             lock (_lockerStore)
@@ -297,6 +322,10 @@ namespace ChessAI
             }
         }
 
+        /// <summary>
+        /// Gets the next move, pretty sure not used, not thread safe
+        /// </summary>
+        /// <returns>Next Move</returns>
         public Move GetNextMove()
         {
             lock (_lockerGet)

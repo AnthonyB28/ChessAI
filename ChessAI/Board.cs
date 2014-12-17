@@ -2275,14 +2275,14 @@ namespace ChessAI
                     //{
                     //    return true;
                     //}
-                    if (!color && board[x + 1, y + 1] == W_PAWN)
+                    if (!color && board[x + 1, y - 1] == W_PAWN)
                     {
                         return true;
                     }
                 }
                 if (y - 1 >= 0)
                 {
-                    if (color && board[x + 1, y - 1] == B_PAWN)
+                    if (color && board[x + 1, y + 1] == B_PAWN)
                     {
                         return true;
                     }
@@ -2300,14 +2300,14 @@ namespace ChessAI
                     //{
                     //    return true;
                     //}
-                    if (!color && board[x - 1, y + 1] == W_PAWN)
+                    if (!color && board[x - 1, y - 1] == W_PAWN)
                     {
                         return true;
                     }
                 }
                 if (y - 1 >= 0)
                 {
-                    if (color && board[x - 1, y - 1] == B_PAWN)
+                    if (color && board[x - 1, y + 1] == B_PAWN)
                     {
                         return true;
                     }
