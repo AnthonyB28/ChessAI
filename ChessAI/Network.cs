@@ -3,7 +3,6 @@ using System.IO;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
-using System.Timers;
 
 /* 
  * Start game = http://www.bencarle.com/chess/startgame
@@ -16,22 +15,19 @@ using System.Timers;
 
 namespace ChessAI
 {
+    /// <summary>
+    /// Handles connection to Carle's server.
+    /// </summary>
     class Network
     {
-        private int gameID;
-        private int teamID;
+        private JSONPollResponse lastResponse;
+        private string moveServerPrefix;
         private string teamKey;
         private string pollingServer;
-        // Append move string with trailing "/" to make a move
-        private string moveServerPrefix;
+        private int gameID;
+        private int teamID;
         private volatile bool receivedResponse;
-        private JSONPollResponse lastResponse;
         private volatile bool moveSending;
-        //private WebClient downloader;
-
-        // FOR TEST
-        //const int teamID2 = 2;
-        //const string teamKey2 = "1a77594c";
 
         public Network(int gameID, int teamID, string teamKey)
         {
@@ -45,7 +41,10 @@ namespace ChessAI
             moveSending = false;
         }
 
-        // Attempts to poll server and returns response set by callback asyncronously.
+        /// <summary>
+        /// Attempts to poll server and returns response set by callback asynchronously.
+        /// </summary>
+        /// <returns></returns>
         public JSONPollResponse RequestPoll()
         {
             receivedResponse = false;
@@ -58,7 +57,9 @@ namespace ChessAI
             return lastResponse;
         }
 
-        // Makes a request to the server with a callback
+        /// <summary>
+        /// Makes a request to the server with a callback
+        /// </summary>
         private void Poll()
         {
             Uri pollingServerURI = new Uri(pollingServer);
@@ -67,8 +68,12 @@ namespace ChessAI
             downloader.OpenReadAsync(pollingServerURI);
         }
 
-        // Callback of MakeRequest when server response is received.
-        // If fails, will reattempt to Poll()
+        /// <summary>
+        /// Callback of MakeRequest when server response is received.
+        /// If fails, will reattempt to Poll()
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void PollCompleted(object sender, OpenReadCompletedEventArgs e)
         {
             bool error = false;
@@ -102,6 +107,10 @@ namespace ChessAI
             }
         }
 
+        /// <summary>
+        /// Send the server our move.
+        /// </summary>
+        /// <param name="move">chess syntax move to make</param>
         public void MakeMove(string move)
         {
             String moveAddress = moveServerPrefix+move+"/";
@@ -117,6 +126,11 @@ namespace ChessAI
             }
         }
 
+        /// <summary>
+        /// Callback for a valid move from server
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void MoveCompleted(object sender, OpenReadCompletedEventArgs e)
         {
             if (e.Error == null)
@@ -128,6 +142,9 @@ namespace ChessAI
             }
         }
 
+        /// <summary>
+        /// JSON response structure from the server
+        /// </summary>
         [DataContract]
         public class JSONPollResponse
         {

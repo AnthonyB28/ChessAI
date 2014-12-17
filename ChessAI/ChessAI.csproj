@@ -45,6 +45,7 @@
     <Compile Include="Board.cs" />
     <Compile Include="Diagnostics.cs" />
     <Compile Include="GameState.cs" />
+    <Compile Include="Move.cs" />
     <Compile Include="Negamax.cs" />
     <Compile Include="NegaMaxMasterThread.cs" />
     <Compile Include="NegaMaxThread.cs" />
