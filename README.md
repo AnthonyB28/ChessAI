@@ -20,7 +20,7 @@ search’s branching factor and the time taken during the last search. Dynamic d
 also adjusted by minimum and maximum depth margins decided by the state of the game: early,
  middle, end, and late end. The states of the game are decided by the number of pieces on the board remaining.
  
- ### Evaluation
+### Evaluation
 The evaluation function considers the entire board state. All pieces have assigned 
 value, and the totals are added together per color. Eval has many factors besides 
 just material values such as mid game and end game bonuses, isolated and doubled pawn files, 
