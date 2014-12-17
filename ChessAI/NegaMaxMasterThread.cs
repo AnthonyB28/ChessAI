@@ -155,7 +155,7 @@ namespace ChessAI
                 {
                     b.UndoMove();
                     List<Move> nonCheckMoves = new List<Move>();
-                    foreach(Move m in this.moves)
+                    foreach(Move m in this.board.GetAllStates(color, true))
                     {
                         b.MakeMove(m);
                         if (!b.CheckForKingCheck(color))
@@ -168,6 +168,7 @@ namespace ChessAI
                     {
                         Console.WriteLine("Researching....");
                         depth = 5;
+                        this.alpha = Negamax.NEGA_SCORE;
                         this.moves = nonCheckMoves;
                         return this.Run();
                     }
