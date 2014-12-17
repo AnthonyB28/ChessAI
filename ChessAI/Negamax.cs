@@ -54,15 +54,14 @@ namespace ChessAI
                 alpha = stand_pat;
             }
 
-
             List<Move> moves = state.GetAllCaptureStates(color);
             if (moves.Count == 0)
             {
                 return state.Evaluate(color, 0);
             }
-            foreach (Move move in moves)
+            for(int i = 0; i < moves.Count; ++i)
             {
-                state.MakeMove(move);
+                state.MakeMove(moves[i]);
                 int score = -Quiesce(state, -beta, -alpha, !color, depth + 1);
                 state.UndoMove();
                 if (score >= beta)
