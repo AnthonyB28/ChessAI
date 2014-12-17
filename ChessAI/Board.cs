@@ -153,6 +153,11 @@ namespace ChessAI
             return gameState == LATE_END_GAME;
         }
 
+        public bool IsStartGame()
+        {
+            return ( whiteKing == 0 && (leftWhiteRook == 0 || rightWhiteRook == 0)) && (blackKing == 0 && (leftBlackRook == 0 || rightBlackRook == 0));
+        }
+
         /// <summary>
         /// Returns if last move applied was a capture
         /// </summary>
@@ -393,13 +398,13 @@ namespace ChessAI
                         --pieceCount[move.destinationPiece];
                     }
                 }
-                if (whiteKing == 0 && move.originPiece % 6 == 0 && move.originX == 4)
+                if (move.originPiece % 6 == 0 && move.originX == 4)
                 {
-                    if (move.originPiece == W_KING && move.originY == 0)
+                    if (whiteKing == 0 && move.originPiece == W_KING && move.originY == 0)
                     {
                         whiteKing = this.moves.Count;
                     }
-                    else if (move.originPiece == B_KING && move.originY == 7)
+                    else if (blackKing == 0 && move.originPiece == B_KING && move.originY == 7)
                     {
                         blackKing = this.moves.Count;
                     }
@@ -533,6 +538,42 @@ namespace ChessAI
                 }
                 board[move.originX, move.originY] = move.originPiece;
                 board[move.destX, move.destY] = move.destinationPiece;
+                if (move.originPiece % 6 == 0 && move.destX == 4)
+                {
+                    if (move.originPiece == W_KING && move.destY == 0 && this.moves.Count < whiteKing)
+                    {
+                        whiteKing = 0;
+                    }
+                    else if (move.originPiece == B_KING && move.destY == 7 && this.moves.Count < blackKing)
+                    {
+                        blackKing = 0;
+                    }
+                }
+                else if (move.originPiece % 6 == W_ROOK)
+                {
+                    if (move.originPiece == W_ROOK)
+                    {
+                        if (move.destX == 0 && move.destY == 0 && this.moves.Count < leftWhiteRook)
+                        {
+                            leftWhiteRook = 0;
+                        }
+                        else if (move.destX == 7 && move.destY == 0 && this.moves.Count < rightWhiteRook)
+                        {
+                            rightWhiteRook = 0;
+                        }
+                    }
+                    else if (move.originPiece == B_ROOK)
+                    {
+                        if (move.destX == 0 && move.destY == 7 && this.moves.Count < leftBlackRook)
+                        {
+                            leftBlackRook = 0;
+                        }
+                        else if (move.destX == 7 && move.destY == 7 && this.moves.Count < rightBlackRook)
+                        {
+                            rightBlackRook = 0;
+                        }
+                    }
+                }
             }
             
         }
@@ -742,7 +783,7 @@ namespace ChessAI
         /// <param name="color"> color to move</param>
         /// <param name="depth"></param>
         /// <returns></returns>
-        public Board PlayNegaMaxMoveMultiThreaded(out string move, bool color, int depth)
+        public Move PlayNegaMaxMoveMultiThreaded(out string move, bool color, int depth)
         {
             //List<Move> moves = GetAllStates(color);
             //Console.WriteLine("Moves Available: " + moves.Count);
@@ -754,20 +795,20 @@ namespace ChessAI
             t.Stop();
             Console.WriteLine("MultiThread Time: " + t.ElapsedMilliseconds);
             //Diagnostics.multiTime += t.ElapsedMilliseconds;
-            Board b = this.Clone();
+            //Board b = this.Clone();
 
             if (moveToMake == null)
             {
                 Console.WriteLine("No move to make");
                 move = "";
-                return b;
+                return null;
             }
             //Console.WriteLine(b.ToString());
-            b.MakeMove(moveToMake);
+            //b.MakeMove(moveToMake);
             //Console.WriteLine(moveToMake.ToString());
             //Console.WriteLine(b.ToString());
             move = moveToMake.ToString();
-            return b;
+            return moveToMake;
         }
 
         /// <summary>
@@ -1193,7 +1234,7 @@ namespace ChessAI
                                     if (j == 6)
                                     {
                                         moves.Add(CreateMove(i, j, i + 1, j + 1, W_QUEEN));
-                                        moves.Add(CreateMove(i, j, i, j + 1, W_KNIGHT));
+                                        moves.Add(CreateMove(i, j, i + 1, j + 1, W_KNIGHT));
                                     }
                                     else
                                     {
@@ -1206,7 +1247,7 @@ namespace ChessAI
                                     if (j == 6)
                                     {
                                         moves.Add(CreateMove(i, j, i - 1, j + 1, W_QUEEN));
-                                        moves.Add(CreateMove(i, j, i, j + 1, W_KNIGHT));
+                                        moves.Add(CreateMove(i, j, i - 1, j + 1, W_KNIGHT));
                                     }
                                     else
                                     {
@@ -1248,7 +1289,7 @@ namespace ChessAI
                                     if (j == 1)
                                     {
                                         moves.Add(CreateMove(i, j, i, j - 1, B_QUEEN));
-                                        moves.Add(CreateMove(i, j, i, j + 1, B_KNIGHT));
+                                        moves.Add(CreateMove(i, j, i, j - 1, B_KNIGHT));
                                     }
                                     else
                                     {
@@ -1266,7 +1307,7 @@ namespace ChessAI
                                     if (j == 1)
                                     {
                                         moves.Add(CreateMove(i, j, i + 1, j - 1, B_QUEEN));
-                                        moves.Add(CreateMove(i, j, i, j + 1, B_KNIGHT));
+                                        moves.Add(CreateMove(i, j, i + 1, j - 1, B_KNIGHT));
                                     }
                                     else
                                     {
@@ -1279,7 +1320,7 @@ namespace ChessAI
                                     if (j == 1)
                                     {
                                         moves.Add(CreateMove(i, j, i - 1, j - 1, B_QUEEN));
-                                        moves.Add(CreateMove(i, j, i, j + 1, B_KNIGHT));
+                                        moves.Add(CreateMove(i, j, i - 1, j - 1, B_KNIGHT));
                                     }
                                     else
                                     {
@@ -1322,7 +1363,6 @@ namespace ChessAI
                             {
                                 if (board[x, j] == 0)
                                 {
-
                                     moves.Add(CreateMove(i, j, x, j));
                                 }
                                 else
@@ -1657,7 +1697,7 @@ namespace ChessAI
 
                                 moves.Add(CreateMove(i, j, i - 1, j - 1));
                             }
-                            if (board[i, j] == W_KING && whiteKing == 0)
+                            if (i == 4 && j == 0 && board[i, j] == W_KING && whiteKing == 0)
                             {
                                 if (rightWhiteRook == 0)
                                 {
@@ -1705,7 +1745,7 @@ namespace ChessAI
                                     }
                                 }
                             }
-                            else if (board[i, j] == B_KING && blackKing == 0)
+                            else if (j == 7 && i == 4 && board[i, j] == B_KING && blackKing == 0)
                             {
                                 if (rightBlackRook == 0)
                                 {
@@ -1889,7 +1929,7 @@ namespace ChessAI
                 {
                     if (color)
                     {
-                        if (board[x, y] == B_ROOK || board[x, y] == B_QUEEN)
+                        if (board[x, j] == B_ROOK || board[x, j] == B_QUEEN)
                         {
                             return true;
                         }
@@ -1897,7 +1937,7 @@ namespace ChessAI
                     }
                     else
                     {
-                        if (board[x, y] == W_ROOK || board[x, y] == W_QUEEN)
+                        if (board[x, j] == W_ROOK || board[x, j] == W_QUEEN)
                         {
                             return true;
                         }
@@ -1912,7 +1952,7 @@ namespace ChessAI
                 {
                     if (color)
                     {
-                        if (board[x, y] == B_ROOK || board[x, y] == B_QUEEN)
+                        if (board[x, j] == B_ROOK || board[x, j] == B_QUEEN)
                         {
                             return true;
                         }
@@ -1920,7 +1960,7 @@ namespace ChessAI
                     }
                     else
                     {
-                        if (board[x, y] == W_ROOK || board[x, y] == W_QUEEN)
+                        if (board[x, j] == W_ROOK || board[x, j] == W_QUEEN)
                         {
                             return true;
                         }
@@ -1938,7 +1978,7 @@ namespace ChessAI
                 {
                     if (color)
                     {
-                        if (board[i, y] == B_BISHOP || board[i, y] == B_QUEEN)
+                        if (board[i, j] == B_BISHOP || board[i, j] == B_QUEEN)
                         {
                             return true;
                         }
@@ -1946,7 +1986,7 @@ namespace ChessAI
                     }
                     else
                     {
-                        if (board[i, y] == W_BISHOP || board[i, y] == W_QUEEN)
+                        if (board[i, j] == W_BISHOP || board[i, j] == W_QUEEN)
                         {
                             return true;
                         }
@@ -1962,7 +2002,7 @@ namespace ChessAI
                 {
                     if (color)
                     {
-                        if (board[i, y] == B_BISHOP || board[i, y] == B_QUEEN)
+                        if (board[i, j] == B_BISHOP || board[i, j] == B_QUEEN)
                         {
                             return true;
                         }
@@ -1970,7 +2010,7 @@ namespace ChessAI
                     }
                     else
                     {
-                        if (board[i, y] == W_BISHOP || board[i, y] == W_QUEEN)
+                        if (board[i, j] == W_BISHOP || board[i, j] == W_QUEEN)
                         {
                             return true;
                         }
@@ -1986,7 +2026,7 @@ namespace ChessAI
                 {
                     if (color)
                     {
-                        if (board[i, y] == B_BISHOP || board[i, y] == B_QUEEN)
+                        if (board[i, j] == B_BISHOP || board[i, j] == B_QUEEN)
                         {
                             return true;
                         }
@@ -1994,7 +2034,7 @@ namespace ChessAI
                     }
                     else
                     {
-                        if (board[i, y] == W_BISHOP || board[i, y] == W_QUEEN)
+                        if (board[i, j] == W_BISHOP || board[i, j] == W_QUEEN)
                         {
                             return true;
                         }
@@ -2010,7 +2050,7 @@ namespace ChessAI
                 {
                     if (color)
                     {
-                        if (board[i, y] == B_BISHOP || board[i, y] == B_QUEEN)
+                        if (board[i, j] == B_BISHOP || board[i, j] == B_QUEEN)
                         {
                             return true;
                         }
@@ -2018,7 +2058,7 @@ namespace ChessAI
                     }
                     else
                     {
-                        if (board[i, y] == W_BISHOP || board[i, y] == W_QUEEN)
+                        if (board[i, j] == W_BISHOP || board[i, j] == W_QUEEN)
                         {
                             return true;
                         }
