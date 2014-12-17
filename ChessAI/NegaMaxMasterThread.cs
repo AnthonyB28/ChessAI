@@ -28,17 +28,13 @@ namespace ChessAI
             this.moves = this.board.GetAllStates(this.color, true);
             
             Console.WriteLine("Moves available: " + this.moves.Count);
-            this.moves.Sort();
+            this.board.SortMoves(this.moves, this.color);
             this.threads = new List<NegaMaxThread>();
             alpha = Negamax.NEGA_SCORE;
             this.depth = depth;
-            if (this.moves.Count < 16)
+            if (this.moves.Count < 9)
             {
-                //this.depth += 2;
-            }
-            if (this.moves.Count < 10)
-            {
-                //this.depth += 2;
+                this.depth += 6;
             }
         }
 
@@ -111,15 +107,6 @@ namespace ChessAI
                         moveToMake = move;
                         this.alpha = alpha;
                         Console.WriteLine("New move:" + alpha + " @depth:" + depth);
-                    }
-                    else if (alpha == this.alpha)
-                    {
-                        if (move.CompareTo(moveToMake) < 0)
-                        {
-                            Console.WriteLine(move);
-                            Console.WriteLine(moveToMake);
-                            moveToMake = move;
-                        }
                     }
                     //if (alpha < this.alpha)
                     //{

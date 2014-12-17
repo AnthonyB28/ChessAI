@@ -14,21 +14,36 @@ namespace ChessAI
         private bool gameOver;
         private Network network;
         private float secondsLeft;
-        private int lastOurMoveCount;
-        private int lastOpponentMoveCount;
-        private double lastMoveTime;
-        private int lastMoveDepth;
 
         public GameState(bool color, int gameID, int teamID, string teamKey)
         {
+            Zobrist.InitTable();
+            Transposition.InitTable();
             board = new Board();
             this.color = color;
             turn = -1;
             gameOver = false;
+//             Console.WriteLine("Default table: " + Zobrist.GetKey(board.board, true).ToString());
+//             board.MakeMove(new Move(0, 1, 0, 2, board.board));
+//             Console.WriteLine("Make move: " + Zobrist.GetKey(board.board, false).ToString());
+//             board.UndoMove();
+//             Console.WriteLine("Undo move: " + Zobrist.GetKey(board.board, true).ToString());
+//             long key = Zobrist.GetKey(board.board, true);
+//             key ^= Zobrist.TABLE[0, 0, 0, 1];
+//             key ^= Zobrist.TABLE[0, 0, 0, 2];
+//             key ^= Zobrist.SIDE;
+//            Console.Write("Make move: " + key.ToString());
+
+//             Console.WriteLine("Default table: " + board.GetKey().ToString());
+//             board.MakeMove(new Move(0, 1, 0, 2, board.board));
+//             Console.WriteLine("Make move white: " + board.GetKey().ToString());
+//             board.MakeMove(new Move(0, 6, 0, 4, board.board));
+//             Console.WriteLine("Make move black: " + board.GetKey().ToString());
+//             board.UndoMove();
+//             Console.WriteLine("Undo move black: " + board.GetKey().ToString());
+//             board.UndoMove();
+//             Console.WriteLine("Undo move white: " + board.GetKey().ToString());
             this.network = new Network(gameID, teamID, teamKey);
-            this.lastMoveDepth = 0;
-            this.lastMoveTime = 0;
-            this.lastOpponentMoveCount = 0;
         }
 
         public void Run()
@@ -158,13 +173,6 @@ namespace ChessAI
         public void MakeMove()
         {
             Console.WriteLine("get here");
-            //List<Move> moves = board.GetAllStates(color, false);
-            //moves.Sort();
-            //foreach (Move m in moves)
-            //{
-            //    Console.WriteLine(m);
-            //}
-            //Console.WriteLine(moves[0].CompareTo(moves[1]));
             String move;
             //Console.WriteLine(board.ToString());
             System.Diagnostics.Stopwatch t = new System.Diagnostics.Stopwatch();
@@ -178,65 +186,13 @@ namespace ChessAI
             t.Reset();
             t.Start();
             //Console.WriteLine("SingleThreaded Move: " + move);
-            int depth = 4;
-            int ourCurrentBranch = board.GetAllStates(color, true).Count;
-            int oppCurrentBranch = board.GetAllStates(!color, false).Count;
-            if (turn > 1)
+            int depth = 8;
+            if (turn > 35 && secondsLeft > 200)
             {
-                long nodes = (long)(Math.Pow(lastOurMoveCount, lastMoveDepth / 2.0) * Math.Pow(lastOpponentMoveCount, lastMoveDepth / 2.0));
-                long currentNodes = (long)(Math.Pow(ourCurrentBranch, depth / 2.0) * Math.Pow(oppCurrentBranch, depth / 2.0));
-                double nodesPerSecond = nodes / lastMoveTime;
-                double estimatedTime = (currentNodes / nodesPerSecond);
-                Console.WriteLine("Estimated Time: " + estimatedTime);
-                if (!board.IsEndGame())
-                {
-                    while (depth < 10 && estimatedTime < 1500)
-                    {
-                        depth++;
-                        currentNodes = (long)(Math.Pow(ourCurrentBranch, depth / 2.0) * Math.Pow(oppCurrentBranch, depth / 2.0));
-                        estimatedTime = (currentNodes / nodesPerSecond);
-                    }
-                    while (depth > 4 && estimatedTime > 20000)
-                    {
-                        depth--;
-                        currentNodes = (long)(Math.Pow(ourCurrentBranch, depth / 2.0) * Math.Pow(oppCurrentBranch, depth / 2.0));
-                        estimatedTime = (currentNodes / nodesPerSecond);
-                    }
-                }
-                else
-                {
-                    while (depth > 4 && estimatedTime < 10000)
-                    {
-                        depth++;
-                        currentNodes = (long)(Math.Pow(ourCurrentBranch, depth / 2.0) * Math.Pow(oppCurrentBranch, depth / 2.0));
-                        estimatedTime = (currentNodes / nodesPerSecond);
-                    }
-                    while (depth > 4 && (estimatedTime > secondsLeft + 20000 || estimatedTime > 60000))
-                    {
-                        depth--;
-                        currentNodes = (long)(Math.Pow(ourCurrentBranch, depth / 2.0) * Math.Pow(oppCurrentBranch, depth / 2.0));
-                        estimatedTime = (currentNodes / nodesPerSecond);
-                    }
-                }
-            }
-            if (depth < 4)
-            {
-                depth = 4;
-            }
-            if (depth > 10)
-            {
-                depth = 10;
-            }
-            //if (turn > 35 && secondsLeft > 200)
-            //{
-            //    depth = 6;
-            //}//else if(secondsLeft > 100 && )
+                depth = 8;
+            }//else if(secondsLeft > 100 && )
             board = board.PlayNegaMaxMoveMultiThreaded(out move, color, depth);
             t.Stop();
-            lastOurMoveCount = ourCurrentBranch;
-            lastOpponentMoveCount = oppCurrentBranch;
-            lastMoveTime = t.ElapsedMilliseconds;
-            lastMoveDepth = depth;
             Diagnostics.setMaxMulti(t.ElapsedMilliseconds);
             //if)
                 Diagnostics.multiTime += t.ElapsedMilliseconds;
