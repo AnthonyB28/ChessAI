@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace ChessAI
 {
     class NegaMaxThread
@@ -31,7 +26,7 @@ namespace ChessAI
         public void Run()
         {
             bool first = true;
-            while (master.hasMoves(out move))
+            while (master.HasMoves(out move))
             {
                 //move = master.get
                 //while loop here to do multiple depths
@@ -53,17 +48,17 @@ namespace ChessAI
                 if (!first) 
                 {
                     board.MakeMove(move);
-                    score = -Negamax.negaMax(board, depth - 1, -(alpha + 1), -alpha, !color, move.destinationPiece != 0, offset);
+                    score = -Negamax.NegaMax(board, depth - 1, -(alpha + 1), -alpha, !color, move.destinationPiece != 0, offset);
                     if (alpha < score && score < beta)
                     {
-                        score = -Negamax.negaMax(board, depth - 1, -beta, -score, !color, move.destinationPiece != 0, offset);
+                        score = -Negamax.NegaMax(board, depth - 1, -beta, -score, !color, move.destinationPiece != 0, offset);
                     }
                     board.UndoMove();
                 }
                 else
                 {
                     board.MakeMove(move);
-                    score = -Negamax.negaMax(board, depth - 1, -beta, -alpha, !color, move.destinationPiece != 0, offset);
+                    score = -Negamax.NegaMax(board, depth - 1, -beta, -alpha, !color, move.destinationPiece != 0, offset);
                     board.UndoMove();
                     first = false;
                 }
@@ -75,7 +70,7 @@ namespace ChessAI
                     master.TellMove(move, alpha);
                     //}
                 }
-                alpha = master.getCurrentAlpha();
+                alpha = master.GetAlpha();
             }
             finished = true;
         }

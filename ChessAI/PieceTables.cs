@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace ChessAI
 {
+    /// <summary>
+    /// Strategized chess positions pased on the pieces and where they should be on the board.
+    /// The higher value is recommended. Negative values are considered bad positions.
+    /// https://chessprogramming.wikispaces.com/Piece-Square+Tables
+    /// </summary>
     class PieceTables
     {
-
         public static readonly short[] Pawn = new short[]
         {
           0,  0,  0,  0,  0,  0,  0,  0,

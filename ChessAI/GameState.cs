@@ -1,36 +1,45 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ChessAI
 {
+    /// <summary>
+    /// A game of chess representation. Only one really exists in the AI at any given time.
+    /// </summary>
     class GameState
     {
         private Board board;
-        private bool color;
-        private int turn;
-        private bool gameOver;
         private Network network;
+        private double lastMoveTime;
         private float secondsLeft;
         private int lastOurMoveCount;
         private int lastOpponentMoveCount;
-        private double lastMoveTime;
+        private int turn;
         private int lastMoveDepth;
+        private bool isWhite;
+        private bool gameOver;
 
-        public GameState(bool color, int gameID, int teamID, string teamKey)
+        /// <summary>
+        /// Start a game on Carle's server
+        /// </summary>
+        /// <param name="white">true if white</param>
+        /// <param name="gameID">game number</param>
+        /// <param name="teamID">team number</param>
+        /// <param name="teamKey">secret password</param>
+        public GameState(bool white, int gameID, int teamID, string teamKey)
         {
             board = new Board();
-            this.color = color;
+            isWhite = white;
             turn = -1;
             gameOver = false;
-            this.network = new Network(gameID, teamID, teamKey);
-            this.lastMoveDepth = 0;
-            this.lastMoveTime = 0;
-            this.lastOpponentMoveCount = 0;
+            network = new Network(gameID, teamID, teamKey);
+            lastMoveDepth = 0;
+            lastMoveTime = 0;
+            lastOpponentMoveCount = 0;
         }
 
+        /// <summary>
+        /// Begins the game loop, polling server.
+        /// </summary>
         public void Run()
         {
             while (!gameOver)
@@ -43,6 +52,9 @@ namespace ChessAI
             Console.WriteLine("Game Over!");
         }
 
+        /// <summary>
+        /// Requests from the server if there is any turn update
+        /// </summary>
         public void PollForTurn()
         {
             Network.JSONPollResponse response = network.RequestPoll();
@@ -58,6 +70,10 @@ namespace ChessAI
             UpdateBoard(response);
         }
 
+        /// <summary>
+        /// Update the board based on the last server update
+        /// </summary>
+        /// <param name="response"></param>
         public void UpdateBoard(Network.JSONPollResponse response)
         {
             secondsLeft = response.secondsleft;
@@ -142,7 +158,7 @@ namespace ChessAI
                             z = 3;
                             break;
                     }
-                    if (color)
+                    if (isWhite)
                     {
                         z += 6;
                     }
@@ -155,6 +171,9 @@ namespace ChessAI
             }
         }
 
+        /// <summary>
+        /// Make a move on the board given the last update
+        /// </summary>
         public void MakeMove()
         {
             Console.WriteLine("get here");
@@ -179,8 +198,8 @@ namespace ChessAI
             t.Start();
             //Console.WriteLine("SingleThreaded Move: " + move);
             int depth = 4;
-            int ourCurrentBranch = board.GetAllStates(color, true).Count;
-            int oppCurrentBranch = board.GetAllStates(!color, false).Count;
+            int ourCurrentBranch = board.GetAllStates(isWhite, true).Count;
+            int oppCurrentBranch = board.GetAllStates(!isWhite, false).Count;
             if (turn > 1)
             {
                 long nodes = (long)(Math.Pow(lastOurMoveCount, lastMoveDepth / 2.0) * Math.Pow(lastOpponentMoveCount, lastMoveDepth / 2.0));
@@ -239,7 +258,7 @@ namespace ChessAI
             //{
             //    depth = 6;
             //}//else if(secondsLeft > 100 && )
-            board = board.PlayNegaMaxMoveMultiThreaded(out move, color, depth);
+            board = board.PlayNegaMaxMoveMultiThreaded(out move, isWhite, depth);
             t.Stop();
             lastOurMoveCount = ourCurrentBranch;
             lastOpponentMoveCount = oppCurrentBranch;

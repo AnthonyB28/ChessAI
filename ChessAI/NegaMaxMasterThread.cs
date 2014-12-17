@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
 
 namespace ChessAI
@@ -10,23 +8,22 @@ namespace ChessAI
     class NegaMaxMasterThread
     {
         private Board board;
+        private List<NegaMaxThread> threads;
         private List<Move> moves;
+        private Move loopMove;
+        private Move moveToMake;
+        private object _lockerGet = new object();
+        private object _lockerStore = new object();
         private int alpha;
         //private int beta;
-        private bool color;
-        private List<NegaMaxThread> threads;
-        private Move moveToMake;
         private int depth;
-        private bool loopState;
-        private Move loopMove;
         private int loopAlpha;
+        private bool color;
+        private bool loopState;
         //private List<Move> checkMateMoves;
         //private bool checkMate;
         //private Move checkMateMove;
-
         //private object _lockerCheckMate = new object();
-        private object _lockerGet = new object();
-        private object _lockerStore = new object();
 
         public NegaMaxMasterThread(Board board, bool color, int depth)
         {
@@ -179,7 +176,7 @@ namespace ChessAI
             return moveToMake;
         }
 
-        public bool hasMoves(out Move move)
+        public bool HasMoves(out Move move)
         {
             // double checked locking if there are moves available, if we see none, obviously we don't need to lock
             if (moves.Count > 0)
@@ -286,7 +283,7 @@ namespace ChessAI
             }
         }
 
-        public int getCurrentAlpha()
+        public int GetAlpha()
         {
             lock (_lockerStore)
             {
@@ -294,7 +291,7 @@ namespace ChessAI
             }
         }
 
-        public Move getNextMove()
+        public Move GetNextMove()
         {
             lock (_lockerGet)
             {
